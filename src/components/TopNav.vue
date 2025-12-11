@@ -40,7 +40,7 @@
                 v-for="notification in notifications"
                 :key="notification.id"
                 :class="['p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer', 
-                         !notification.read ? 'bg-blue-50' : '']"
+                        !notification.read ? 'bg-blue-50' : '']"
               >
                 <div class="flex items-start gap-3">
                   <div :class="['mt-1 h-2 w-2 rounded-full', !notification.read ? 'bg-blue-500' : 'bg-gray-300']"></div>
@@ -63,11 +63,11 @@
         <!-- Profile -->
         <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
           <div class="text-right">
-            <p class="text-sm font-medium text-gray-800">John Doe</p>
+            <p class="text-sm font-medium text-gray-800">Meng Korng</p>
             <p class="text-xs text-gray-500">Administrator</p>
           </div>
           <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-            JD
+            MK
           </div>
         </div>
       </div>

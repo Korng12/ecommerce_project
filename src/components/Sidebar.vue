@@ -14,9 +14,9 @@
         :key="item.id"
         @click="$emit('change-tab', item.id)"
         :class="['w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all', 
-                 activeTab === item.id 
-                   ? 'bg-blue-600 text-white shadow-lg' 
-                   : 'hover:bg-slate-700 text-gray-300']"
+                activeTab === item.id 
+                ? 'bg-blue-600 text-white shadow-lg' 
+                : 'hover:bg-slate-700 text-gray-300']"
       >
         <component :is="item.icon" :size="22" />
         <span v-if="sidebarOpen" class="font-medium">{{ item.label }}</span>

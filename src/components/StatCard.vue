@@ -17,6 +17,8 @@
 
 <script setup>
 import { defineProps, computed } from 'vue'
+
+// this icon use lucide-vue-text "run: npm lucide-vue-next"
 import { 
   DollarSign, UserCheck, Package, TrendingUp, ShoppingCart, 
   Activity, Globe, ShoppingBag 
@@ -48,10 +50,10 @@ const iconComponent = computed(() => {
 })
 
 const iconColorClasses = {
-  blue: 'bg-blue-100 text-blue-600',
-  green: 'bg-green-100 text-green-600',
-  purple: 'bg-purple-100 text-purple-600',
-  orange: 'bg-orange-100 text-orange-600',
-  red: 'bg-red-100 text-red-600'
+  blue: 'bg-blue-400 text-blue-600',
+  green: 'bg-green-400 text-green-600',
+  purple: 'bg-purple-400 text-purple-600',
+  orange: 'bg-orange-400 text-orange-600',
+  red: 'bg-red-400 text-red-600'
 }
 </script>

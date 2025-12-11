@@ -44,13 +44,13 @@
             <td class="px-6 py-4 text-gray-600">{{ user.email }}</td>
             <td class="px-6 py-4">
               <span :class="['px-3 py-1 rounded-full text-sm', 
-                           user.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700']">
+                      user.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700']">
                 {{ user.role }}
               </span>
             </td>
             <td class="px-6 py-4">
               <span :class="['px-3 py-1 rounded-full text-sm', 
-                           user.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700']">
+                        user.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700']">
                 {{ user.status }}
               </span>
             </td>
@@ -76,10 +76,10 @@ import { Search } from 'lucide-vue-next'
 
 // Mock users data
 const users = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-  { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'User', status: 'Inactive' },
-  { id: 4, name: 'Sarah Williams', email: 'sarah@example.com', role: 'User', status: 'Active' },
-  { id: 5, name: 'Robert Brown', email: 'robert@example.com', role: 'Manager', status: 'Active' },
+  { id: 1, name: 'Meng Kong', email: 'korng@gmail.com', role: 'Manager', status: 'Active' },
+  { id: 2, name: 'Seng Kea', email: 'sengkea@gmail.com', role: 'User', status: 'Active' },
+  { id: 3, name: 'Kakda', email: 'kakda@gmail.com', role: 'User', status: 'Inactive' },
+  { id: 4, name: 'ChyHang', email: 'chyhang@gmail.com', role: 'User', status: 'Active' },
+  { id: 5, name: 'Mesa', email: 'mesa@gmail.com', role: 'Admin', status: 'Active' },
 ]
 </script>
