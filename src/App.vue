@@ -1,4 +1,5 @@
-<template>
+ <template>
+  
   <div class="flex h-screen bg-gray-50">
     <!-- Sidebar Component -->
     <Sidebar 
@@ -16,7 +17,6 @@
         :show-notifications="showNotifications"
         @toggle-notifications="showNotifications = !showNotifications"
       />
-      
       <!-- Page Content -->
       <div class="p-8">
         <!-- Dynamic Content based on Active Tab -->
@@ -25,6 +25,7 @@
         <OrdersTab v-else-if="activeTab === 'orders'" />
         <AnalyticsTab v-else-if="activeTab === 'analytics'" />
         <SettingsTab v-else-if="activeTab === 'settings'" />
+        
       </div>
     </div>
   </div>
@@ -39,6 +40,7 @@ import UsersTab from './components/UsersTab.vue'
 import OrdersTab from './components/OrdersTab.vue'
 import AnalyticsTab from './components/AnalyticsTab.vue'
 import SettingsTab from './components/SettingsTab.vue'
+import AuthForm from './components/AuthForm.vue'
 
 // State
 const sidebarOpen = ref(true)
