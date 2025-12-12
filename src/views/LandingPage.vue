@@ -1,0 +1,37 @@
+<template>
+  <div class="w-full h-screen">
+    <Header></Header>
+    <div class="mt-24">
+      <HeroSection></HeroSection>
+    </div>
+    <div class="mt-24">
+      <BannerHero></BannerHero>
+    </div>
+    <div>
+      <CategoryPreview></CategoryPreview>
+    </div>
+
+    <!-- Only show "Popular Products" section -->
+    <ProductSection title="Popular Products" :show="true" />
+    <ProductSection title="New Arrivals" :show="false" />
+    <ProductSection title="Recommended" :show="false" />
+    <ProductSection title="Accessories" :show="false" />
+
+    <div>
+      <Footer></Footer>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import ProductSection from '@/components/ProductSection.vue';
+import Header from '@/components/Header.vue';
+import BannerHero from '@/components/BannerHero.vue';
+import HeroSection from '@/components/HeroSection.vue';
+import CategoryPreview from '@/components/CategoryPreview.vue';
+import Footer from '@/components/Footer.vue';
+</script>
+
+<style>
+
+</style>

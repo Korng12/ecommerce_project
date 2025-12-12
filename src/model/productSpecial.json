@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "name": "FREE SHIPPING",
+    "icon": "",
+    "banner": "../assets/large_img/FreeShipping.png",
+    "description":"Free Shipping on all orders over $50."
+  },
+  {
+    "id": 2,
+    "name": "HIGH BUDGET",
+    "icon": "",
+    "banner": "../assets/large_img/HighPrice.png",
+    "description": "Premium quality products."
+  },
+  {
+    "id": 3,
+    "name": "MEDIUM BUDGET",
+    "icon": "",
+    "banner": "../assets/large_img/Medium.png",
+    "description": "Moderate price range."
+  },
+    {
+    "id": 4,
+    "name": "LOW BUDGET",
+    "icon": "",
+    "banner": "../assets/large_img/low.png",
+    "description": "Affordable products."
+  }
+
+]
