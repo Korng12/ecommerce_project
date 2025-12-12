@@ -1,0 +1,79 @@
+[
+  {
+    "id": 1,
+    "name": "ASUS ROG Strix G15",
+    "price": 1299,
+    "brand": "ASUS",
+    "stock":55,
+    "category": "Laptop",
+    "image": "../assets/small_img/mac_book.jpg",
+    "description":"ASUS ROG Strix G16 Gaming Laptop, 165Hz Display, NVIDIA® GeForce RTX™ 4060, Intel Core i7-13650HX, 16GB DDR5, 1TB PCIe Gen4 SSD, Wi-Fi 6E, Windows 11, G614JV-AS74",
+    "rating": 4.8
+  },
+  {
+    "id": 2,
+    "name": "iPhone 15 Pro",
+    "price": 999,
+    "brand": "Apple",
+    "stock":55,
+    "category": "Phone",
+    "image": "../assets/small_img/mac_book.jpg",
+    "description":"Apple iPhone 15 Pro , US Version, 256GB, eSIM, Silver for T-Mobile (Renewed) ",
+    "rating": 4.9
+  },
+  {
+    "id": 3,
+    "name": "Samsung 1TB SSD",
+    "price": 89,
+    "brand": "Samsung",
+    "stock":55,
+    "category": "Component",
+    "image": "../assets/small_img/mac_book.jpg",
+    "description":"",
+    "rating": 4.7
+  },
+  {
+    "id": 4,
+    "name": "Samsung ",
+    "price": 89,
+    "brand": "Samsung",
+    "stock":55,
+    "category": "samsung",
+    "image": "../assets/small_img/mac_book.jpg",
+    "description":"",
+    "rating": 4.7
+  },
+  {
+    "id": 5,
+    "name": "Keyboards",
+    "price": 89,
+    "brand": "Kl12",
+    "stock":55,
+    "category": "Accessories",
+    "image": "../assets/small_img/mac_book.jpg",
+    "description":"",
+    "rating": 4.7
+  },
+  {
+    "id": 6,
+    "name": "Samsung 1TB SSD",
+    "price": 89,
+    "brand": "Samsung",
+    "stock":55,
+    "category": "Component",
+    "image": "../assets/small_img/mac_book.jpg",
+    "description":"",
+    "rating": 4.7
+  },
+  {
+    "id": 7,
+    "name": "Mac book pro M5",
+    "price": 89,
+    "brand": "apple",
+    "stock":55,
+    "category": "laptop",
+    "description":"Apple 2025 MacBook Pro Laptop with M5 chip with 10‑core CPU and 10‑core GPU: Built for Apple Intelligence, 14.2-inch Liquid Retina XDR Display, 16GB Unified Memory, 1TB SSD Storage; Space Black ",
+    "image": "../assets/small_img/mac_book.jpg",
+    "rating": 4.7
+  }
+]
