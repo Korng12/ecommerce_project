@@ -36,6 +36,9 @@
 
 <script setup>
 import { useCategory } from '@/stores/categories';
+import { useRoute } from 'vue-router';
+const route =useRoute();
+const catName=route.params.catName;
 const categoryStore = useCategory();
 
 const fixImage = (path) => {

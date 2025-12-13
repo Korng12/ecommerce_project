@@ -38,7 +38,7 @@
     "price": 89,
     "brand": "Samsung",
     "stock":55,
-    "category": "samsung",
+    "category": "Phone",
     "image": "../assets/small_img/mac_book.jpg",
     "description":"",
     "rating": 4.7

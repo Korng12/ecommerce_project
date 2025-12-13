@@ -19,6 +19,11 @@ const routes = [
     name:'contactUsView',
     path:'/contactUsView',
     component:()=>import('@/views/ContactUsView.vue')
+  },
+  {
+    name:'categoryView',
+    path:'/categoryView/:catName',
+    component:()=>import('@/views/CategoryView.vue')
   }
 
 ]
