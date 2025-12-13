@@ -1,12 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "FREE SHIPPING",
-    "icon": "",
-    "banner": "../assets/large_img/FreeShipping.png",
-    "description":"Free Shipping on all orders over $50."
-  },
-  {
     "id": 2,
     "name": "HIGH BUDGET",
     "icon": "",

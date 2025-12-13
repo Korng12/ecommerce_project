@@ -10,6 +10,9 @@
     <ProductSection title="Best Selling" :show="true" />
     <ProductSection title="Recommended" :show="true" />
     <ProductSection title="Accessories" :show="true" />
+     <div>
+      <SpecialKind></SpecialKind>
+    </div>
     <div>
       <SpecialProduct></SpecialProduct>
     </div>
@@ -25,6 +28,7 @@ import Header from '@/components/Header.vue';
 import BannerHero from '@/components/BannerHero.vue';
 import Footer from '@/components/Footer.vue';
 import SpecialProduct from '@/components/SpecialProduct.vue';
+import SpecialKind from '@/components/SpecialKind.vue';
 </script>
 
 <style>
