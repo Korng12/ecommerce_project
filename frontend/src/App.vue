@@ -1,4 +1,5 @@
 <script setup>
+import { RouterView } from 'vue-router';
 // import Header from './components/Header.vue';
 import LandingPage from './views/LandingPage.vue';
 </script>
@@ -7,4 +8,3 @@ import LandingPage from './views/LandingPage.vue';
   <router-view></router-view>
 
 </template>
-

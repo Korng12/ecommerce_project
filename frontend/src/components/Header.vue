@@ -47,10 +47,12 @@
         </div>
 
         <!-- Cart -->
-        <button class="relative p-2 rounded-full hover:bg-gray-200 transition-transform duration-200 hover:scale-110">
-          <font-awesome-icon icon="shopping-cart" class="text-gray-700"/>
-          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
-        </button>
+        <router-link :to="{name:'cartView',path:'/cartView'}">
+          <button class="relative p-2 rounded-full hover:bg-gray-200 transition-transform duration-200 hover:scale-110">
+            <font-awesome-icon icon="shopping-cart" class="text-gray-700"/>
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+          </button>
+        </router-link>
 
         <!-- Mobile Burger -->
         <button class="md:hidden p-2 rounded-md hover:bg-gray-200 transition-transform duration-200 hover:scale-110">
@@ -94,6 +96,7 @@
 </template>
 
 <script setup>
+import CartView from '@/views/CartView.vue'
 import { ref, computed } from 'vue'
 
 const searchOpen = ref(false)
