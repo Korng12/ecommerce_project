@@ -1,6 +1,11 @@
 import './assets/main.css'
+<<<<<<< HEAD
 import './input.css'
 
+=======
+
+import 'primeicons/primeicons.css'
+>>>>>>> main
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createApp } from 'vue'

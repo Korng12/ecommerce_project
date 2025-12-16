@@ -16,7 +16,8 @@
       <div class="mt-4 space-y-1">
         <h2 class="text-lg font-semibold text-gray-900">{{ product.name }}</h2>
         <p class="text-sm text-gray-500">{{ product.brand }}</p>
-
+        <p class="text-sm text-gray-500">{{ product.category }}</p>
+        
         <!-- Price Badge -->
         <p
           class="mt-2 inline-block bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full"
