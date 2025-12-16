@@ -1,6 +1,17 @@
 <template>
   <div>
     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">Analytics Dashboard</h1>
+      <div class="mb-6 flex gap-2">
+      <select v-model="dateRange" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <option value="7days">Last 7 days</option>
+        <option value="30days">Last 30 days</option>
+        <option value="90days">Last 90 days</option>
+        <option value="year">This year</option>
+      </select>
+      <button @click="refreshData" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+        Refresh
+      </button>
+    </div>
     
     <!-- Key Metrics -->
     <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -108,6 +119,11 @@ import ChartContainer from './ChartContainer.vue'
 import BarChart from './BarChart.vue'
 import LineChart from './LineChart.vue'
 import DoughnutChart from './DoughnutChart.vue'
+
+const dateRange = ref('30days')
+const refreshData = () => {
+  console.log('Refreshing data for:', dateRange.value)
+}
 
 // Mock data
 const topProducts = [

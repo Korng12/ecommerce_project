@@ -8,6 +8,9 @@
           <option>Last 30 days</option>
           <option>Last 90 days</option>
         </select>
+         <button @click="refreshDashboard" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+          ↻ Refresh
+        </button>
         <button class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
           Export
         </button>
@@ -148,6 +151,10 @@ import ActivityItem from './ActivityItem.vue'
 import ChartContainer from './ChartContainer.vue'
 import BarChart from './BarChart.vue'
 import PieChart from './PieChart.vue'
+
+const refreshDashboard = () => {
+  console.log('Refreshing dashboard data...')
+}
 
 // Revenue Chart Data
 const revenueChartData = ref({
