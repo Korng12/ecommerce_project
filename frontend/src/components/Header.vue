@@ -9,7 +9,7 @@
 
       <!-- Desktop Menu -->
       <ul class="hidden md:flex items-center space-x-8 font-medium text-gray-700">
-        <li><router-link href="#" to="/" class="hover:text-blue-600 transition">Home</router-link></li>
+        <li><router-link href="#" to="/HomePage" class="hover:text-blue-600 transition">Home</router-link></li>
 
         <li><router-link to="/aboutUsView" class="hover:text-blue-600 transition">About</router-link></li>
         <li class="relative group">
