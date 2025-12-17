@@ -20,9 +20,15 @@
             </svg>
           </button>
           <ul class="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Phones</a></li>
+            <!-- <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Phones</a></li>
             <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Laptops</a></li>
-            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Accessories</a></li>
+            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Accessories</a></li> -->
+               <li v-for="cat in categoriesStore.categories" :key="cat.id" class="block px-4 py-2 hover:bg-gray-100">
+               <router-link :to="{name:'categoryView',params:{catName:cat.name}}">
+                {{ cat.name }}
+               </router-link>
+              </li>
+            
           </ul>
         </li>
         <li><router-link :to="{name:'contactUsView',path:'/contactUsView'}" class="hover:text-blue-600 transition">Contact</router-link></li>
@@ -92,12 +98,16 @@
         </ul>
       </div>
     </transition>
+
   </nav>
 </template>
 
 <script setup>
 import CartView from '@/views/CartView.vue'
 import { ref, computed } from 'vue'
+import { useCategory } from '@/stores/categories'
+import { useProduct } from '@/stores/products';
+const categoriesStore=useCategory();
 
 const searchOpen = ref(false)
 const searchQuery = ref('')

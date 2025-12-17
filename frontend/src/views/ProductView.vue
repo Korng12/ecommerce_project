@@ -70,6 +70,13 @@
         Add to Cart
       </button>
     </div>
+    <div class="flex flex-col gap-4">
+      <h1 class="text-xl font-bold">Related Products</h1>
+      <div v-for="product in relatedProducts" :key="product.id">
+      <ProductCard :product="product"></ProductCard>
+      </div>
+    </div>
+    
   </section>
   <Footer></Footer>
   </div>
@@ -81,9 +88,12 @@ import { useRoute } from 'vue-router'
 import { useProduct } from '@/stores/products'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
+import { computed } from 'vue'
+import ProductCard from '@/components/ProductCard.vue'
 const productStore = useProduct()
 const route = useRoute()
 const id = route.params.productId
+
 const product = productStore.products.find(pro => pro.id == id) || {
   name: 'Product Name',
   brand: 'Brand Name',
@@ -92,7 +102,10 @@ const product = productStore.products.find(pro => pro.id == id) || {
   image: '../assets/small_img/mac_book_hero.jpg',
   description: 'This is a sample product description. Highlight features, specs, and other details to make it appealing.'
 }
-
+// we will filter related products by using category
+const relatedProducts=computed(()=>
+  productStore.products.filter(p=> p.category.toLowerCase()===product.category.toLowerCase() && p.id!==product.id)
+)
 // Helper to fix image path
 const fixImage = (path) => new URL(path, import.meta.url).href
 </script>

@@ -1,7 +1,7 @@
 <template>
   <section class="w-full relative overflow-hidden">
     <Swiper
-      :modules="[Navigation, Pagination, Autoplay]"
+      :modules="[Pagination, Autoplay]"
       :slides-per-view="1"
       :loop="true"
       :autoplay="{ delay: 7000, disableOnInteraction: false }"
