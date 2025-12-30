@@ -143,11 +143,11 @@
 
 <script setup>
 import { ref } from 'vue'
-import StatCard from './StatCard.vue'
-import ActivityItem from './ActivityItem.vue'
-import ChartContainer from './ChartContainer.vue'
-import BarChart from './BarChart.vue'
-import PieChart from './PieChart.vue'
+import StatCard from '@/components/admin/StatCard.vue'
+import ActivityItem from '@/components/admin/ActivityItem.vue'
+import ChartContainer from '@/components/admin/ChartContainer.vue'
+import BarChart from '@/components/admin/BarChart.vue'
+import PieChart from '@/components/admin/PieChart.vue'
 
 // Revenue Chart Data
 const revenueChartData = ref({

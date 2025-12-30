@@ -24,12 +24,12 @@
 </template>
 
 <script setup>
-import ProductSection from '@/components/ProductSection.vue';
-import Header from '@/components/Header.vue';
+import ProductSection from '@/components/product/ProductSection.vue';
+import Header from '@/components/layout/Header.vue';
 import BannerHero from '@/components/BannerHero.vue';
 import HeroSection from '@/components/HeroSection.vue';
 import CategoryPreview from '@/components/CategoryPreview.vue';
-import Footer from '@/components/Footer.vue';
+import Footer from '@/components/layout/Footer.vue';
 </script>
 
 <style>

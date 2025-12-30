@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import ProductCard from './ProductCard.vue';
+import ProductCard from '@/components/product/ProductCard.vue';
 import { useProduct } from '@/stores/products';
 
 const props = defineProps({

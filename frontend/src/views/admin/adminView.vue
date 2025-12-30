@@ -33,13 +33,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import Sidebar from '@/components/Sidebar.vue'
-import TopNav from '@/components/TopNav.vue'
-import DashboardTab from '@/components/DashboardTab.vue'
-import UsersTab from '@/components/UsersTab.vue'
-import OrdersTab from '@/components/OrdersTab.vue'
-import AnalyticsTab from '@/components/AnalyticsTab.vue'
-import SettingsTab from '@/components/SettingsTab.vue'
+import Sidebar from '@/components/admin/Sidebar.vue'
+import TopNav from '@/components/admin/TopNav.vue'
+import DashboardTab from '@/components/admin/DashboardTab.vue'
+import UsersTab from '@/components/admin/UsersTab.vue'
+import OrdersTab from '@/components/admin/OrdersTab.vue'
+import AnalyticsTab from '@/components/admin/AnalyticsTab.vue'
+import SettingsTab from '@/components/admin/SettingsTab.vue'
 import AuthForm from '@/components/AuthForm.vue'
 
 // State

@@ -25,10 +25,10 @@
 </template>
 
 <script setup>
-import ProductSection from '@/components/ProductSection.vue';
-import Header from '@/components/Header.vue';
+import ProductSection from '@/components/product/ProductSection.vue';
+import Header from '@/components/layout/Header.vue';
 import HeroSection from '@/components/BannerHero.vue';
-import Footer from '@/components/Footer.vue';
+import Footer from '@/components/layout/Footer.vue';
 import SpecialProduct from '@/components/SpecialProduct.vue';
 import SpecialKind from '@/components/SpecialKind.vue';
 </script>

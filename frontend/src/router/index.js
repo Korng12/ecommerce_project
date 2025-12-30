@@ -9,12 +9,12 @@ const routes = [
   {
     name:'HomePage',
     path:'/HomePage',
-    component:()=>import('@/views/HomePage.vue'),
+    component:()=>import('@/views/user/HomePage.vue'),
   },
   {
     name: "productView",
     path: "/product/productView/:productId",
-    component: () => import("@/views/ProductView.vue"),
+    component: () => import("@/views/user/ProductView.vue"),
   },
   {
     name: "aboutUsView",
@@ -29,22 +29,22 @@ const routes = [
       {
       path: '/category/:catName',
       name: 'categoryView',
-      component: ()=>import('@/views/CategoryView.vue')
+      component: ()=>import('@/views/user/CategoryView.vue')
     },
   {
     name: "cartView",
     path: "/cartView",
-    component: () => import("@/views/CartView.vue"),
+    component: () => import("@/views/user/CartView.vue"),
   },
   {
     name: "checkoutView",
     path: "/checkoutView",
-    component: () => import("@/views/CheckoutView.vue"),
+    component: () => import("@/views/user/CheckoutView.vue"),
   },
   {
     name: "categoryView",
     path: "/product/categoryView/:catName",
-    component: () => import("@/views/CategoryView.vue"),
+    component: () => import("@/views/user/CategoryView.vue"),
   },
 ];
 

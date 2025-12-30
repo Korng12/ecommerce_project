@@ -1,10 +1,12 @@
 <template>
-  <div>
+  <div class="min-h-screen">
     <Header></Header>
-    <div class="relative h-96 mt-32 flex flex-col items-center justify-center">
+    <div class="relative h-[380px] mt-32 flex flex-col items-center justify-center ">
 
-      <img :src="store_img" class="absolute inset-0 w-full h-full object-cover filter blur-sm " alt="Store Background">
-      <div class="relative z-10 text-center px-4">
+      <img :src="store_img" class="absolute inset-0 w-full h-full object-cover " alt="Store Background">
+      <!-- <div class="absolute inset-0 bg-black/70"></div> -->
+      
+      <div class="relative z-10 text-center px-4 animate-floating slide-fade-in">
         <h1 class="text-4xl text-white font-bold">Your Trusted Destination for the Latest Electronics</h1>
         <h2 class="text-3xl text-white font-bold mt-2">We provide high-quality tech products at honest prices</h2>
       </div>
@@ -95,7 +97,7 @@
 
         <!-- Full Width Product Image -->
         <img
-          src="../assets/small_img/mac_book_hero.jpg"
+          src="../assets/mac_book_hero.jpg"
           class="relative w-full max-w-xl rounded-2xl shadow-lg object-cover float-anim"
         />
 
@@ -115,7 +117,7 @@
       <div class="core-values grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl">
 
         <!-- Trust -->
-        <div class="flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+        <div class="flex flex-col items-center  text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
           <img :src="medal" alt="trust" class="w-20 h-20 mb-4">
           <h2 class="text-2xl font-semibold mb-2">Trust</h2>
           <p class="text-lg text-gray-600">
@@ -252,12 +254,12 @@
 </template>
 
 <script setup>
-import Header from '@/components/Header.vue';
-import Footer from '@/components/Footer.vue';
+import Header from '@/components/layout/Header.vue';
+import Footer from '@/components/layout/Footer.vue';
 import { onMounted, ref } from "vue";
 import medal from '@/assets/medal.jpg'
-import phone from '@/assets/large_img/phone_banner.jpg'
-import store_img from '@/assets/large_img/store.jpg'
+import phone from '/category_img/phone_banner.jpg'
+import store_img from '@/assets/store.jpg'
 const typingText = ref(null);
 const visible = ref(false)
 const sectionRef = ref(null)
@@ -344,8 +346,25 @@ onMounted(() => {
   0%,100% { transform: translateY(0); }
   50%     { transform: translateY(-10px); }
 }
+@keyframes slideFadeIn {
+  0% {
+    transform: translateY(-50px); /* start above */
+    opacity: 0;                  /* invisible */
+  }
+  60% {
+    transform: translateY(10px); /* overshoot a little for bounce */
+    opacity: 1;                  /* visible */
+  }
+  100% {
+    transform: translateY(0);    /* final position */
+  }
+}
 
 .animate-floating {
   animation: float 6s ease-in-out infinite;
 }
+.slide-fade-in {
+  animation: slideFadeIn 1s ease-out forwards;
+}
+
 </style>

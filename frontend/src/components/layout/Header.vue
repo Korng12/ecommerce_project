@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import CartView from '@/views/CartView.vue'
+import CartView from '@/views/user/CartView.vue'
 import { ref, computed } from 'vue'
 import { useCategory } from '@/stores/categories'
 import { useProduct } from '@/stores/products';

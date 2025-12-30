@@ -103,11 +103,11 @@
 
 <script setup>
 import { ref } from 'vue'
-import StatCard from './StatCard.vue'
-import ChartContainer from './ChartContainer.vue'
-import BarChart from './BarChart.vue'
-import LineChart from './LineChart.vue'
-import DoughnutChart from './DoughnutChart.vue'
+import StatCard from '@/components/admin/StatCard.vue'
+import ChartContainer from '@/components/admin/ChartContainer.vue'
+import BarChart from '@/components/admin/BarChart.vue'
+import LineChart from '@/components/admin/LineChart.vue'
+import DoughnutChart from '@/components/admin/DoughnutChart.vue'
 
 // Mock data
 const topProducts = [
