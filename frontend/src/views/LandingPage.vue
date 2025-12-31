@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full h-screen">
-    <Header></Header>
+  <div class="w-full ">
+    <!-- <Header></Header> -->
     <div class="mt-24">
       <HeroSection></HeroSection>
     </div>
@@ -17,9 +17,6 @@
     <ProductSection title="Recommended" :show="false" />
     <ProductSection title="Accessories" :show="false" />
 
-    <div>
-      <Footer></Footer>
-    </div>
   </div>
 </template>
 

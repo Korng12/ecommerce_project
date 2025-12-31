@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <Header />
+    <!-- <Header /> -->
 
     <!-- HERO -->
     <section class="relative mt-24 h-[380px] flex items-center justify-center">
@@ -23,7 +23,7 @@
         <!-- MAP -->
         <div class="rounded-2xl overflow-hidden shadow-lg">
           <img
-            src="@/assets/large_img/map.png"
+            src="@/assets/map.png"
             class="w-full h-full object-cover"
             alt="Map"
           />
@@ -95,7 +95,7 @@
 
       </div>
     </section>
-    <Footer></Footer>
+    <!-- <Footer></Footer> -->
   </div>
 </template>
 

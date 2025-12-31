@@ -1,7 +1,7 @@
 <!-- CartPage.vue -->
 <script setup>
 import CartList from "@/components/cart/CartList.vue";
-import OrderSummary from "@/components/cart/OrderSummary.vue";
+import OrderSummary from "@/components/order/OrderSummary.vue";
 import Header from "@/components/layout/Header.vue";
 import Footer from "@/components/layout/Footer.vue";
 import { useCart } from "@/stores/carts";

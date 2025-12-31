@@ -11,11 +11,11 @@
           class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
         />
       </div>
-      <img src="../../assets/small_img/mac_book.jpg" alt="">
+      <!-- <img src="../../assets/small_img/mac_book.jpg" alt=""> -->
 
       <!-- Product Info -->
       <div class="mt-4 space-y-1">
-        <p>{{ product.image }}</p>
+        <!-- <p>{{ product.image }}</p> -->
         <h2 class="text-lg font-semibold text-gray-900">{{ product.name }}</h2>
         <p class="text-sm text-gray-500">{{ product.brand }}</p>
         <p class="text-sm text-gray-500">{{ product.category }}</p>
