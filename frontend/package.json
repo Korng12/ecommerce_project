@@ -20,11 +20,8 @@
     "chart.js": "^4.5.1",
     "flowbite": "^4.0.1",
     "flowbite-vue": "^0.2.2",
-<<<<<<< HEAD
-    "lucide-vue-next": "^0.561.0",
-=======
+    "lucide-vue-next": "^0.562.0",
     "pi": "^2.0.5",
->>>>>>> main
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
     "props": "^0.3.0",
