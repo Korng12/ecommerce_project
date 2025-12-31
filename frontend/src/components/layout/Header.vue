@@ -9,7 +9,7 @@
 
       <!-- Desktop Menu -->
       <ul class="hidden md:flex items-center space-x-8 font-medium text-gray-700">
-        <li><router-link href="#" to="/" class="hover:text-blue-600 transition">Home</router-link></li>
+        <li><router-link href="#" to="/HomePage" class="hover:text-blue-600 transition">Home</router-link></li>
 
         <li><router-link to="/aboutUsView" class="hover:text-blue-600 transition">About</router-link></li>
         <li class="relative group">
@@ -47,8 +47,8 @@
             <font-awesome-icon icon="user" class="text-gray-700"/>
           </button>
           <ul class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Login</a></li>
-            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Register</a></li>
+            <li><router-link to="/login" class="block px-4 py-2 hover:bg-gray-100">Login</router-link></li>
+            <li><router-link to="/register" class="block px-4 py-2 hover:bg-gray-100">Register</router-link></li>
           </ul>
         </div>
 
@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import CartView from '@/views/CartView.vue'
+import CartView from '@/views/user/CartView.vue'
 import { ref, computed } from 'vue'
 import { useCategory } from '@/stores/categories'
 import { useProduct } from '@/stores/products';
