@@ -55,9 +55,9 @@
 </template>
 
 <script>
-import freeShippingIcon from '../assets/small_img/FreeShipping.png';
-import fiftyPercentOffIcon from '../assets/small_img/fiftyPercentOff.png';
-import popularProductIcon from '../assets/small_img/gift.png'; 
+import freeShippingIcon from '../assets/icon/FreeShipping.png';
+import fiftyPercentOffIcon from '../assets/icon/fiftyPercentOff.png';
+import popularProductIcon from '../assets/icon/gift.png'; 
 
 export default {
   name: 'HoverBoxShadowDemo',

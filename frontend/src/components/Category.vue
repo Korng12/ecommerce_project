@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import Header from './Header.vue';
+import Header from './layout/Header.vue';
 </script>
 
 <style>

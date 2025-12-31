@@ -8,6 +8,7 @@
           class="relative group rounded-xl overflow-hidden shadow-lg cursor-pointer"
         >
           <!-- Image -->
+           <p>{{ product.banner }}</p>
           <img
             :src="fixImage(product.banner)"
             alt=""
