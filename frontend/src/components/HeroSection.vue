@@ -38,7 +38,7 @@
 
         <!-- Full Width Product Image -->
         <img
-          src="../assets/small_img/mac_book_hero.jpg"
+          src="../assets/mac_book_hero.jpg"
           class="relative w-full max-w-xl rounded-2xl shadow-lg object-cover float-anim"
         />
 
