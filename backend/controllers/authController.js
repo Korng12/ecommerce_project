@@ -1,11 +1,14 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import db from '../models/index.js';
+const bcrypt =require('bcrypt')
+const jwt =require('jsonwebtoken')
+// import db from '../models/index.js';
+const db = require('../models/index.js')
+console.log('DB keys:', Object.keys(db));
+require('dotenv').config()
+const User= db.user;
 
-const User = db.user;
 
 // ================= REGISTER =================
-export const register = async (req, res) => {
+ const register = async (req, res) => {
   try {
     const { username, email, password, roleId } = req.body;
 
@@ -41,7 +44,7 @@ export const register = async (req, res) => {
 };
 
 // ================= LOGIN =================
-export const login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -67,3 +70,4 @@ export const login = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+module.exports={register,login}
