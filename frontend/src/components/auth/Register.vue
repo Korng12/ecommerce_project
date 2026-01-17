@@ -109,7 +109,8 @@ const handleSubmit = async () => {
     });
 
     localStorage.setItem('token', res.data.token);
-    router.push('/home');
+    localStorage.setItem('user', JSON.stringify(res.data.user));
+    router.push('/profile');
   } catch (err) {
     alert(err.response?.data?.message || 'Registration failed');
   }

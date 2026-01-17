@@ -94,7 +94,8 @@ const handleSubmit = async () => {
   try {
     const res = await axios.post('http://localhost:3000/api/login', formData);
     localStorage.setItem('token', res.data.token);
-    router.push('/home');
+    localStorage.setItem('user', JSON.stringify(res.data.user));
+    router.push('/profile');
   } catch (err) {
     message.value = err.response?.data?.message || 'Login failed';
   }

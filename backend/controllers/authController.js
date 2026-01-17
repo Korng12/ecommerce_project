@@ -36,7 +36,12 @@ const User= db.user;
       { expiresIn: '1h' }
     );
 
-    res.status(201).json({ token });
+    // Return user data without password
+    const { password: userPassword, ...userWithoutPassword } = user.toJSON();
+    res.status(201).json({ 
+      token, 
+      user: userWithoutPassword 
+    });
   } catch (err) {
     console.error('REGISTER ERROR:', err);
     res.status(500).json({ message: 'Server error' });
@@ -64,7 +69,12 @@ const login = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    res.json({ token });
+    // Return user data without password
+    const { password: userPassword, ...userWithoutPassword } = user.toJSON();
+    res.json({ 
+      token, 
+      user: userWithoutPassword 
+    });
   } catch (err) {
     console.error('LOGIN ERROR:', err);
     res.status(500).json({ message: 'Server error' });

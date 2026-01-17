@@ -7,7 +7,9 @@ app.use(cors());
 app.use(express.json());               // ✅ REQUIRED
 app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/authRoutes')
+const profileRoutes = require('./routes/profileRoutes')
 app.use('/api', authRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/hello',(req,res)=>{
   console.log(req.url)
   res.status(200).json("Hello")
