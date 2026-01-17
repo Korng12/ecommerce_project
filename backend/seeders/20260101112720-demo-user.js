@@ -5,22 +5,22 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     // Generate hashed passwords
     const adminPassword = await bcrypt.hash('admin123', 10);   // 10 = salt rounds
-    const customerPassword = await bcrypt.hash('customer123', 10);
+    const customerPassword = await bcrypt.hash('user123', 10);
 
     await queryInterface.bulkInsert('users', [
       {
         username: 'admin',
         password: adminPassword,  // hashed
         roleId: 1,
-        email: 'admin@example.com',
+        email: 'admin@gmail.com',
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
-        username: 'customer',
+        username: 'user',
         password: customerPassword, // hashed
         roleId: 2,
-        email: 'customer@example.com',
+        email: 'user@gmail.com',
         createdAt: new Date(),
         updatedAt: new Date()
       }

@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   cart.init({
     userId: DataTypes.INTEGER,
-    status: DataTypes.ENUM
+    status: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'cart',
