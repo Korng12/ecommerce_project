@@ -16,7 +16,7 @@
       >
         <!-- Background Image -->
         <img
-          :src="fixImage(slide.banner)"
+          :src="slide.banner"
           class="absolute w-full h-full object-cover"
         />
         <!-- Dark Gradient Overlay -->
@@ -59,7 +59,7 @@ import { useBanner } from '@/stores/banners'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 
 const bannerStore = useBanner();
-const fixImage = (path) => new URL(path, import.meta.url).href
+// const fixImage = (path) => new URL(path, import.meta.url).href
 </script>
 
 <style scoped>
