@@ -11,7 +11,7 @@ module.exports = {
       {
         username: 'admin',
         password: adminPassword,  // hashed
-        roleId: 1,
+        roleId: 5,
         email: 'admin@gmail.com',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -19,7 +19,7 @@ module.exports = {
       {
         username: 'user',
         password: customerPassword, // hashed
-        roleId: 2,
+        roleId: 6,
         email: 'user@gmail.com',
         createdAt: new Date(),
         updatedAt: new Date()

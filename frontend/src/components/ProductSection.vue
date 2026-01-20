@@ -1,29 +1,35 @@
 <template>
-  <div>
-    <div class="flex">
-      <!-- <div v-for="product in productsStore.products" :key="product.id">
-        <ProductCard :product="product"></ProductCard>
-      </div> -->
-      <!-- <div>
-      </div> -->
-      <div class="flex flex-col gap-4 items-center w-full">
-        <h1>Popular Product</h1>
-        <div  class="grid grid-cols-3 gap-4">
-          <ProductCard v-for="product in productsStore.products" :key="product.id" :product="product"></ProductCard>
-        </div>
+  <div v-if="show">
+    <div class="flex flex-col gap-4 items-center w-full mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+      <button class="view-more text-sm text-blue-500">View More</button>
+      <div class="grid grid-cols-3 gap-4">
+        <ProductCard v-for="product in productsStore.products" :key="product.id" :product="product"></ProductCard>
       </div>
-   
     </div>
-
   </div>
 </template>
 
 <script setup>
 import ProductCard from './ProductCard.vue';
 import { useProduct } from '@/stores/products';
-const productsStore=useProduct();
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: 'Product Section'
+  },
+  show: {
+    type: Boolean,
+    default: true
+  }
+});
+
+const productsStore = useProduct();
 </script>
 
 <style>
-
+.text-left {
+  text-align: left;
+}
 </style>

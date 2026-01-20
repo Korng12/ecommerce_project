@@ -3,28 +3,28 @@
     "id": 1,
     "name": "Laptops",
     "icon": "laptop.png",
-    "banner": "../assets/large_img/rog_strix_banner.jpg",
+    "banner": "/category_img/rog_strix_banner.jpg",
     "description":"High-performance laptops for work, school, and gaming."
   },
   {
     "id": 2,
     "name": "Smartphones",
     "icon": "phone.png",
-    "banner": "../assets/large_img/phone_banner.jpg",
+    "banner": "/category_img/phone_banner.jpg",
     "description": "Latest smartphones from top brands."
   },
   {
     "id": 3,
     "name": "Components",
     "icon": "cpu.png",
-    "banner": "../assets/large_img/component_banner.jpg",
+    "banner": "/category_img/component_banner.jpg",
     "description": "CPUs, GPUs, RAM, SSDs, motherboards, power supplies."
   },
-    {
+  {
     "id": 4,
     "name": "Accessories",
     "icon": "cpu.png",
-    "banner": "../assets/large_img/accessories_banner.jpg",
+    "banner": "/category_img/accessories_banner.jpg",
     "description": "Keyboard, Mice, Headphones,Adapters."
   }
 

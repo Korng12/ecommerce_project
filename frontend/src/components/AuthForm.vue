@@ -4,10 +4,6 @@
       <!-- Card -->
       <div class="bg-white rounded-3xl shadow-2xl overflow-hidden backdrop-blur-lg">
         <!-- Header -->
-         <!-- Add this after the header div -->
-<div v-if="formError" class="bg-red-50 border-l-4 border-red-500 p-4 mx-8">
-  <p class="text-red-700">{{ formError }}</p>
-</div>
         <div class="bg-white p-8 text-black">
           <h1 class="text-3xl  text-center font-bold mb-2">
             {{ isLogin ? 'WELCOME BACK' : 'WELCOME BACK' }}
@@ -140,7 +136,6 @@ import { Mail, Lock, User, Eye, EyeOff } from 'lucide-vue-next'
 
 const isLogin = ref(true)
 const showPassword = ref(false)
-const formError = ref('')
 
 const formData = reactive({
   name: '',
@@ -150,29 +145,12 @@ const formData = reactive({
 })
 
 const handleSubmit = () => {
-   if (!formData.email.includes('@')) {
-    formError.value = 'Please enter a valid email address'
-    return
-  }
-  
-  if (formData.password.length < 6) {
-    formError.value = 'Password must be at least 6 characters'
-    return
-  }
-  
-  if (!isLogin.value && formData.password !== formData.confirmPassword) {
-    formError.value = 'Passwords do not match'
-    return
-  }
-  
-  formError.value = '' // Clear error
-  
   if (isLogin.value) {
     console.log('Login:', { 
       email: formData.email, 
       password: formData.password 
     })
-  }  else {
+  } else {
     console.log('Sign Up:', formData)
   }
 }

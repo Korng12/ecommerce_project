@@ -1,0 +1,24 @@
+[
+  {
+      "product_id": 1,
+      "name": "ASUS ROG Strix G15",
+      "brand": "ASUS",
+      "price": 1299,
+      "quantity": 1,
+      "item_total": 1299,
+      "image": "https://dlcdnwebimgs.asus.com/files/media/2b37c5bc-fc31-4697-925a-6622e78c5cf9/v4/img/main-banner-15@0.25x.jpg",
+      "description": "ASUS ROG Strix G16 Gaming Laptop, 165Hz Display, NVIDIA® GeForce RTX™ 4060, Intel Core i7-13650HX, 16GB DDR5, 1TB PCIe Gen4 SSD, Wi-Fi 6E, Windows 11, G614JV-AS74",
+      "rating": 4.8
+  },
+  {
+      "product_id": 2,
+      "name": "iPhone 15 Pro",
+      "brand": "Apple",
+      "price": 999,
+      "quantity": 1,
+      "item_total": 999,
+      "image": "https://www.apple.com/newsroom/images/2023/09/apple-unveils-iphone-15-pro-and-iphone-15-pro-max/article/Apple-iPhone-15-Pro-lineup-hero-230912_Full-Bleed-Image.jpg.large.jpg",
+      "description": "Apple iPhone 15 Pro , US Version, 256GB, eSIM, Silver for T-Mobile (Renewed)",
+      "rating": 4.9
+  }
+]
