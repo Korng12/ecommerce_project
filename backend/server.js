@@ -6,15 +6,15 @@ const cors=require('cors')
 const path=require('path')
 
 const productRoutes = require('./routes/api/products');
-const categoryRoutes = require('./routes/api/categoryRoutes');
-
+const categoryRoutes = require('./routes/api/categories');
+const brandRoutes = require('./routes/api/brands');
 const verifyJwt = require('./middleware/authJwt'); 
 const verifyRole = require('./middleware/verifyRoles');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes')
 
 // Serve static files for images
-app.use('/public/images', express.static(path.join(__dirname, 'public', 'images')));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 console.log('📁 Serving static images from:', path.join(__dirname, 'public', 'images'));
 
 app.use(cookieParser());
@@ -37,6 +37,8 @@ app.use('/protected',verifyJwt,(req,res)=>{
   res.status(200).json({message:"Protected content",user:req.user});
 });
 app.use('/api', productRoutes);
+app.use('/api', categoryRoutes);
+app.use('/api', brandRoutes);
 app.use('/users',verifyJwt,verifyRole(1),require('./controllers/authController').getAllUsers);
 app.listen(3000, () => {
   console.log('🚀 Server running on port 3000');

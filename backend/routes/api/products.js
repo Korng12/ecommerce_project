@@ -15,18 +15,4 @@ router.get('/products/category/:categoryId', productController.getProductsByCate
 router.get('/products/brand/:brandId', productController.getProductsByBrand);
 
 
-// Category Routes
-router.get('/categories', categoryController.getAllCategories);
-router.get('/categories/:id', categoryController.getCategoryById);
-router.post('/categories', categoryController.createCategory);
-router.put('/categories/:id', categoryController.updateCategory);
-router.delete('/categories/:id', categoryController.deleteCategory);
-
-// Brand Routes
-router.get('/brands', brandController.getAllBrands);
-router.get('/brands/:id', brandController.getBrandById);
-router.post('/brands', brandController.createBrand);
-router.put('/brands/:id', brandController.updateBrand);
-router.delete('/brands/:id', brandController.deleteBrand);
-
 module.exports = router;
