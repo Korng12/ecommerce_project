@@ -119,5 +119,17 @@ const getAllUsers=async(req,res)=>{
   }
 }
 
+// ================= LOGOUT =================
+const logout = async (req, res) => {
+  try {
+    // Clear the authentication cookie
+    res.clearCookie('token', { httpOnly: true, secure: false, sameSite: 'lax' });
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('LOGOUT ERROR:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
-module.exports = { register, login ,getAllUsers,me};
+
+module.exports = { register, login ,getAllUsers,me, logout};

@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-screen">
     <div>
-    <Header></Header>
+    <!-- <Header></Header> -->
     </div>
     <div class="mt-24">
         <HeroSection></HeroSection>
@@ -18,9 +18,9 @@
     <div>
       <SpecialProduct></SpecialProduct>
     </div>
-    <div>
+    <!-- <div>
       <Footer></Footer>
-    </div>
+    </div> -->
   </div>
 </template>
 

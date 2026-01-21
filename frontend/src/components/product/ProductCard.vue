@@ -57,6 +57,15 @@ const props = defineProps({
 const store = useProduct();
 
 const fixImage = (path) => {
-  return new URL(path, import.meta.url).href;
+  // If path is already a full URL (from backend), return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  // Otherwise, treat as local asset
+  try {
+    return new URL(path, import.meta.url).href;
+  } catch {
+    return path;
+  }
 };
 </script>

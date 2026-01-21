@@ -32,8 +32,6 @@ const routes = [
     children: [
     {
         path: '', name: "home",component: () => import("@/views/user/HomePage.vue"), 
-
- 
       },
       {
         path: 'category/:catName',

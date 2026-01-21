@@ -73,7 +73,7 @@ import Header from '@/components/layout/Header.vue';
 import ProductCard from '@/components/product/ProductCard.vue';
 import Footer from '@/components/layout/Footer.vue';
 import { useProduct } from '@/stores/products';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 const route=useRoute();
 const catName=computed(()=>route.params.catName)
@@ -97,6 +97,12 @@ const filteredProducts = computed(()=>{
   searchText.value=''
 })
 console.log("Tthe length",filteredProducts.value.length)
+
+onMounted(async () => {
+  if (!productsStore.products?.length) {
+    try { await productsStore.fetchAllProducts() } catch (e) { /* noop */ }
+  }
+});
 </script>
 
 <style scoped>

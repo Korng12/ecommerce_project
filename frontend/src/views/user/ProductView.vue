@@ -88,7 +88,7 @@ import { useRoute } from 'vue-router'
 import { useProduct } from '@/stores/products'
 import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/layout/Footer.vue'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 const productStore = useProduct()
 const route = useRoute()
@@ -107,7 +107,22 @@ const relatedProducts=computed(()=>
   productStore.products.filter(p=> p.category.toLowerCase()===product.category.toLowerCase() && p.id!==product.id)
 )
 // Helper to fix image path
-const fixImage = (path) => new URL(path, import.meta.url).href
+const fixImage = (path) => {
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  try {
+    return new URL(path, import.meta.url).href;
+  } catch {
+    return path;
+  }
+}
+
+onMounted(async () => {
+  if (!productStore.products?.length) {
+    try { await productStore.fetchAllProducts() } catch (e) { /* noop */ }
+  }
+})
 </script>
 
 <style scoped>
