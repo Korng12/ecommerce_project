@@ -1,21 +1,49 @@
 import { defineStore } from "pinia";
-import productsData from '@/model/products.json'
+
 export const useProduct = defineStore('productStore',{
   state:()=>({
-    products:productsData,
-    
- 
+    products: [],
   }),
   getters:{
     getByCategory:(state)=>(catName)=>{
-      return state.products.filter(p=>p.category.toLowerCase()===catName.toLowerCase())
+      if(!catName) return state.products
+      return state.products.filter(p=> (p.category || '').toLowerCase()===catName.toLowerCase())
     },
     searchSuggestions:(state)=>(query)=>{
-      if(!query) return[]
-      return state.products.filter(p=>p.name.toLowerCase().includes(query.toLowerCase())).slice(0,5)
+      if(!query) return []
+      return state.products.filter(p=> (p.name || '').toLowerCase().includes(query.toLowerCase())).slice(0,5)
     }
   },
   actions:{
-    
+    async fetchAllProducts(){
+      try{
+        const res = await fetch('http://localhost:3000/api/products')
+        if(!res.ok){
+          throw new Error('Failed to fetch products')
+        }
+        const data = await res.json()
+        // Normalize backend shape to what the UI expects
+        this.products = Array.isArray(data) ? data.map(p => {
+          const primaryImage = (p.images && Array.isArray(p.images)) ? (p.images.find(i => i.isPrimary) || p.images[0]) : null
+          // Construct full backend URL for images
+          const imageUrl = primaryImage?.imageUrl || ''
+          const image = imageUrl ? `http://localhost:3000${imageUrl}` : ''
+          return {
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            image,
+            brand: p.brand?.name || '',
+            category: p.category?.name || '',
+            rating: p.rating || 0,
+            description: p.description || ''
+          }
+        }) : []
+      }catch(err){
+        console.error('Failed to fetch products:', err)
+        this.products = []
+        throw err
+      }
+    }
   }
 })

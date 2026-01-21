@@ -1,25 +1,77 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class product extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      product.belongsTo(models.category, {
+        foreignKey: 'categoryId',
+        as: 'category'
+      });
+      
+      product.belongsTo(models.brand, {
+        foreignKey: 'brandId',
+        as: 'brand'
+      });
+      
+      product.hasMany(models.productImage, {
+        foreignKey: 'productId',
+        as: 'images'
+      });
+      
+      product.hasMany(models.specification, {
+        foreignKey: 'productId',
+        as: 'specifications'
+      });
+      
+      product.hasMany(models.cartItem, {
+        foreignKey: 'productId',
+        as: 'cartItems'
+      });
+      
+      product.hasMany(models.orderItem, {
+        foreignKey: 'productId',
+        as: 'orderItems'
+      });
     }
   }
+  
   product.init({
-    name: DataTypes.STRING,
-    description: DataTypes.TEXT,
-    image: DataTypes.STRING
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    name: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    stock: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    brandId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'product',
+    tableName: 'products'
   });
+  
   return product;
 };

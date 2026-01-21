@@ -1,21 +1,45 @@
-import express from "express";
-import dotenv from "dotenv";
-import sequelize from "./config/dbConn.js";
 
-dotenv.config();
-
+require('dotenv').config()
+const express=require('express')
 const app = express();
-app.use(express.json());
+const cors=require('cors')
+const path=require('path')
 
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("✅ DB connected");
+const productRoutes = require('./routes/api/products');
+const categoryRoutes = require('./routes/api/categories');
+const brandRoutes = require('./routes/api/brands');
+const verifyJwt = require('./middleware/authJwt'); 
+const verifyRole = require('./middleware/verifyRoles');
+const cookieParser = require('cookie-parser');
+const authRoutes = require('./routes/authRoutes')
 
-    app.listen(3000, () => {
-      console.log("🚀 Server running on port 3000");
-    });
-  } catch (err) {
-    console.error("❌ DB connection failed", err);
-  }
-})();
+// Serve static files for images
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+console.log('📁 Serving static images from:', path.join(__dirname, 'public', 'images'));
+
+app.use(cookieParser());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  credentials: true
+}));
+
+app.use(express.json());               // ✅ REQUIRED
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/api', authRoutes);
+app.use('/hello',(req,res)=>{
+  console.log(req.url)
+  res.status(200).json("Hello")
+});
+
+  
+app.use('/protected',verifyJwt,(req,res)=>{
+  res.status(200).json({message:"Protected content",user:req.user});
+});
+app.use('/api', productRoutes);
+app.use('/api', categoryRoutes);
+app.use('/api', brandRoutes);
+app.use('/users',verifyJwt,verifyRole(1),require('./controllers/authController').getAllUsers);
+app.listen(3000, () => {
+  console.log('🚀 Server running on port 3000');
+});
