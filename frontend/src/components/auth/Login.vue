@@ -3,13 +3,11 @@
     <div class="w-full max-w-md">
       <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
 
-        <!-- Header -->
         <div class="p-8 text-black text-center">
           <h1 class="text-3xl font-bold mb-2">WELCOME BACK</h1>
           <p class="text-gray-700">Welcome back! Please enter your details.</p>
         </div>
 
-        <!-- Form -->
         <form @submit.prevent="handleSubmit" class="p-8 space-y-6">
 
           <!-- Email -->
@@ -58,10 +56,7 @@
             Sign In
           </button>
 
-          <!-- Error -->
-          <p v-if="message" class="text-red-500 text-center">
-            {{ message }}
-          </p>
+          <p v-if="message" class="text-red-500 text-center">{{ message }}</p>
 
           <p class="text-center text-sm">
             Don't have an account?
@@ -77,28 +72,25 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-vue-next'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
-import { jwtDecode } from 'jwt-decode'
-
-const router = useRouter()
-const showPassword = ref(false)
-const message = ref('')
+import { reactive, ref } from 'vue';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import { ROLES } from '@/constants/roles';  
+const router = useRouter();
+const showPassword = ref(false);
+const message = ref('');
 
 const formData = reactive({
   email: '',
-  password: '',
-})
+  password: ''
+});
 
 const togglePassword = () => {
-  showPassword.value = !showPassword.value
-}
+  showPassword.value = !showPassword.value;
+};
 
 const handleSubmit = async () => {
-  message.value = ''
-
   try {
     const authStore = useAuthStore();
     await authStore.login(formData.email, formData.password);
