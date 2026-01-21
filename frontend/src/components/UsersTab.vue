@@ -14,9 +14,14 @@
           />
         </div>
       </div>
-      <button class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        Add User
-      </button>
+      <button 
+  @click="handleAddUser"
+  :disabled="isLoading"
+  class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+>
+  <span v-if="isLoading">Adding...</span>
+  <span v-else>Add User</span>
+</button>
     </div>
     
     <!-- Users Table -->
@@ -73,6 +78,8 @@
 
 <script setup>
 import { Search } from 'lucide-vue-next'
+import { ref } from 'vue' 
+const isLoading = ref(false) 
 
 // Mock users data
 const users = [
@@ -82,4 +89,12 @@ const users = [
   { id: 4, name: 'ChyHang', email: 'chyhang@gmail.com', role: 'User', status: 'Active' },
   { id: 5, name: 'Mesa', email: 'mesa@gmail.com', role: 'Admin', status: 'Active' },
 ]
+
+const handleAddUser = () => {
+  isLoading.value = true
+  setTimeout(() => {
+    console.log('Add user clicked')
+    isLoading.value = false
+  }, 1000)
+}
 </script>

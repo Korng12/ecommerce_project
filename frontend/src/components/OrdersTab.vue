@@ -34,16 +34,21 @@
       <table class="w-full">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+           <th @click="handleSort('orderId')" class="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100">
+           Order ID</th>
+           <th @click="handleSort('customer')" class="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100">
+          Customer</th>
+           <th @click="handleSort('amount')" class="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100">
+           Amount</th>
+           <th @click="handleSort('status')" class="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100">
+           Status</th>
+           <th @click="handleSort('date')" class="px-6 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100">
+           Date</th>
+           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr v-for="order in orders" :key="order.id" class="hover:bg-gray-50">
+          <tr v-for="order in sortedOrders" :key="order.id" class="hover:bg-gray-50">
             <td class="px-6 py-4 text-gray-800 font-medium">{{ order.orderId }}</td>
             <td class="px-6 py-4 text-gray-600">{{ order.customer }}</td>
             <td class="px-6 py-4 text-gray-800 font-semibold">{{ order.amount }}</td>
@@ -67,15 +72,44 @@
 
 <script setup>
 import StatCard from './StatCard.vue'
+import { ref, computed } from 'vue'
 
 // Mock orders data
-const orders = [
+const orders = ref([ // CHANGE to ref
   { id: 1, orderId: '#ORD-001', customer: 'Alice Cooper', amount: '$299.00', status: 'Delivered', date: 'Dec 8, 2025' },
   { id: 2, orderId: '#ORD-002', customer: 'Bob Wilson', amount: '$149.00', status: 'Processing', date: 'Dec 9, 2025' },
   { id: 3, orderId: '#ORD-003', customer: 'Carol Davis', amount: '$499.00', status: 'Pending', date: 'Dec 9, 2025' },
   { id: 4, orderId: '#ORD-004', customer: 'David Miller', amount: '$89.00', status: 'Delivered', date: 'Dec 7, 2025' },
   { id: 5, orderId: '#ORD-005', customer: 'Emma Wilson', amount: '$199.00', status: 'Cancelled', date: 'Dec 6, 2025' },
-]
+])
+
+const sortBy = ref('date') 
+const sortOrder = ref('desc')
+
+const sortedOrders = computed(() => {
+  return [...orders.value].sort((a, b) => {
+    let aVal = a[sortBy.value]
+    let bVal = b[sortBy.value]
+    
+    // Handle dates
+    if (sortBy.value === 'date') {
+      aVal = new Date(aVal)
+      bVal = new Date(bVal)
+    }
+    
+    // Handle amounts
+    if (sortBy.value === 'amount') {
+      aVal = parseFloat(aVal.replace('$', ''))
+      bVal = parseFloat(bVal.replace('$', ''))
+    }
+    
+    if (sortOrder.value === 'asc') {
+      return aVal > bVal ? 1 : -1
+    } else {
+      return aVal < bVal ? 1 : -1
+    }
+  })
+})
 
 // Status CSS classes
 const statusClasses = {
@@ -83,5 +117,13 @@ const statusClasses = {
   'Processing': 'bg-blue-100 text-blue-700',
   'Pending': 'bg-yellow-100 text-yellow-700',
   'Cancelled': 'bg-red-100 text-red-700',
+}
+const handleSort = (column) => {
+  if (sortBy.value === column) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = column
+    sortOrder.value = 'desc'
+  }
 }
 </script>

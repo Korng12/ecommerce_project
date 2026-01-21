@@ -22,7 +22,6 @@
         <!-- Dynamic Content based on Active Tab -->
         <DashboardTab v-if="activeTab === 'dashboard'" />
         <UsersTab v-else-if="activeTab === 'users'" />
-        <Products v-else-if="activeTab === 'products'"/>
         <OrdersTab v-else-if="activeTab === 'orders'" />
         <AnalyticsTab v-else-if="activeTab === 'analytics'" />
         <SettingsTab v-else-if="activeTab === 'settings'" />
@@ -42,7 +41,6 @@ import OrdersTab from '@/components/OrdersTab.vue'
 import AnalyticsTab from '@/components/AnalyticsTab.vue'
 import SettingsTab from '@/components/SettingsTab.vue'
 import AuthForm from '@/components/AuthForm.vue'
-import Products from '@/components/admin/Products.vue'
 
 // State
 const sidebarOpen = ref(true)

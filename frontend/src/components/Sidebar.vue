@@ -49,7 +49,6 @@ defineEmits(['toggle-sidebar', 'change-tab'])
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
   { id: 'users', label: 'Users', icon: markRaw(Users) },
-  { id: 'products', label: 'Products', icon: markRaw(Products) },
   { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },
   { id: 'settings', label: 'Settings', icon: markRaw(Settings) },
