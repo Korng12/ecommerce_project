@@ -49,10 +49,21 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    logout() {
-      this.user = null;
-      this.isAuthenticated = false;
-      this.checkedAuth = true;
+    async logout() {
+      try {
+        // Call backend logout endpoint to clear cookies
+        await fetch('http://localhost:3000/api/logout', {
+          method: 'POST',
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        // Clear local state regardless of backend response
+        this.user = null;
+        this.isAuthenticated = false;
+        this.checkedAuth = true;
+      }
     }
   }
 });

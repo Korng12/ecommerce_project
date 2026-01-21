@@ -4,30 +4,69 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class product extends Model {
     static associate(models) {
-      // define association here
-
-      product.hasMany(models.cartItem, {
-        foreignKey: 'productId'
-      })
-
-      product.hasMany(models.orderItem, {
-        foreignKey: 'productId'
-      })
-
       product.belongsTo(models.category, {
-        foreignKey: 'category_id'
-      })
-
+        foreignKey: 'categoryId',
+        as: 'category'
+      });
+      
+      product.belongsTo(models.brand, {
+        foreignKey: 'brandId',
+        as: 'brand'
+      });
+      
+      product.hasMany(models.productImage, {
+        foreignKey: 'productId',
+        as: 'images'
+      });
+      
+      product.hasMany(models.specification, {
+        foreignKey: 'productId',
+        as: 'specifications'
+      });
+      
+      product.hasMany(models.cartItem, {
+        foreignKey: 'productId',
+        as: 'cartItems'
+      });
+      
+      product.hasMany(models.orderItem, {
+        foreignKey: 'productId',
+        as: 'orderItems'
+      });
     }
   }
   
   product.init({
-    name: DataTypes.STRING,
-    description: DataTypes.TEXT,
-    price: DataTypes.DECIMAL(10,2),
-    stock: DataTypes.INTEGER,
-    image: DataTypes.STRING,
-    category_id: DataTypes.INTEGER
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    name: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    stock: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    brandId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'product',
