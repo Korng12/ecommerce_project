@@ -3,14 +3,36 @@ const Category = db.category;
 const Product = db.product;
 
 // ================= GET ALL CATEGORIES =================
+// const getAllCategories = async (req, res) => {
+//   try {
+//     const categories = await Category.findAll({
+//       include: [{
+//         model: Product,
+//         as: 'products',
+//         attributes: ['id', 'name', 'price'],
+//         limit: 5
+//       }],
+//       order: [['name', 'ASC']]
+//     });
+//     res.json(categories);
+//   } catch (error) {
+//     console.error('Error fetching categories:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
 const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll({
       include: [{
         model: Product,
         as: 'products',
-        attributes: ['id', 'name', 'price'],
-        limit: 5
+        include: [
+          {
+            model: db.brand,
+            as: 'brand',
+            attributes: ['id', 'name']
+          }
+        ]
       }],
       order: [['name', 'ASC']]
     });

@@ -30,7 +30,7 @@ const routes = [
     component: () => import("@/layouts/MainLayout.vue"),
     meta:{requiresAuth:true,ROLES: [ROLES.USER,ROLES.ADMIN]},
     children: [
-    {
+      {
         path: '', name: "home",component: () => import("@/views/user/HomePage.vue"), 
       },
       {
@@ -95,6 +95,5 @@ router.beforeEach(async (to) => {
     return { name: 'forbidden' };
   }
 });
-
 
 export default router;

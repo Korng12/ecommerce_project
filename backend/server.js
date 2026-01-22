@@ -32,7 +32,6 @@ app.use('/hello',(req,res)=>{
   res.status(200).json("Hello")
 });
 
-  
 app.use('/protected',verifyJwt,(req,res)=>{
   res.status(200).json({message:"Protected content",user:req.user});
 });
