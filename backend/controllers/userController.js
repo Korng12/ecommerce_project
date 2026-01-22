@@ -1,21 +1,41 @@
 const userService = require('../services/userService')
 
 exports.getUsers = async (req, res) => {
-  const users = await userService.getAll()
-  res.json(users)
+  try {
+    const users = await userService.getAll()
+    res.json(users)
+  } catch (err) {
+    console.error('GET USERS ERROR:', err)
+    res.status(500).json({ message: err.message })
+  }
 }
 
 exports.createUser = async (req, res) => {
-  await userService.create(req.body)
-  res.status(201).json({ message: 'User created' })
+  try {
+    const user = await userService.create(req.body)
+    res.status(201).json(user)
+  } catch (err) {
+    console.error('CREATE USER ERROR:', err)
+    res.status(500).json({ message: err.message })
+  }
 }
 
 exports.updateUser = async (req, res) => {
-  await userService.update(req.params.id, req.body)
-  res.json({ message: 'User updated' })
+  try {
+    await userService.update(req.params.id, req.body)
+    res.json({ message: 'User updated' })
+  } catch (err) {
+    console.error('UPDATE USER ERROR:', err)
+    res.status(500).json({ message: err.message })
+  }
 }
 
 exports.deleteUser = async (req, res) => {
-  await userService.remove(req.params.id)
-  res.json({ message: 'User deleted' })
+  try {
+    await userService.remove(req.params.id)
+    res.json({ message: 'User deleted' })
+  } catch (err) {
+    console.error('DELETE USER ERROR:', err)
+    res.status(500).json({ message: err.message })
+  }
 }

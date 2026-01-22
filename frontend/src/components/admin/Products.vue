@@ -204,11 +204,18 @@ async function saveProduct() {
   const payload = {
     name: form.value.name,
     description: form.value.description,
-    image: form.value.image,
-    price: form.value.price,
-    stock: form.value.stock,
-    categoryId: Number(form.value.categoryId), // 🔥 CRITICAL FIX
+    price: Number(form.value.price),
+    stock: Number(form.value.stock),
+    categoryId: Number(form.value.categoryId),
+    brandId: form.value.brandId ? Number(form.value.brandId) : null,
+
+    // ✅ FIX IMAGE FORMAT
+    images: form.value.image
+      ? [{ url: form.value.image, isPrimary: true }]
+      : []
   }
+
+  console.log('🟢 PRODUCT PAYLOAD:', payload)
 
   const url = isEditing.value
     ? `${API_URL}/${form.value.id}`
@@ -218,7 +225,10 @@ async function saveProduct() {
 
   const res = await fetch(url, {
     method,
-    headers: authHeaders(),
+    credentials: 'include', // 🔥 REQUIRED (JWT COOKIE)
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(payload),
   })
 
@@ -232,6 +242,7 @@ async function saveProduct() {
   closeModal()
   fetchProducts()
 }
+
 
 /* DELETE */
 async function deleteProduct(p) {

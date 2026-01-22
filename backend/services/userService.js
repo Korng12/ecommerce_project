@@ -3,45 +3,66 @@ const db = require('../models')
 const User = db.user
 const Role = db.role
 
-exports.getAll = async () => {
-  const users = await User.findAll({
-    include: [
-      {
-        model: Role,
-        as: 'role',
-        attributes: ['name']
-      }
-    ]
-  })
+module.exports = {
+  // ================= GET ALL USERS =================
+  async getAll() {
+    const users = await User.findAll({
+      include: [
+        {
+          model: Role,
+          as: 'role',
+          attributes: ['name']
+        }
+      ]
+    })
 
-  return users.map(u => ({
-    id: u.id,
-    name: u.username,
-    email: u.email,
-    role: u.role?.name === 'Admin' ? 'Admin' : 'User',
-    status: 'Active'
-  }))
-}
+    return users.map(u => ({
+      id: u.id,
+      name: u.username || 'Unknown',
+      email: u.email,
+      role: u.role || 'USER',
+      status: 'Active'
+    }))
+  },
 
-exports.create = async (data) => {
-  return await User.create({
-    username: data.name,
-    email: data.email,
-    roleId: data.role === 'Admin' ? 1 : 2
-  })
-}
+  // ================= CREATE USER =================
+  async create(data) {
+    const roleId = data.role === 'Admin' || data.role === 'ADMIN' ? 1 : 2
 
-exports.update = async (id, data) => {
-  return await User.update(
-    {
+    const user = await User.create({
       username: data.name,
       email: data.email,
-      roleId: data.role === 'Admin' ? 1 : 2
-    },
-    { where: { id } }
-  )
-}
+      roleId
+    })
 
-exports.remove = async (id) => {
-  return await User.destroy({ where: { id } })
+    return {
+      id: user.id,
+      name: user.username,
+      email: user.email,
+      role: roleId === 1 ? 'ADMIN' : 'USER',
+      status: 'Active'
+    }
+  },
+
+  // ================= UPDATE USER =================
+  async update(id, data) {
+    const roleId = data.role === 'Admin' || data.role === 'ADMIN' ? 1 : 2
+
+    await User.update(
+      {
+        username: data.name,
+        email: data.email,
+        roleId
+      },
+      { where: { id } }
+    )
+
+    return true
+  },
+
+  // ================= DELETE USER =================
+  async remove(id) {
+    await User.destroy({ where: { id } })
+    return true
+  }
 }

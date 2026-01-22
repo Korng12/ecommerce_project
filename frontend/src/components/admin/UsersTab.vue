@@ -51,7 +51,7 @@
               <div
                 class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600"
               >
-                {{ user.name.charAt(0) }}
+                {{ (user.name || '?').charAt(0).toUpperCase() }}
               </div>
               {{ user.name }}
             </td>
@@ -60,15 +60,16 @@
 
             <td class="px-6 py-4">
                <span
-                  :class="[
-                    'px-3 py-1 rounded-full text-sm',
-                    user.role === 'ADMIN'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'bg-blue-100 text-blue-700'
-                  ]"
-                >
-                  {{ user.role === 'ADMIN' ? 'Admin' : 'User' }}
-                </span>
+                :class="[
+                  'px-3 py-1 rounded-full text-sm',
+                  user.role === 'ADMIN'
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'bg-blue-100 text-blue-700'
+                ]"
+              >
+                {{ user.role === 'ADMIN' ? 'Admin' : 'User' }}
+              </span>
+
             </td>
 
             <td class="px-6 py-4">
@@ -220,27 +221,20 @@ const formData = ref({
 /* ================= API ================= */
 const API_URL = 'http://localhost:3000/users'
 
+
 const loadUsers = async () => {
-  try {
-    const res = await axios.get(API_URL, {
-      withCredentials: true
-    })
+  const res = await axios.get(API_URL, { withCredentials: true })
 
-    users.value = res.data.map(u => ({
-      id: u.id,
-      name: u.name || u.username || '',
-      email: u.email,
-      role:
-        typeof u.role === 'string'
-          ? u.role
-          : u.role?.name || 'USER',
+  users.value = res.data.map(u => ({
+    id: u.id,
+    name: u.username || 'Unknown',
+    email: u.email,
+    role: u.role || 'USER',
+    status: u.status || 'Active'
+  }))
 
-      status: u.status || 'Active'
-    }))
-  } catch (error) {
-    console.error('Error loading users:', error)
-  }
 }
+
 
 
 
@@ -248,9 +242,9 @@ const loadUsers = async () => {
 const addUser = async () => {
   try {
     await axios.post(
-      'http://localhost:3000/users',
+      'http://localhost:3000/api/users',
       formData.value,
-      { withCredentials: true }   // 🔥 REQUIRED
+      { withCredentials: true }   
     )
     await loadUsers()
     closeModal()
@@ -265,7 +259,7 @@ const updateUser = async () => {
     await axios.put(
       `${API_URL}/${editingUserId.value}`,
       formData.value,
-      { withCredentials: true }   // 🔥 REQUIRED
+      { withCredentials: true }   
     )
 
     await loadUsers()
@@ -281,7 +275,7 @@ const deleteUser = async (id) => {
 
   try {
     await axios.delete(`${API_URL}/${id}`, {
-      withCredentials: true       // 🔥 REQUIRED
+      withCredentials: true       
     })
 
     await loadUsers()

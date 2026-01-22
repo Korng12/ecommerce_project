@@ -106,13 +106,14 @@ const createProduct = async (req, res) => {
 
     // Create product
     const product = await Product.create({
-      name,
-      description,
-      stock: stock || 0,
-      price,
-      categoryId,
-      brandId: brandId || null
-    });
+        name,
+        description: description || null,
+        stock: Number(stock) || 0,
+        price: Number(price),
+        categoryId: Number(categoryId),
+        brandId: brandId ? Number(brandId) : null
+      });
+
 
     // Add images if provided
     if (images && Array.isArray(images)) {
