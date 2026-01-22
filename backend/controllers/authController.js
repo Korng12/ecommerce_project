@@ -36,7 +36,7 @@ const register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-    res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 3600000 }); // 1 hour
+    res.cookie('token', token, { httpOnly: true, secure:false, sameSite: 'lax' , maxAge: 3600000 }); // 1 hour
 
     res.status(201).json({
       user: {
@@ -76,7 +76,7 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-    res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 3600000 }); // 1 hour
+    res.cookie('token', token, { httpOnly: true, secure:false, sameSite: 'lax' , maxAge: 3600000 }); // 1 hour
 
     res.json({
       user: {
@@ -92,32 +92,30 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-const me = async (req, res) => {
-  try {
-    const currentUser = await User.findByPk(req.user.id);
-    if (!currentUser) {
-      return res.status(404).json({ message: 'User not found' });
+const me =async(req,res)=>{
+  try{
+    const currentUser  =await User.findByPk(req.user.id);
+    if(!currentUser){
+      res.status(404).json({message:'User not found' });
     }
-    res.status(200).json({
-      user: {
-        id: currentUser.id,
-        username: currentUser.username,
-        email: currentUser.email,
-        roleId: currentUser.roleId
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(200).json({user:{
+      id:currentUser.id,
+      username:currentUser.username,
+      email:currentUser.email,
+      roleId:currentUser.roleId
+    }}); 
+  }catch(err){
+    res.status(500).json({message:'Server error' }); 
   }
 
 }
-const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.findAll();
-    res.status(200).json(users);
-  } catch (err) {
+const getAllUsers=async(req,res)=>{
+  try{
+    const users=await User.findAll();
+    res.status(200).json(users);  
+  }catch(err){
     console.error('GET USERS ERROR:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({message:'Server error' });
   }
 }
 
@@ -133,4 +131,5 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getAllUsers, me, logout };
+
+module.exports = { register, login ,getAllUsers,me, logout};

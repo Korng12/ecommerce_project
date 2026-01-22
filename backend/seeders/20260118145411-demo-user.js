@@ -20,7 +20,7 @@ module.exports = {
       },
       {
         username: 'user',
-        password: customerPassword, // hashed
+        password: userPassword, // hashed
         roleId: 2,
         email: 'user@gmail.com',
         password: userPassword,

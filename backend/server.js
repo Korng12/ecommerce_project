@@ -5,12 +5,20 @@ const cors=require('cors')
 const path=require('path')
 
 const productRoutes = require('./routes/api/products');
-const categoryRoutes = require('./routes/api/categoryRoutes');
+//const categoryRoutes = require('./routes/api/categoryRoutes');
 
 const verifyJwt = require('./middleware/authJwt'); 
 const verifyRole = require('./middleware/verifyRoles');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes')
+
+// user management routes
+const userRoutes = require('./routes/users');
+app.use('/api/users', userRoutes)
+
+// Dashboard routes
+const dashboardRoutes = require('./routes/dashboard')
+app.use('/dashboard', dashboardRoutes)
 
 // Serve static files for images
 app.use('/public/images', express.static(path.join(__dirname, 'public', 'images')));

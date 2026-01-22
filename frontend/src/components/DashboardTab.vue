@@ -27,13 +27,14 @@
         icon-color="blue"
       />
       
-      <StatCard 
-        title="Total Users"
-        value="2,847"
-        change="+8.2% from last month"
-        icon="UserCheck"
-        icon-color="green"
-      />
+      <StatCard
+  title="Total Users"
+  :value="totalUsers"
+  change="+8.2% from last month"
+  icon="UserCheck"
+  icon-color="green"
+/>
+
       
       <StatCard 
         title="Total Orders"
@@ -151,6 +152,30 @@ import ActivityItem from './ActivityItem.vue'
 import ChartContainer from './ChartContainer.vue'
 import BarChart from './BarChart.vue'
 import PieChart from './PieChart.vue'
+import StatCard from '@/components/StatCard.vue'
+
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+const totalUsers = ref(0)
+
+const loadStats = async () => {
+  try {
+    const res = await axios.get(
+      'http://localhost:3000/dashboard/stats',
+      { withCredentials: true }
+    )
+
+    console.log('STATS RESPONSE 👉', res.data)
+
+    totalUsers.value = res.data.totalUsers
+  } catch (err) {
+    console.error('Dashboard stats error:', err)
+  }
+}
+
+
+
 
 const refreshDashboard = () => {
   console.log('Refreshing dashboard data...')
@@ -203,4 +228,5 @@ const categoryChartData = ref({
     }
   ]
 })
+onMounted(loadStats)
 </script>

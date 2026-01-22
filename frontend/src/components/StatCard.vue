@@ -3,6 +3,9 @@
     <div class="flex items-center justify-between">
       <div>
         <p class="text-gray-500 text-sm">{{ title }}</p>
+        <h2 class="text-3xl font-bold">
+      {{ formattedValue }}
+    </h2>
         <p class="text-2xl font-bold text-gray-800 mt-1">{{ value }}</p>
       </div>
       <div :class="[iconColorClasses[iconColor], 'p-3 rounded-lg']">
@@ -48,6 +51,11 @@ const iconComponent = computed(() => {
   }
   return icons[props.icon] || DollarSign
 })
+
+
+const formattedValue = computed(() =>
+  Number(props.value).toLocaleString()
+)
 
 const iconColorClasses = {
   blue: 'bg-blue-400 text-blue-600',
