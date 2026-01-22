@@ -64,11 +64,15 @@
       </div>
 
       <!-- Add to Cart -->
-      <button 
-        class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition transform hover:scale-105 active:scale-95"
+      <button @click="handleAddToCart"
+        :disabled="cartStore.loading"
+        class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Add to Cart
+        {{ cartStore.loading ? 'Adding...' : 'Add to Cart' }}
       </button>
+      
+      <!-- Error Message -->
+      <p v-if="cartStore.error" class="text-red-600 text-sm">{{ cartStore.error }}</p>
     </div>
     <div class="flex flex-col gap-4">
       <h1 class="text-xl font-bold">Related Products</h1>
@@ -88,8 +92,10 @@ import { useRoute } from 'vue-router'
 import { useProduct } from '@/stores/products'
 import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/layout/Footer.vue'
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import ProductCard from '@/components/product/ProductCard.vue'
+import { useCart } from '@/stores/carts'
+const cartStore=useCart()
 const productStore = useProduct()
 const route = useRoute()
 const id = route.params.productId
@@ -102,27 +108,23 @@ const product = productStore.products.find(pro => pro.id == id) || {
   image: '../assets/small_img/mac_book_hero.jpg',
   description: 'This is a sample product description. Highlight features, specs, and other details to make it appealing.'
 }
+
+// Handle add to cart with error handling
+const handleAddToCart = async () => {
+  try {
+    await cartStore.addToCart(product.id, 1);
+    alert('Product added to cart successfully!');
+  } catch (error) {
+    alert(error.message || 'Failed to add to cart. Please try again.');
+  }
+}
+
 // we will filter related products by using category
 const relatedProducts=computed(()=>
   productStore.products.filter(p=> p.category.toLowerCase()===product.category.toLowerCase() && p.id!==product.id)
 )
 // Helper to fix image path
-const fixImage = (path) => {
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-  try {
-    return new URL(path, import.meta.url).href;
-  } catch {
-    return path;
-  }
-}
-
-onMounted(async () => {
-  if (!productStore.products?.length) {
-    try { await productStore.fetchAllProducts() } catch (e) { /* noop */ }
-  }
-})
+const fixImage = (path) => new URL(path, import.meta.url).href
 </script>
 
 <style scoped>

@@ -61,7 +61,7 @@
         <router-link :to="{name:'cartView',path:'/cartView'}">
           <button class="relative p-2 rounded-full hover:bg-gray-200 transition-transform duration-200 hover:scale-110">
             <font-awesome-icon icon="shopping-cart" class="text-gray-700"/>
-            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+            <span v-if="cartStore.cartCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">{{ cartStore.cartCount }}</span>
           </button>
         </router-link>
 
@@ -109,16 +109,24 @@
 
 <script setup>
 import CartView from '@/views/user/CartView.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useCategory } from '@/stores/categories'
 import { useProduct } from '@/stores/products';
 import {useAuthStore} from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { useCart} from '@/stores/carts';
 
+const cartStore=useCart();
 const categoriesStore=useCategory();
 const authStore=useAuthStore();
 const router = useRouter();
 
+// Fetch cart on mount if user is authenticated
+onMounted(async () => {
+  if (authStore.isAuthenticated) {
+    await cartStore.getCart();
+  }
+});
 
 const searchOpen = ref(false)
 const searchQuery = ref('')

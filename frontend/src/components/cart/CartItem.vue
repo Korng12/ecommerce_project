@@ -1,8 +1,17 @@
 <script setup>
+import { useCart } from '@/stores/carts';
 
-defineProps({
+const props = defineProps({
   item: Object,
 });
+
+const cartStore = useCart();
+const increment = () => cartStore.updateCartItem(props.item.productId, props.item.quantity + 1);
+const decrement =() => {
+  if(props.item.quantity > 1){
+    cartStore.updateCartItem(props.item.productId, props.item.quantity - 1);
+  }
+};
 </script>
 
 <template>
@@ -28,7 +37,7 @@ defineProps({
 
           <div class="flex gap-2 sm:gap-3">
             <i class="pi pi-heart cursor-pointer border p-2 rounded-full hover:bg-gray-200"></i>
-            <i class="pi pi-times cursor-pointer border p-2 rounded-full hover:bg-gray-200"></i>
+            <i @click="cartStore.removeFromCart(item.productId)" class="pi pi-times cursor-pointer border p-2 rounded-full hover:bg-gray-200"></i>
           </div>
         </div>
 
@@ -44,9 +53,9 @@ defineProps({
 
           <!-- Quantity -->
           <div class="flex items-center bg-gray-100 rounded-full shadow-inner">
-            <button class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-200 text-xl">−</button>
+            <button @click="decrement" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-200 text-xl">−</button>
             <span class="w-10 sm:w-12 text-center font-medium text-lg">{{ item.quantity }}</span>
-            <button class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-200 text-xl">+</button>
+            <button @click="increment" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-200 text-xl">+</button>
           </div>
 
           <!-- Price (or item_total for line total) -->
