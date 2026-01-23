@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const cartController = require('../../controllers/cartController');
 const verifyJWT = require('../../middleware/authJwt'); // Add auth!
-const cart = require('../../models/cart');
 
 // Protect routes with JWT
 router.get('/carts', verifyJWT, cartController.getCartByUserId);
