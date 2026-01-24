@@ -10,6 +10,7 @@ const brandRoutes = require("./routes/api/brands");
 const cartRoutes = require("./routes/api/carts");
 const orderRoutes = require("./routes/api/orders");
 const paymentRoutes = require("./routes/api/payments");
+const analyticsRoutes = require("./routes/api/analytics");
 const verifyJwt = require("./middleware/authJwt");
 const verifyRole = require("./middleware/verifyRoles");
 const cookieParser = require("cookie-parser");
@@ -45,14 +46,15 @@ app.use("/hello", (req, res) => {
   res.status(200).json("Hello");
 });
 
-app.use('/protected',verifyJwt,(req,res)=>{
-  res.status(200).json({message:"Protected content",user:req.user});
+app.use("/protected", verifyJwt, (req, res) => {
+  res.status(200).json({ message: "Protected content", user: req.user });
 });
 app.use("/api", productRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api", brandRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
+app.use("/api", analyticsRoutes);
 app.use("/api", webhookRouter.apiRoutes);
 app.use(
   "/users",

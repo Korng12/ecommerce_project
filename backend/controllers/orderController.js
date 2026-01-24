@@ -112,4 +112,57 @@ const reactivateCart = async (req, res) => {
   }
 };
 
-module.exports = { createOrderFromCart, reactivateCart };
+const getAllOrders = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const orders = await Order.findAll({
+      where: { userId },
+      include: [
+        {
+          model: OrderItem,
+          as: "orderItems",
+          include: [{ model: Product, as: "orderProduct" }],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.status(200).json(orders);
+  } catch (error) {
+    console.error("getAllOrders error:", error);
+    return res.status(500).json({ msg: "Server error" });
+  }
+};
+
+const getAllOrdersAdmin = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      include: [
+        {
+          model: OrderItem,
+          as: "orderItems",
+          include: [{ model: Product, as: "orderProduct" }],
+        },
+        {
+          model: db.user,
+          as: "userOrder",
+          attributes: ["id", "username", "email"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.status(200).json(orders);
+  } catch (error) {
+    console.error("getAllOrdersAdmin error:", error);
+    return res.status(500).json({ msg: "Server error", error: error.message });
+  }
+};
+
+module.exports = {
+  createOrderFromCart,
+  reactivateCart,
+  getAllOrders,
+  getAllOrdersAdmin,
+};
