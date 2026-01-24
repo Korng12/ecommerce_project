@@ -22,6 +22,7 @@
         <!-- Dynamic Content based on Active Tab -->
         <DashboardTab v-if="activeTab === 'dashboard'" />
         <UsersTab v-else-if="activeTab === 'users'" />
+        <CategoriesTab v-else-if="activeTab === 'categories'" />
         <OrdersTab v-else-if="activeTab === 'orders'" />
         <AnalyticsTab v-else-if="activeTab === 'analytics'" />
         <SettingsTab v-else-if="activeTab === 'settings'" />
@@ -37,6 +38,7 @@ import Sidebar from '@/components/admin/Sidebar.vue'
 import TopNav from '@/components/admin/TopNav.vue'
 import DashboardTab from '@/components/admin/DashboardTab.vue'
 import UsersTab from '@/components/admin/UsersTab.vue'
+import CategoriesTab from '@/components/admin/CategoriesTab.vue'
 import OrdersTab from '@/components/admin/OrdersTab.vue'
 import AnalyticsTab from '@/components/admin/AnalyticsTab.vue'
 import SettingsTab from '@/components/admin/SettingsTab.vue'

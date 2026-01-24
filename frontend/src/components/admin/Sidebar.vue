@@ -35,7 +35,7 @@
 <script setup>
 import { defineProps, defineEmits, markRaw } from 'vue'
 import { 
-  LayoutDashboard, Users, ShoppingCart, BarChart3, Settings, LogOut, Menu, X
+  LayoutDashboard, Users, ShoppingCart, BarChart3, Settings, LogOut, Menu, X, Folder
 } from 'lucide-vue-next'
 
 defineProps({
@@ -49,6 +49,7 @@ defineEmits(['toggle-sidebar', 'change-tab'])
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
   { id: 'users', label: 'Users', icon: markRaw(Users) },
+  { id: 'categories', label: 'Categories', icon: markRaw(Folder) },
   { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },
   { id: 'settings', label: 'Settings', icon: markRaw(Settings) },
