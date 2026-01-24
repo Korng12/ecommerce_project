@@ -1,11 +1,20 @@
 <script setup>
-  import { useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
+
 defineProps({
   subtotal: Number,
   shipping: Number,
   tax: Number
 });
+
+const emit = defineEmits(['checkout']);
 const path = useRoute().path;
+
+const handleButtonClick = () => {
+  if (path === '/checkoutView') {
+    emit('checkout');
+  }
+};
 </script>
 
 <template>
@@ -13,27 +22,39 @@ const path = useRoute().path;
     <p class="text-xl font-bold mb-5">Order Summary</p>
 
     <div class="flex justify-between py-2">
-      <p>Subtotal</p><p>${{ subtotal.toFixed(2) }}</p>
+      <p>Subtotal</p>
+      <p>${{ subtotal.toFixed(2) }}</p>
     </div>
 
     <div class="flex justify-between py-2">
-      <p>Standard Shipping</p><p>${{ shipping.toFixed(2) }}</p>
+      <p>Standard Shipping</p>
+      <p>${{ shipping.toFixed(2) }}</p>
     </div>
 
     <div class="flex justify-between py-2">
-      <p>Tax</p><p>${{ tax.toFixed(2) }}</p>
+      <p>Tax</p>
+      <p>${{ tax.toFixed(2) }}</p>
     </div>
 
     <hr class="my-4" />
 
     <div class="flex justify-between font-bold text-lg">
-      <p>Total</p><p>${{( subtotal + shipping + tax ).toFixed(2)}}</p>
+      <p>Total</p>
+      <p>${{ (subtotal + shipping + tax).toFixed(2) }}</p>
     </div>
-
-    <button class="w-full mt-4 bg-blue-700 text-white py-3 rounded-lg">
-      <RouterLink to="/checkoutView">
-        {{ path === '/checkoutView' ? 'Pay Now' : 'Checkout' }}
-      </RouterLink>
+    
+    <button 
+      v-if="path === '/checkoutView'"
+      @click="handleButtonClick"
+      class="w-full mt-4 bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800"
+    >
+      Pay Now
     </button>
+    
+    <RouterLink v-else to="/checkoutView">
+      <button class="w-full mt-4 bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800">
+        Checkout
+      </button>
+    </RouterLink>
   </div>
 </template>

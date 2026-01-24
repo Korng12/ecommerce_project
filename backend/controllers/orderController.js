@@ -1,0 +1,115 @@
+// backend/controllers/orderController.js
+const db = require("../models/index.js");
+
+const Cart = db.cart;
+const CartItem = db.cartItem;
+const Product = db.product;
+
+const Order = db.order;
+const OrderItem = db.orderItem;
+
+const createOrderFromCart = async (req, res) => {
+  const userId = req.user.id;
+
+  const t = await db.sequelize.transaction();
+  try {
+    const cart = await Cart.findOne({
+      where: { userId, status: "active" },
+      include: [
+        {
+          model: CartItem,
+          as: "items",
+          include: [{ model: Product, as: "product" }],
+        },
+      ],
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+
+    if (!cart || !cart.items || cart.items.length === 0) {
+      await t.rollback();
+      return res.status(400).json({ msg: "Cart is empty" });
+    }
+
+    // Calculate total from DB prices (never trust client)
+    let total = 0;
+    for (const item of cart.items) {
+      const product = item.product;
+      if (!product) throw new Error("CartItem missing product association");
+
+      const qty = Number(item.quantity);
+      const price = Number(product.price);
+
+      if (!Number.isFinite(qty) || qty < 1) throw new Error("Invalid quantity");
+      if (!Number.isFinite(price) || price < 0)
+        throw new Error("Invalid product price");
+
+      // Optional stock check
+      if (product.stock != null && Number(product.stock) < qty) {
+        await t.rollback();
+        return res
+          .status(400)
+          .json({ msg: `Not enough stock for ${product.name}` });
+      }
+
+      total += price * qty;
+    }
+
+    // Create order (pending)
+    const order = await Order.create(
+      {
+        userId,
+        totalAmount: total,
+        status: "pending",
+      },
+      { transaction: t },
+    );
+
+    // Snapshot order items (price at purchase time)
+    const orderItems = cart.items.map((item) => ({
+      orderId: order.id,
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.product.price,
+    }));
+
+    await OrderItem.bulkCreate(orderItems, { transaction: t });
+
+    // Don't mark cart as completed yet - wait for payment success
+    // Cart will be marked completed in the payment webhook
+
+    await t.commit();
+
+    return res.status(201).json({
+      orderId: order.id,
+      totalAmount: order.totalAmount,
+      status: order.status,
+    });
+  } catch (err) {
+    await t.rollback();
+    console.error("createOrderFromCart error:", err);
+    return res.status(500).json({ msg: "Server error" });
+  }
+};
+
+// Allow user to reactivate a cart if they backed out or cancelled before payment
+const reactivateCart = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const cart = await Cart.findOne({ where: { userId, status: "completed" } });
+    if (!cart) {
+      return res.status(404).json({ msg: "No completed cart to reactivate" });
+    }
+
+    await cart.update({ status: "active" });
+    return res
+      .status(200)
+      .json({ msg: "Cart reactivated", cartId: cart.id, status: cart.status });
+  } catch (err) {
+    console.error("reactivateCart error:", err);
+    return res.status(500).json({ msg: "Server error" });
+  }
+};
+
+module.exports = { createOrderFromCart, reactivateCart };
