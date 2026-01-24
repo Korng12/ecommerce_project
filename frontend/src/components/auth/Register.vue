@@ -83,6 +83,8 @@
 import { reactive } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import { ROLES } from '@/constants/roles';
 
 const router = useRouter();
 
@@ -91,7 +93,7 @@ const formData = reactive({
   email: '',
   password: '',
   confirmPassword: '',
-  roleId: 1   // DEFAULT USER ROLE
+  roleId: 2   // DEFAULT USER ROLE (not admin)
 });
 
 const handleSubmit = async () => {
@@ -101,18 +103,41 @@ const handleSubmit = async () => {
   }
 
   try {
+    // First check if backend is reachable
+    try {
+      await axios.get('http://localhost:3000/api/health');
+    } catch (healthErr) {
+      alert('Cannot connect to backend server. Please ensure backend is running on port 3000');
+      console.error('Backend connection error:', healthErr.message);
+      return;
+    }
+
     const res = await axios.post('http://localhost:3000/api/register', {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      roleId: 1
+      roleId: 2  // New users are always USER role, not ADMIN
+    }, {
+      withCredentials: true  // Enable cookies
     });
 
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    router.push('/profile');
+    console.log('Registration successful:', res.data);
+
+    // Update auth store
+    const authStore = useAuthStore();
+    authStore.user = res.data.user;
+    authStore.isAuthenticated = true;
+    authStore.checkedAuth = true;
+
+    // Redirect based on role
+    if(res.data.user.roleId === ROLES.ADMIN){
+      router.push('/adminView');
+    } else {
+      router.push('/app/profile');
+    }
   } catch (err) {
-    alert(err.response?.data?.message || 'Registration failed');
+    console.error('Registration error:', err.response?.data || err.message);
+    alert(err.response?.data?.message || 'Registration failed: ' + err.message);
   }
 };
 </script>

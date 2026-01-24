@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const {verifyToken, getProfile, updateProfile, deleteProfile, updatePassword, uploadAvatar} = require('../controllers/profileController')
+const verifyJwt = require('../middleware/authJwt');
+const {getProfile, updateProfile, deleteProfile, updatePassword, uploadAvatar} = require('../controllers/profileController')
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -10,7 +11,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, req.userId + '-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, req.user.id + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
@@ -29,7 +30,9 @@ const upload = multer({
     }
   }
 });
-router.use(verifyToken);
+
+// Apply JWT verification middleware to all routes
+router.use(verifyJwt);
 
 router.get('/', getProfile);
 router.put('/', updateProfile);

@@ -174,12 +174,16 @@
 import { reactive, ref, onMounted } from 'vue'
 import { Edit2 } from 'lucide-vue-next'
 import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const isEditing = ref(false)
 
 const user = reactive({
+  id: '',
   username: '',
-  email: ''
+  email: '',
+  roleId: ''
 })
 
 const passwordData = reactive({
@@ -191,72 +195,90 @@ const passwordData = reactive({
 const getInitials = (username) =>
   username ? username.charAt(0).toUpperCase() : 'U'
 
-const loadUserData = () => {
-  const data = localStorage.getItem('user')
-  if (data) {
-    const userData = JSON.parse(data)
+const loadUserData = async () => {
+  // First try to get from auth store
+  if (authStore.user) {
     Object.assign(user, {
-      username: userData.username || '',
-      email: userData.email || ''
+      id: authStore.user.id || '',
+      username: authStore.user.username || '',
+      email: authStore.user.email || '',
+      roleId: authStore.user.roleId || ''
     })
+  } else {
+    // Fallback to fetching current user
+    try {
+      await authStore.fetchCurrentUser()
+      if (authStore.user) {
+        Object.assign(user, {
+          id: authStore.user.id || '',
+          username: authStore.user.username || '',
+          email: authStore.user.email || '',
+          roleId: authStore.user.roleId || ''
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load user data:', error)
+    }
   }
 }
 
 const updateProfile = async () => {
   try {
-    const token = localStorage.getItem('token');
-    
-   
-    if (passwordData.newPassword) {
-      if (!passwordData.currentPassword) {
-        alert('Please enter current password');
-        return;
-      }
-      if (passwordData.newPassword !== passwordData.confirmPassword) {
-        alert('New passwords do not match');
-        return;
-      }
-      
-     
-      await axios.put('http://localhost:3000/api/profile/password', {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-   
-      passwordData.currentPassword = '';
-      passwordData.newPassword = '';
-      passwordData.confirmPassword = '';
-    }
-    
-
+    // Use cookies for authentication (credentials: 'include' in fetch)
     const response = await axios.put('http://localhost:3000/api/profile', {
       username: user.username,
       email: user.email
     }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+      withCredentials: true
+    })
     
-  
-    localStorage.setItem('user', JSON.stringify({ ...response.data }));
+    // Update auth store with new data
+    authStore.user = response.data
     
-    isEditing.value = false;
-    alert('Profile updated successfully!');
+    isEditing.value = false
+    alert('Profile updated successfully!')
   } catch (error) {
-    alert('Failed to update profile: ' + (error.response?.data?.message || 'Server error'));
+    alert('Failed to update profile: ' + (error.response?.data?.message || 'Server error'))
+  }
+}
+
+const updatePassword = async () => {
+  try {
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      alert('Please fill in all password fields')
+      return
+    }
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('New passwords do not match')
+      return
+    }
+
+    await axios.put('http://localhost:3000/api/profile/password', {
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword
+    }, {
+      withCredentials: true
+    })
+    
+    // Clear password fields
+    passwordData.currentPassword = ''
+    passwordData.newPassword = ''
+    passwordData.confirmPassword = ''
+    
+    alert('Password updated successfully!')
+  } catch (error) {
+    alert('Failed to update password: ' + (error.response?.data?.message || 'Server error'))
   }
 }
 
 const handleImageError = (event) => {
- 
-  event.target.style.display = 'none';
+  event.target.style.display = 'none'
   event.target.parentElement.innerHTML = `
     <div class="w-full h-full flex items-center justify-center text-white text-3xl font-bold bg-gradient-to-br from-indigo-500 to-purple-600">
       ${getInitials(user.username)}
     </div>
-  `;
+  `
 }
 
 onMounted(loadUserData)

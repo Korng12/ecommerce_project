@@ -74,9 +74,9 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-vue-next';
-import axios from 'axios';
 import { useRouter } from 'vue-router';
-
+import { useAuthStore } from '@/stores/auth';
+import { ROLES } from '@/constants/roles';  
 const router = useRouter();
 const showPassword = ref(false);
 const message = ref('');
@@ -92,12 +92,17 @@ const togglePassword = () => {
 
 const handleSubmit = async () => {
   try {
-    const res = await axios.post('http://localhost:3000/api/login', formData);
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    router.push('/profile');
+    const authStore = useAuthStore();
+    await authStore.login(formData.email, formData.password);
+    
+    // Redirect based on user role
+    if(authStore.user?.roleId === ROLES.ADMIN){
+      router.push('/adminView');
+    } else {
+      router.push('/app');
+    }
   } catch (err) {
-    message.value = err.response?.data?.message || 'Login failed';
+    message.value = err.message || 'Login failed';
   }
 };
 </script>

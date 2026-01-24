@@ -1,59 +1,57 @@
 import { createRouter, createWebHistory } from "vue-router";
-
+import { useAuthStore } from "@/stores/auth";
+import { ROLES } from "@/constants/roles";
 const routes = [
-  // Landing Layout (for public pages)
   {
     path: "/",
     component: () => import("@/layouts/LandingLayout.vue"),
     children: [
       {
-        path: '',
+        path: "",
         name: "landingPage",
         component: () => import("@/views/LandingPage.vue"),
       },
       {
-        path: 'aboutUsView',
+        path: "aboutUsView",
         name: "aboutUsView",
         component: () => import("@/views/AboutUsView.vue"),
       },
       {
-        path: 'contactUsView',
+        path: "contactUsView",
         name: "contactUsView",
+        
         component: () => import("@/views/ContactUsView.vue"),
       },
       {
-        path: 'register',
+        path: "register",
         name: "register",
         component: () => import("@/views/RegisterView.vue"),
       },
       {
-        path: 'login',
+        path: "login",
         name: "login",
         component: () => import("@/views/LoginView.vue"),
-      }
-    ]
+      },
+    ],
   },
-
-  // Main Layout (for authenticated users)
   {
-    path: "/",
+    path: "/app",
     component: () => import("@/layouts/MainLayout.vue"),
+    meta: { requiresAuth: true, ROLES: [ROLES.USER, ROLES.ADMIN] },
     children: [
       {
-        path: 'home',
-        name: "home",
-        component: () => import("@/views/user/HomePage.vue"),
+        path: '', name: "home",component: () => import("@/views/user/HomePage.vue"), 
       },
       {
-        path: 'category/:catName',
-        name: 'categoryView',
-        component: () => import('@/views/user/CategoryView.vue')
+        path: "category/:catName",
+        name: "categoryView",
+        component: () => import("@/views/user/CategoryView.vue"),
       },
       {
-        path: 'profile',
-        name: "profileView",
+        path: "profile",
+        name: "profile",
         component: () => import("@/views/user/ProfileView.vue"),
-      }
+      },
     ],
   },
 
@@ -61,16 +59,15 @@ const routes = [
   {
     path: "/adminView",
     component: () => import("@/layouts/AdminLayout.vue"),
+    meta: { requiresAuth: true, requiredRole: ROLES.ADMIN },
     children: [
       {
-        path: '',
+        path: "",
         name: "adminView",
         component: () => import("@/views/admin/adminView.vue"),
-      }
+      },
     ],
   },
-
-  // Standalone Routes (no layout needed)
   {
     name: "productView",
     path: "/product/:productId",
@@ -86,14 +83,37 @@ const routes = [
     path: "/checkoutView",
     component: () => import("@/views/user/CheckoutView.vue"),
   },
-
-  // Catch all
-  { path: '/:catchAll(.*)', redirect: '/' }
+  {
+    name: "paymentSuccess",
+    path: "/payment-success",
+    component: () => import("@/views/user/PaymentSuccessView.vue"),
+  },
+  // {
+  //   name: "categoryView",
+  //   path: "/product/categoryView/:catName",
+  //   component: () => import("@/views/user/CategoryView.vue"),
+  // },
+  { path: "/:catchAll(.*)", redirect: "/" },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore();
+
+  if (!authStore.checkedAuth) {
+    await authStore.fetchCurrentUser();
+  }
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { name: "login" };
+  }
+
+  if (to.meta.requiredRole && authStore.user?.roleId !== to.meta.requiredRole) {
+    return { name: "landingPage" };
+  }
 });
 
 export default router;
