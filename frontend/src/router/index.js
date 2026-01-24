@@ -25,18 +25,21 @@ const routes = [
       {
         path: "register",
         name: "register",
-        component: () => import("@/views/RegisterView.vue"),
+        component: () => import("@/components/auth/Register.vue"),
+        // component: () => import("@/views/RegisterView.vue"),
       },
       {
         path: "login",
         name: "login",
-        component: () => import("@/views/LoginView.vue"),
+        // component: () => import("@/views/LoginView.vue"),
+        component:()=> import("@/components/auth/Login.vue"),
       },
     ],
   },
   {
     path: "/app",
     component: () => import("@/layouts/MainLayout.vue"),
+    
     meta: { requiresAuth: true, ROLES: [ROLES.USER, ROLES.ADMIN] },
     children: [
       {
