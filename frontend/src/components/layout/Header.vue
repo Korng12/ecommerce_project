@@ -42,13 +42,18 @@
         </button>
 
         <!-- User Dropdown -->
-        <div class="relative group">
+        <div  class="relative group">
           <button class="flex items-center gap-1 p-2 rounded-full hover:bg-gray-200 transition-transform duration-200 hover:scale-110">
             <font-awesome-icon icon="user" class="text-gray-700"/>
           </button>
-          <ul class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+         
+          <ul v-if="!authStore.isAuthenticated" class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
             <li><router-link to="/login" class="block px-4 py-2 hover:bg-gray-100">Login</router-link></li>
             <li><router-link to="/register" class="block px-4 py-2 hover:bg-gray-100">Register</router-link></li>
+          </ul>
+          <ul v-else class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+            <li><router-link to="/profile" class="block px-4 py-2 hover:bg-gray-100">Profile</router-link></li>
+            <li><button @click="handleLogout" class="w-full text-left px-4 py-2 hover:bg-gray-100">Logout</button></li>
           </ul>
         </div>
 
@@ -56,7 +61,7 @@
         <router-link :to="{name:'cartView',path:'/cartView'}">
           <button class="relative p-2 rounded-full hover:bg-gray-200 transition-transform duration-200 hover:scale-110">
             <font-awesome-icon icon="shopping-cart" class="text-gray-700"/>
-            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+            <span v-if="cartStore.cartCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">{{ cartStore.cartCount }}</span>
           </button>
         </router-link>
 
@@ -104,19 +109,42 @@
 
 <script setup>
 import CartView from '@/views/user/CartView.vue'
-import { ref, computed } from 'vue'
+import { ref, computed,onMounted } from 'vue'
 import { useCategory } from '@/stores/categories'
 import { useProduct } from '@/stores/products';
+import {useAuthStore} from '@/stores/auth';
+import { useRouter } from 'vue-router';
+import { useCart} from '@/stores/carts';
+
+const cartStore=useCart();
 const categoriesStore=useCategory();
+const authStore=useAuthStore();
+const router = useRouter();
+
+// Fetch cart on mount if user is authenticated
+onMounted(async () => {
+  if (authStore.isAuthenticated) {
+    await cartStore.getCart();
+  }
+});
 
 const searchOpen = ref(false)
 const searchQuery = ref('')
 const products = ['iPhone 15', 'MacBook Pro', 'AirPods', 'Apple Watch', 'iPad Pro']
-
+onMounted(() => {
+  categoriesStore.fetchAllCategories();
+  console.log('Fetched categories in header:', categoriesStore.categories);
+});
 const toggleSearch = () => searchOpen.value = !searchOpen.value
 const closeSearch = () => {
   searchOpen.value = false
   searchQuery.value = ''
+}
+
+// Handle logout with redirect
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push({ name: 'landingPage' });
 }
 
 // Filter suggestions

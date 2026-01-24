@@ -246,9 +246,9 @@
 
 
 
-    <Footer>
+    <!-- <Footer>
 
-    </Footer>
+    </Footer> -->
 
   </div>
 </template>

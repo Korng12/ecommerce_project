@@ -11,7 +11,7 @@
         >
           <!-- Image -->
           <img
-            :src="fixImage(category.banner)"
+            :src="fixImage(category.image)"
             alt=""
             class="w-full h-64 sm:h-80 lg:h-72 object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -42,6 +42,20 @@ const catName=route.params.catName;
 const categoryStore = useCategory();
 
 const fixImage = (path) => {
-  return new URL(path, import.meta.url).href;
+  if (!path) return ''
+  // If it's already a full URL, return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  // If it's a backend path (starts with /), prepend the API base URL
+  if (path.startsWith('/')) {
+    return `http://localhost:3000${path}`
+  }
+  // Otherwise treat as local asset
+  try {
+    return new URL(path, import.meta.url).href
+  } catch {
+    return path
+  }
 };
 </script>
