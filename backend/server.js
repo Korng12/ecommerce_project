@@ -33,6 +33,8 @@ app.use('/api/dashboard', dashboardRoutes)
 
 // Serve static files for images
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+// for uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 console.log('📁 Serving static images from:', path.join(__dirname, 'public', 'images'));
 
 app.use('/api', authRoutes);
