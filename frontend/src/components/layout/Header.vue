@@ -109,7 +109,7 @@
 
 <script setup>
 import CartView from '@/views/user/CartView.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed,onMounted } from 'vue'
 import { useCategory } from '@/stores/categories'
 import { useProduct } from '@/stores/products';
 import {useAuthStore} from '@/stores/auth';
@@ -131,7 +131,10 @@ onMounted(async () => {
 const searchOpen = ref(false)
 const searchQuery = ref('')
 const products = ['iPhone 15', 'MacBook Pro', 'AirPods', 'Apple Watch', 'iPad Pro']
-
+onMounted(() => {
+  categoriesStore.fetchAllCategories();
+  console.log('Fetched categories in header:', categoriesStore.categories);
+});
 const toggleSearch = () => searchOpen.value = !searchOpen.value
 const closeSearch = () => {
   searchOpen.value = false

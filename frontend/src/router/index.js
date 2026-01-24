@@ -39,9 +39,7 @@ const routes = [
     meta: { requiresAuth: true, ROLES: [ROLES.USER, ROLES.ADMIN] },
     children: [
       {
-        path: "",
-        name: "home",
-        component: () => import("@/views/user/HomePage.vue"),
+        path: '', name: "home",component: () => import("@/views/user/HomePage.vue"), 
       },
       {
         path: "category/:catName",
