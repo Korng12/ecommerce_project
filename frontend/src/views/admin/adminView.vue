@@ -42,7 +42,6 @@ import CategoriesTab from '@/components/admin/CategoriesTab.vue'
 import OrdersTab from '@/components/admin/OrdersTab.vue'
 import AnalyticsTab from '@/components/admin/AnalyticsTab.vue'
 import SettingsTab from '@/components/admin/SettingsTab.vue'
-import AuthForm from '@/components/AuthForm.vue'
 
 // State
 const sidebarOpen = ref(true)
