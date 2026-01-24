@@ -21,7 +21,7 @@ import { defineProps, computed } from 'vue'
 // this icon use lucide-vue-text "run: npm lucide-vue-next"
 import { 
   DollarSign, UserCheck, Package, TrendingUp, ShoppingCart, 
-  Activity, Globe, ShoppingBag 
+  Activity, Globe, ShoppingBag, Users
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -44,7 +44,8 @@ const iconComponent = computed(() => {
     ShoppingCart,
     Activity,
     Globe,
-    ShoppingBag
+    ShoppingBag,
+    Users
   }
   return icons[props.icon] || DollarSign
 })
