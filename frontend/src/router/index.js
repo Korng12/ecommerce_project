@@ -47,8 +47,15 @@ const routes = [
         name: "categoryView",
         component: () => import("@/views/user/CategoryView.vue"),
       },
+      {
+        path: "profile",
+        name: "profile",
+        component: () => import("@/views/user/ProfileView.vue"),
+      },
     ],
   },
+
+  // Admin Layout
   {
     path: "/adminView",
     component: () => import("@/layouts/AdminLayout.vue"),
@@ -63,7 +70,7 @@ const routes = [
   },
   {
     name: "productView",
-    path: "/product/productView/:productId",
+    path: "/product/:productId",
     component: () => import("@/views/user/ProductView.vue"),
   },
   {
@@ -105,7 +112,7 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiredRole && authStore.user?.roleId !== to.meta.requiredRole) {
-    return { name: "forbidden" };
+    return { name: "landingPage" };
   }
 });
 

@@ -94,14 +94,15 @@ const handleSubmit = async () => {
   try {
     const authStore = useAuthStore();
     await authStore.login(formData.email, formData.password);
-    if(authStore.user.roleId===ROLES.ADMIN){
+    
+    // Redirect based on user role
+    if(authStore.user?.roleId === ROLES.ADMIN){
       router.push('/adminView');
-      return;
+    } else {
+      router.push('/app');
     }
-    router.push('/app');
   } catch (err) {
     message.value = err.message || 'Login failed';
   }
-
 };
 </script>

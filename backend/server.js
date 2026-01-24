@@ -39,10 +39,19 @@ app.use("/api", webhookRouter.webhookOnly);
 app.use(express.json()); // ✅ REQUIRED
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", authRoutes);
-app.use("/hello", (req, res) => {
-  console.log(req.url);
-  res.status(200).json("Hello");
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Backend is running' });
+});
+
+const profileRoutes = require('./routes/profileRoutes')
+const statisticsRoutes = require('./routes/statisticsRoutes')
+app.use('/api', authRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/statistics', statisticsRoutes);
+app.use('/hello',(req,res)=>{
+  console.log(req.url)
+  res.status(200).json("Hello")
 });
 
 app.use('/protected',verifyJwt,(req,res)=>{
@@ -60,6 +69,21 @@ app.use(
   verifyRole(1),
   require("./controllers/authController").getAllUsers,
 );
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('ERROR:', err);
+  res.status(err.status || 500).json({ 
+    message: err.message || 'Server error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
 app.listen(3000, () => {
   console.log("🚀 Server running on port 3000");
 });
