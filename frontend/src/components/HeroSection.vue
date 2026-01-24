@@ -21,13 +21,15 @@
         </p>
 
         <!-- Animated Button -->
-        <button
+         <router-link :to="{name:'home'}">
+        <button 
           class="mt-4 px-8 py-3 text-lg bg-blue-600 text-white rounded-xl shadow-md 
           hover:shadow-blue-400/60 hover:scale-105 active:scale-95
           transition-all duration-300 animate-btn-glow"
         >
           Shop Now
         </button>
+        </router-link>
       </div>
 
       <!-- IMAGE FULL-WIDTH WITH BLUR BACKGROUND -->

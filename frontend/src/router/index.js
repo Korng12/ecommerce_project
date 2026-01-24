@@ -19,6 +19,7 @@ const routes = [
       {
         path: "contactUsView",
         name: "contactUsView",
+        
         component: () => import("@/views/ContactUsView.vue"),
       },
       {
@@ -80,11 +81,11 @@ const routes = [
     path: "/payment-success",
     component: () => import("@/views/user/PaymentSuccessView.vue"),
   },
-  {
-    name: "categoryView",
-    path: "/product/categoryView/:catName",
-    component: () => import("@/views/user/CategoryView.vue"),
-  },
+  // {
+  //   name: "categoryView",
+  //   path: "/product/categoryView/:catName",
+  //   component: () => import("@/views/user/CategoryView.vue"),
+  // },
   { path: "/:catchAll(.*)", redirect: "/" },
 ];
 
