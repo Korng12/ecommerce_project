@@ -4,7 +4,7 @@
       
   
       <div class="bg-white rounded-3xl shadow-2xl overflow-hidden mb-10">
-        <div class="h-48 bg-gradient-to-r from-gray-900 via-black to-gray-900 relative">
+        <div class="h-48 bg-gradient-to-r via-black relative">
           <div class="absolute inset-0 bg-black/10"></div>
         </div>
         
@@ -45,7 +45,7 @@
             <div class="flex space-x-3">
               <button
                 @click="isEditing = !isEditing"
-                class="px-8 py-4 bg-gradient-to-r from-gray-900 via-black to-gray-900 hover:from-gray-800 hover:via-gray-900 hover:to-gray-800 text-white rounded-2xl transition-all shadow-xl hover:shadow-2xl flex items-center space-x-3 font-semibold"
+                class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl transition-all shadow-xl hover:shadow-2xl flex items-center space-x-3 font-semibold"
               >
                 <Edit2 class="w-5 h-5" />
                 <span>{{ isEditing ? 'Cancel Edit' : 'Edit Profile' }}</span>
@@ -159,7 +159,7 @@
             </button>
             <button
               type="submit"
-              class="px-10 py-4 bg-gradient-to-r from-gray-900 via-black to-gray-900 hover:from-gray-800 hover:via-gray-900 hover:to-gray-800 text-white font-bold rounded-2xl transition-all shadow-xl hover:shadow-2xl text-lg"
+              class="px-10 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-2xl transition-all shadow-xl hover:shadow-2xl text-lg"
             >
               Save Changes
             </button>
@@ -174,16 +174,12 @@
 import { reactive, ref, onMounted } from 'vue'
 import { Edit2 } from 'lucide-vue-next'
 import axios from 'axios'
-import { useAuthStore } from '@/stores/auth'
 
-const authStore = useAuthStore()
 const isEditing = ref(false)
 
 const user = reactive({
-  id: '',
   username: '',
-  email: '',
-  roleId: ''
+  email: ''
 })
 
 const passwordData = reactive({
@@ -195,90 +191,72 @@ const passwordData = reactive({
 const getInitials = (username) =>
   username ? username.charAt(0).toUpperCase() : 'U'
 
-const loadUserData = async () => {
-  // First try to get from auth store
-  if (authStore.user) {
+const loadUserData = () => {
+  const data = localStorage.getItem('user')
+  if (data) {
+    const userData = JSON.parse(data)
     Object.assign(user, {
-      id: authStore.user.id || '',
-      username: authStore.user.username || '',
-      email: authStore.user.email || '',
-      roleId: authStore.user.roleId || ''
+      username: userData.username || '',
+      email: userData.email || ''
     })
-  } else {
-    // Fallback to fetching current user
-    try {
-      await authStore.fetchCurrentUser()
-      if (authStore.user) {
-        Object.assign(user, {
-          id: authStore.user.id || '',
-          username: authStore.user.username || '',
-          email: authStore.user.email || '',
-          roleId: authStore.user.roleId || ''
-        })
-      }
-    } catch (error) {
-      console.error('Failed to load user data:', error)
-    }
   }
 }
 
 const updateProfile = async () => {
   try {
-    // Use cookies for authentication (credentials: 'include' in fetch)
+    const token = localStorage.getItem('token');
+    
+   
+    if (passwordData.newPassword) {
+      if (!passwordData.currentPassword) {
+        alert('Please enter current password');
+        return;
+      }
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        alert('New passwords do not match');
+        return;
+      }
+      
+     
+      await axios.put('http://localhost:3000/api/profile/password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+   
+      passwordData.currentPassword = '';
+      passwordData.newPassword = '';
+      passwordData.confirmPassword = '';
+    }
+    
+
     const response = await axios.put('http://localhost:3000/api/profile', {
       username: user.username,
       email: user.email
     }, {
-      withCredentials: true
-    })
+      headers: { Authorization: `Bearer ${token}` }
+    });
     
-    // Update auth store with new data
-    authStore.user = response.data
+  
+    localStorage.setItem('user', JSON.stringify({ ...response.data }));
     
-    isEditing.value = false
-    alert('Profile updated successfully!')
+    isEditing.value = false;
+    alert('Profile updated successfully!');
   } catch (error) {
-    alert('Failed to update profile: ' + (error.response?.data?.message || 'Server error'))
-  }
-}
-
-const updatePassword = async () => {
-  try {
-    if (!passwordData.currentPassword || !passwordData.newPassword) {
-      alert('Please fill in all password fields')
-      return
-    }
-    
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match')
-      return
-    }
-
-    await axios.put('http://localhost:3000/api/profile/password', {
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword
-    }, {
-      withCredentials: true
-    })
-    
-    // Clear password fields
-    passwordData.currentPassword = ''
-    passwordData.newPassword = ''
-    passwordData.confirmPassword = ''
-    
-    alert('Password updated successfully!')
-  } catch (error) {
-    alert('Failed to update password: ' + (error.response?.data?.message || 'Server error'))
+    alert('Failed to update profile: ' + (error.response?.data?.message || 'Server error'));
   }
 }
 
 const handleImageError = (event) => {
-  event.target.style.display = 'none'
+ 
+  event.target.style.display = 'none';
   event.target.parentElement.innerHTML = `
     <div class="w-full h-full flex items-center justify-center text-white text-3xl font-bold bg-gradient-to-br from-indigo-500 to-purple-600">
       ${getInitials(user.username)}
     </div>
-  `
+  `;
 }
 
 onMounted(loadUserData)
