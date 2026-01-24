@@ -31,6 +31,10 @@ app.use('/api/users', userRoutes)
 const dashboardRoutes = require('./routes/dashboard')
 app.use('/api/dashboard', dashboardRoutes)
 
+// Product Routes
+const productsRoutes = require('./routes/api/products');
+app.use('/api', productsRoutes);
+
 // Serve static files for images
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 // for uploaded files

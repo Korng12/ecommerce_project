@@ -198,6 +198,8 @@ const searchQuery = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
 const editingUserId = ref(null)
+const errorMessage = ref('')
+
 
 const formData = ref({
   name: '',
@@ -233,6 +235,7 @@ const addUser = async () => {
   closeModal()
 }
 
+// Update User
 const updateUser = async () => {
   await axios.put(`${API_USERS_URL}/${editingUserId.value}`, {
     name: formData.value.name,
@@ -244,11 +247,25 @@ const updateUser = async () => {
   closeModal()
 }
 
+// Delete User
 const deleteUser = async (id) => {
   if (!confirm('Delete this user?')) return
-  await axios.delete(`${API_USERS_URL}/${id}`, { withCredentials: true })
-  await loadUsers()
+
+  try {
+    errorMessage.value = ''
+
+    await axios.delete(`${API_USERS_URL}/${id}`, {
+      withCredentials: true
+    })
+
+    await loadUsers()
+  } catch (error) {
+    errorMessage.value =
+      error.response?.data?.message || 'Delete failed'
+  }
 }
+
+
 
 /* ================= UI ================= */
 const openAddModal = () => {

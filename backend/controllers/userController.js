@@ -36,6 +36,13 @@ exports.deleteUser = async (req, res) => {
     res.json({ message: 'User deleted' })
   } catch (err) {
     console.error('DELETE USER ERROR:', err)
+
+    if (err.message === 'Cannot delete the last admin') {
+      return res.status(400).json({ message: err.message })
+    }
+
     res.status(500).json({ message: err.message })
   }
 }
+
+

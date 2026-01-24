@@ -76,7 +76,27 @@ module.exports = {
 
   // ================= DELETE USER =================
   async remove(id) {
-    await User.destroy({ where: { id } })
-    return true
+  // 1️⃣ Find user
+  const user = await User.findByPk(id)
+
+  if (!user) {
+    throw new Error('User not found')
   }
+
+  // 2️⃣ Count how many ADMIN users exist (roleId = 1)
+  const adminCount = await User.count({
+    where: { roleId: 1 }
+  })
+
+  // 3️⃣ Prevent deleting the last ADMIN
+  if (user.roleId === 1 && adminCount === 1) {
+    throw new Error('Cannot delete the last admin')
+  }
+
+  // 4️⃣ Delete user
+  await User.destroy({ where: { id } })
+
+  return true
+}
+
 }

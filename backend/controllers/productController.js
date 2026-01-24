@@ -155,12 +155,15 @@ const createProduct = async (req, res) => {
 /* ================= UPDATE PRODUCT ================= */
 const updateProduct = async (req, res) => {
   try {
+    console.log('📝 UPDATE PRODUCT - BODY:', req.body);
+    console.log('📝 UPDATE PRODUCT - FILE:', req.file);
+
     const product = await Product.findByPk(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const {
+    let {
       name,
       description,
       stock,
@@ -168,6 +171,13 @@ const updateProduct = async (req, res) => {
       categoryId,
       brandId
     } = req.body;
+
+    // ✅ FIX EMPTY STRING & TYPE ISSUES
+    categoryId = Number(categoryId);
+    brandId =
+      brandId && String(brandId).trim() !== ''
+        ? Number(brandId)
+        : null;
 
     if (!name || !price || !categoryId) {
       return res.status(400).json({
@@ -192,10 +202,11 @@ const updateProduct = async (req, res) => {
       description: description || null,
       stock: Number(stock) || 0,
       price: Number(price),
-      categoryId: Number(categoryId),
-      brandId: brandId ? Number(brandId) : null
+      categoryId,
+      brandId
     });
 
+    // ✅ IMAGE UPDATE
     if (req.file) {
       await ProductImage.destroy({ where: { productId: product.id } });
       await ProductImage.create({
@@ -216,10 +227,15 @@ const updateProduct = async (req, res) => {
 
     res.json(updatedProduct);
   } catch (err) {
-    console.error('❌ UPDATE PRODUCT ERROR:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('❌ UPDATE PRODUCT ERROR:', err.message);
+    console.error(err.stack);
+    res.status(500).json({
+      message: 'Server error',
+      error: err.message
+    });
   }
 };
+
 
 /* ================= DELETE PRODUCT ================= */
 const deleteProduct = async (req, res) => {

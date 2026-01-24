@@ -35,7 +35,6 @@
           <th class="p-3 text-left">Action</th>
         </tr>
       </thead>
-
       <tbody>
         <tr v-for="p in filteredProducts" :key="p.id" class="border-t">
           <td class="p-3">
@@ -47,7 +46,7 @@
           <td class="p-3">{{ p.name }}</td>
           <td class="p-3">{{ p.description || '-' }}</td>
           <td class="p-3">{{ p.brandName || '-' }}</td>
-          <td class="p-3">{{ p.categoryName }}</td>
+          <td class="p-3">{{ p.categoryName || '-' }}</td>
           <td class="p-3">${{ p.price }}</td>
           <td class="p-3">{{ p.stock }}</td>
           <td class="p-3 space-x-2">
@@ -59,7 +58,10 @@
     </table>
 
     <!-- Modal -->
-    <div v-if="showModal" class="fixed inset-0 bg-black/40 flex items-center justify-center">
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center"
+    >
       <div class="bg-white w-full max-w-lg rounded p-6">
         <h2 class="text-xl font-semibold mb-4">
           {{ isEditing ? 'Edit Product' : 'Add Product' }}
@@ -67,14 +69,19 @@
 
         <div class="space-y-3">
           <input v-model="form.name" placeholder="Product name" class="w-full border p-2 rounded" />
-          <textarea v-model="form.description" placeholder="Description" class="w-full border p-2 rounded"></textarea>
 
-          <input type="file" accept="image/*" @change="handleImage" class="w-full border p-2 rounded" />
+          <textarea
+            v-model="form.description"
+            placeholder="Description"
+            class="w-full border p-2 rounded"
+          ></textarea>
+
+          <input type="file" accept="image/*" @change="handleImage" />
 
           <img v-if="imagePreview" :src="imagePreview" class="w-24 h-24 rounded object-cover" />
 
           <select v-model.number="form.brandId" class="w-full border p-2 rounded">
-            <option disabled value="">Select brand</option>
+            <option :value="null">Select brand</option>
             <option :value="1">Apple</option>
             <option :value="2">Asus</option>
             <option :value="3">Samsung</option>
@@ -130,28 +137,25 @@ const form = ref({
 
 /* ================= LOAD ================= */
 const fetchProducts = async () => {
-  try {
-    const res = await axios.get(API_URL, { withCredentials: true })
-    products.value = res.data.map(p => ({
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      price: p.price,
-      stock: p.stock,
-      brandId: p.brand?.id,
-      brandName: p.brand?.name,
-      categoryId: p.category?.id,
-      categoryName: p.category?.name,
-      imageUrl: p.images?.[0]?.imageUrl || ''
-    }))
-  } catch (err) {
-    console.error('❌ Fetch Error:', err)
-    alert('Failed to load products: ' + (err.response?.data?.message || err.message))
-  }
+  const res = await axios.get(API_URL)
+  products.value = res.data.map(p => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: p.price,
+    stock: p.stock,
+    brandId: p.brand?.id ?? null,
+    brandName: p.brand?.name ?? '',
+    categoryId: p.category?.id ?? null,
+    categoryName: p.category?.name ?? '',
+    imageUrl: p.images?.[0]?.imageUrl
+      ? `http://localhost:3000${p.images[0].imageUrl}`
+      : ''
+  }))
 }
 
 /* ================= IMAGE ================= */
-const handleImage = (e) => {
+const handleImage = e => {
   imageFile.value = e.target.files[0]
   if (imageFile.value) {
     imagePreview.value = URL.createObjectURL(imageFile.value)
@@ -162,61 +166,60 @@ const handleImage = (e) => {
 const saveProduct = async () => {
   try {
     if (!form.value.name || !form.value.price || !form.value.categoryId) {
-      alert('Name, price, category required')
+      alert('Name, price, and category are required')
       return
     }
 
-    if (isEditing.value && !form.value.id) {
-      alert('Invalid product ID')
-      return
-    }
+    const fd = new FormData()
+    fd.append('name', form.value.name)
+    fd.append('description', form.value.description || '')
+    fd.append('price', form.value.price)
+    fd.append('stock', form.value.stock || 0)
+    fd.append('categoryId', form.value.categoryId)
 
-    const formData = new FormData()
-    formData.append('name', form.value.name)
-    formData.append('description', form.value.description || '')
-    formData.append('price', String(form.value.price))
-    formData.append('stock', String(form.value.stock || 0))
-    formData.append('categoryId', String(form.value.categoryId))
     if (form.value.brandId) {
-      formData.append('brandId', String(form.value.brandId))
+      fd.append('brandId', form.value.brandId)
     }
 
     if (imageFile.value) {
-      formData.append('image', imageFile.value)
+      fd.append('image', imageFile.value)
     }
 
     if (isEditing.value) {
-      await axios.put(`${API_URL}/${form.value.id}`, formData, {
-        withCredentials: true
-      })
+      await axios.put(`${API_URL}/${form.value.id}`, fd)
     } else {
-      await axios.post(API_URL, formData, {
-        withCredentials: true
-      })
+      await axios.post(API_URL, fd)
     }
 
     closeModal()
     fetchProducts()
   } catch (err) {
-    console.error('❌ Save Error:', err)
-    console.error('Response data:', err.response?.data)
-    alert('Save failed: ' + (err.response?.data?.message || err.response?.data?.error || err.message))
+    console.error('❌ Save Error:', err.response?.data || err)
+    alert(err.response?.data?.error || err.response?.data?.message || 'Save failed')
   }
 }
 
 /* ================= EDIT ================= */
-const editProduct = (p) => {
+const editProduct = p => {
   isEditing.value = true
-  form.value = { ...p }
+  form.value = {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: p.price,
+    stock: p.stock,
+    categoryId: p.categoryId,
+    brandId: p.brandId
+  }
   imagePreview.value = p.imageUrl
   imageFile.value = null
   showModal.value = true
 }
 
 /* ================= DELETE ================= */
-const deleteProduct = async (p) => {
+const deleteProduct = async p => {
   if (!confirm('Delete product?')) return
-  await axios.delete(`${API_URL}/${p.id}`, { withCredentials: true })
+  await axios.delete(`${API_URL}/${p.id}`)
   fetchProducts()
 }
 
@@ -245,7 +248,7 @@ const closeModal = () => {
 /* ================= SEARCH ================= */
 const filteredProducts = computed(() =>
   products.value.filter(p =>
-    p.name.toLowerCase().includes(search.value.toLowerCase())
+    (p.name || '').toLowerCase().includes(search.value.toLowerCase())
   )
 )
 
