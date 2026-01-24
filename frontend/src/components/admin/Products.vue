@@ -33,6 +33,7 @@
           <th class="p-3 text-left">Action</th>
         </tr>
       </thead>
+
       <tbody>
         <tr v-for="p in filteredProducts" :key="p.id" class="border-t">
           <td class="p-3">
@@ -60,7 +61,7 @@
     <!-- Modal -->
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center"
     >
       <div class="bg-white w-full max-w-lg rounded p-6">
         <h2 class="text-xl font-semibold mb-4">
@@ -69,13 +70,8 @@
 
         <div class="space-y-3">
           <input v-model="form.name" placeholder="Product name" class="w-full border p-2 rounded" />
-          <input
-            v-model="form.image"
-            placeholder="Image URL (https://...)"
-            class="w-full border p-2 rounded"
-          />
+          <input v-model="form.image" placeholder="Image URL" class="w-full border p-2 rounded" />
 
-          <!-- IMPORTANT: numeric categoryId -->
           <select v-model.number="form.categoryId" class="w-full border p-2 rounded">
             <option disabled value="">Select category</option>
             <option :value="1">Laptops</option>
@@ -102,11 +98,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
-const API_URL = 'http://localhost:3000/api/products'
-
-const search = ref('')
+/* ================= STATE ================= */
 const products = ref([])
+const search = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
 
@@ -117,66 +113,93 @@ const form = ref({
   image: '',
   price: null,
   stock: null,
-  categoryId: null,
+  categoryId: null
 })
 
-/* AUTH */
-const authHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('token')}`,
-})
+/* ================= API ================= */
+const API_URL = 'http://localhost:3000/api/products'
 
-/* FILTER */
-const filteredProducts = computed(() => {
-  const q = search.value.toLowerCase()
-  return products.value.filter(p => p.name.toLowerCase().includes(q))
-})
+/* ================= LOAD PRODUCTS ================= */
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get(API_URL, { withCredentials: true })
 
-onMounted(fetchProducts)
-
-/* FETCH */
-async function fetchProducts() {
-  const res = await fetch(API_URL, { headers: authHeaders() })
-  const data = await res.json()
-
-  products.value = data.map(p => ({
-    id: p.id,
-    name: p.name,
-    description: p.description,
-    imageUrl: p.image,
-    price: p.price,
-    stock: p.stock,
-    categoryId: p.categoryId,
-    categoryName: p.categoryName,
-  }))
+    products.value = res.data.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      stock: p.stock,
+      categoryId: p.category?.id,          // 🔥 IMPORTANT
+      categoryName: p.category?.name || '-',
+      imageUrl: p.images?.[0]?.imageUrl || ''
+    }))
+  } catch (err) {
+    console.error('Fetch products error:', err.response?.data || err)
+  }
 }
 
-/* MODAL */
-function openModal() {
-  resetForm()
-  showModal.value = true
+/* ================= SAVE ================= */
+const saveProduct = async () => {
+  if (!form.value.name || !form.value.price || !form.value.categoryId) {
+    alert('Name, price and category are required')
+    return
+  }
+
+  const payload = {
+    name: form.value.name,
+    description: form.value.description,
+    price: Number(form.value.price),
+    stock: Number(form.value.stock || 0),
+    categoryId: Number(form.value.categoryId),
+    images: form.value.image
+      ? [{ url: form.value.image, isPrimary: true }]
+      : []
+  }
+
+  try {
+    if (isEditing.value) {
+      await axios.put(`${API_URL}/${form.value.id}`, payload, { withCredentials: true })
+    } else {
+      await axios.post(API_URL, payload, { withCredentials: true })
+    }
+
+    closeModal()
+    await fetchProducts() 
+  } catch (err) {
+    console.error('Save product error:', err.response?.data || err)
+    alert('Save failed. Check console.')
+  }
 }
 
-function closeModal() {
-  showModal.value = false
-  resetForm()
-}
-
-function editProduct(p) {
+/* ================= EDIT ================= */
+const editProduct = (p) => {
   isEditing.value = true
   form.value = {
     id: p.id,
     name: p.name,
-    description: p.description,
-    image: p.imageUrl,
+    description: '',
+    image: p.imageUrl || '',
     price: p.price,
     stock: p.stock,
-    categoryId: p.categoryId,
+    categoryId: p.categoryId
   }
   showModal.value = true
 }
 
-function resetForm() {
+/* ================= DELETE ================= */
+const deleteProduct = async (p) => {
+  if (!confirm('Delete this product?')) return
+
+  try {
+    await axios.delete(`${API_URL}/${p.id}`, { withCredentials: true })
+    await fetchProducts()
+  } catch (err) {
+    console.error('Delete product error:', err.response?.data || err)
+  }
+}
+
+/* ================= UI ================= */
+const openModal = () => {
   isEditing.value = false
   form.value = {
     id: null,
@@ -185,74 +208,23 @@ function resetForm() {
     image: '',
     price: null,
     stock: null,
-    categoryId: null,
+    categoryId: null
   }
+  showModal.value = true
 }
 
-/* SAVE (FIXED) */
-async function saveProduct() {
-  if (
-    !form.value.name ||
-    form.value.price === null ||
-    form.value.stock === null ||
-    !form.value.categoryId
-  ) {
-    alert('Please fill all required fields')
-    return
-  }
-
-  const payload = {
-    name: form.value.name,
-    description: form.value.description,
-    price: Number(form.value.price),
-    stock: Number(form.value.stock),
-    categoryId: Number(form.value.categoryId),
-    brandId: form.value.brandId ? Number(form.value.brandId) : null,
-
-    // ✅ FIX IMAGE FORMAT
-    images: form.value.image
-      ? [{ url: form.value.image, isPrimary: true }]
-      : []
-  }
-
-  console.log('🟢 PRODUCT PAYLOAD:', payload)
-
-  const url = isEditing.value
-    ? `${API_URL}/${form.value.id}`
-    : API_URL
-
-  const method = isEditing.value ? 'PUT' : 'POST'
-
-  const res = await fetch(url, {
-    method,
-    credentials: 'include', // 🔥 REQUIRED (JWT COOKIE)
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!res.ok) {
-    const err = await res.text()
-    console.error('SAVE FAILED:', err)
-    alert('Save failed. Check console.')
-    return
-  }
-
-  closeModal()
-  fetchProducts()
+const closeModal = () => {
+  showModal.value = false
+  isEditing.value = false
 }
 
+/* ================= SEARCH ================= */
+const filteredProducts = computed(() => {
+  if (!search.value) return products.value
+  return products.value.filter(p =>
+    p.name.toLowerCase().includes(search.value.toLowerCase())
+  )
+})
 
-/* DELETE */
-async function deleteProduct(p) {
-  if (!confirm(`Delete "${p.name}"?`)) return
-
-  await fetch(`${API_URL}/${p.id}`, {
-    method: 'DELETE',
-    headers: authHeaders(),
-  })
-
-  fetchProducts()
-}
+onMounted(fetchProducts)
 </script>

@@ -1,4 +1,5 @@
 const db = require('../models')
+const bcrypt = require('bcrypt')
 
 const User = db.user
 const Role = db.role
@@ -20,18 +21,26 @@ module.exports = {
       id: u.id,
       name: u.username || 'Unknown',
       email: u.email,
-      role: u.role || 'USER',
+      role: u.role?.name?.toUpperCase() || 'USER',
       status: 'Active'
     }))
   },
 
   // ================= CREATE USER =================
   async create(data) {
-    const roleId = data.role === 'Admin' || data.role === 'ADMIN' ? 1 : 2
+    if (!data.password) {
+      throw new Error('Password is required')
+    }
+
+    const roleId =
+      data.role === 'ADMIN' || data.role === 'Admin' ? 1 : 2
+
+    const hashedPassword = await bcrypt.hash(data.password, 10)
 
     const user = await User.create({
       username: data.name,
       email: data.email,
+      password: hashedPassword,   // ✅ FIX
       roleId
     })
 
@@ -46,16 +55,21 @@ module.exports = {
 
   // ================= UPDATE USER =================
   async update(id, data) {
-    const roleId = data.role === 'Admin' || data.role === 'ADMIN' ? 1 : 2
+    const roleId =
+      data.role === 'ADMIN' || data.role === 'Admin' ? 1 : 2
 
-    await User.update(
-      {
-        username: data.name,
-        email: data.email,
-        roleId
-      },
-      { where: { id } }
-    )
+    const updateData = {
+      username: data.name,
+      email: data.email,
+      roleId
+    }
+
+    // update password ONLY if provided
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, 10)
+    }
+
+    await User.update(updateData, { where: { id } })
 
     return true
   },

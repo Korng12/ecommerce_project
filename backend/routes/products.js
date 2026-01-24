@@ -2,14 +2,14 @@ const express = require('express')
 const router = express.Router()
 const controller = require('../controllers/productController')
 const verifyJWT = require('../middleware/verifyJWT')
-const roleCheck = require('../middleware/roleCheck')
+const verifyRole = require('../middleware/verifyRole')
 
 // GET products
-router.get('/', verifyJWT, controller.getAll)
+router.get('/', verifyJWT, controller.getAllProducts)
 
 // ADMIN only
-router.post('/', verifyJWT, roleCheck('ADMIN'), controller.create)
-router.put('/:id', verifyJWT, roleCheck('ADMIN'), controller.update)
-router.delete('/:id', verifyJWT, roleCheck('ADMIN'), controller.remove)
+router.post('/', verifyJWT, verifyRole(1), controller.createProduct)
+router.put('/:id', verifyJWT, verifyRole(1), controller.updateProduct)
+router.delete('/:id', verifyJWT, verifyRole(1), controller.deleteProduct)
 
 module.exports = router

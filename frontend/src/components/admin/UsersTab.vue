@@ -40,7 +40,6 @@
           </tr>
         </thead>
 
-        <!-- ✅ USERS FOUND -->
         <tbody v-if="filteredUsers.length">
           <tr
             v-for="user in filteredUsers"
@@ -59,7 +58,7 @@
             <td class="px-6 py-4">{{ user.email }}</td>
 
             <td class="px-6 py-4">
-               <span
+              <span
                 :class="[
                   'px-3 py-1 rounded-full text-sm',
                   user.role === 'ADMIN'
@@ -69,19 +68,11 @@
               >
                 {{ user.role === 'ADMIN' ? 'Admin' : 'User' }}
               </span>
-
             </td>
 
             <td class="px-6 py-4">
-              <span
-                :class="[
-                  'px-3 py-1 rounded-full text-sm',
-                  user.status === 'Active'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-700'
-                ]"
-              >
-                {{ user.status }}
+              <span class="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">
+                Active
               </span>
             </td>
 
@@ -102,21 +93,10 @@
           </tr>
         </tbody>
 
-        <!-- If empty data -->
         <tbody v-else>
           <tr>
-            <td
-              colspan="5"
-              class="text-center py-10 text-gray-500"
-            >
-              <div class="flex flex-col items-center gap-2">
-                <p class="text-lg font-semibold">
-                  {{ emptyMessage }}
-                </p>
-                <p class="text-sm text-gray-400">
-                  Try adding a new user or change your search keyword.
-                </p>
-              </div>
+            <td colspan="5" class="text-center py-10 text-gray-500">
+              {{ emptyMessage }}
             </td>
           </tr>
         </tbody>
@@ -154,25 +134,32 @@
               class="w-full px-4 py-2 border rounded-lg"
             />
 
+            <input
+              v-if="!isEditing"
+              v-model="formData.password"
+              type="password"
+              placeholder="Password"
+              required
+              class="w-full px-4 py-2 border rounded-lg"
+            />
+
+            <input
+              v-if="!isEditing"
+              v-model="formData.confirmPassword"
+              type="password"
+              placeholder="Confirm Password"
+              required
+              class="w-full px-4 py-2 border rounded-lg"
+            />
+
             <select
               v-model="formData.role"
               required
               class="w-full px-4 py-2 border rounded-lg"
             >
               <option value="">Select Role</option>
-              <option v-for="r in roles" :key="r" :value="r">
-                {{ r }}
-              </option>
-            </select>
-
-            <select
-              v-model="formData.status"
-              required
-              class="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value="">Select Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
+              <option value="ADMIN">Admin</option>
+              <option value="USER">User</option>
             </select>
           </div>
 
@@ -202,6 +189,9 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { Search, X } from 'lucide-vue-next'
 
+/* ================= API ================= */
+const API_USERS_URL = 'http://localhost:3000/api/users'
+
 /* ================= STATE ================= */
 const users = ref([])
 const searchQuery = ref('')
@@ -209,82 +199,56 @@ const showModal = ref(false)
 const isEditing = ref(false)
 const editingUserId = ref(null)
 
-const roles = ['Admin', 'User']
-
 const formData = ref({
   name: '',
   email: '',
-  role: '',
-  status: ''
+  password: '',
+  confirmPassword: '',
+  role: ''
 })
 
-/* ================= API ================= */
-const API_URL = 'http://localhost:3000/users'
-
-
+/* ================= LOAD USERS ================= */
 const loadUsers = async () => {
-  const res = await axios.get(API_URL, { withCredentials: true })
-
-  users.value = res.data.map(u => ({
-    id: u.id,
-    name: u.username || 'Unknown',
-    email: u.email,
-    role: u.role || 'USER',
-    status: u.status || 'Active'
-  }))
-
+  const res = await axios.get(API_USERS_URL, { withCredentials: true })
+  users.value = res.data
 }
 
-
-
+onMounted(loadUsers)
 
 /* ================= CRUD ================= */
 const addUser = async () => {
-  try {
-    await axios.post(
-      'http://localhost:3000/api/users',
-      formData.value,
-      { withCredentials: true }   
-    )
-    await loadUsers()
-    closeModal()
-  } catch (err) {
-    console.error('Add user error:', err)
+  if (formData.value.password !== formData.value.confirmPassword) {
+    alert('Passwords do not match')
+    return
   }
+
+  await axios.post(API_USERS_URL, {
+    name: formData.value.name,
+    email: formData.value.email,
+    password: formData.value.password,
+    role: formData.value.role
+  }, { withCredentials: true })
+
+  await loadUsers()
+  closeModal()
 }
 
-// Update user
 const updateUser = async () => {
-  try {
-    await axios.put(
-      `${API_URL}/${editingUserId.value}`,
-      formData.value,
-      { withCredentials: true }   
-    )
+  await axios.put(`${API_USERS_URL}/${editingUserId.value}`, {
+    name: formData.value.name,
+    email: formData.value.email,
+    role: formData.value.role
+  }, { withCredentials: true })
 
-    await loadUsers()
-    closeModal()
-  } catch (err) {
-    console.error('Update user error:', err)
-  }
+  await loadUsers()
+  closeModal()
 }
 
-// Delete user
 const deleteUser = async (id) => {
   if (!confirm('Delete this user?')) return
-
-  try {
-    await axios.delete(`${API_URL}/${id}`, {
-      withCredentials: true       
-    })
-
-    await loadUsers()
-  } catch (err) {
-    console.error('Delete user error:', err)
-  }
+  await axios.delete(`${API_USERS_URL}/${id}`, { withCredentials: true })
+  await loadUsers()
 }
-
-
 
 /* ================= UI ================= */
 const openAddModal = () => {
@@ -296,17 +260,15 @@ const openAddModal = () => {
 const openEditModal = (user) => {
   isEditing.value = true
   editingUserId.value = user.id
-
   formData.value = {
     name: user.name,
     email: user.email,
-    role: user.role === 'ADMIN' ? 'Admin' : 'User',
-    status: user.status
+    password: '',
+    confirmPassword: '',
+    role: user.role
   }
-
   showModal.value = true
 }
-
 
 const closeModal = () => {
   showModal.value = false
@@ -319,32 +281,22 @@ const resetForm = () => {
   formData.value = {
     name: '',
     email: '',
-    role: '',
-    status: ''
+    password: '',
+    confirmPassword: '',
+    role: ''
   }
 }
 
 /* ================= SEARCH ================= */
 const filteredUsers = computed(() => {
   if (!searchQuery.value) return users.value
-  return users.value.filter(
-    (u) =>
-      u.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+  return users.value.filter(u =>
+    u.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 })
 
-/* ✅ EMPTY MESSAGE LOGIC */
-const emptyMessage = computed(() => {
-  if (!users.value.length) {
-    return 'User not found'
-  }
-  if (searchQuery.value && !filteredUsers.value.length) {
-    return 'No users match your search'
-  }
-  return ''
-})
-
-/* ================= INIT ================= */
-onMounted(loadUsers)
+const emptyMessage = computed(() =>
+  users.value.length ? 'No users match your search' : 'No users found'
+)
 </script>
