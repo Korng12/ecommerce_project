@@ -33,8 +33,8 @@ router.use(verifyToken);
 
 router.get('/', getProfile);
 router.put('/', updateProfile);
-router.delete('/', deleteProfile);
 router.put('/password', updatePassword);
+router.delete('/', deleteProfile);
 router.post('/avatar', upload.single('avatar'), uploadAvatar);
 
 module.exports=router

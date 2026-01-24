@@ -4,6 +4,7 @@ const db = require('../models/index.js')
 require('dotenv').config()
 const User= db.user;
 
+// Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   
@@ -20,6 +21,7 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+// ================= GET PROFILE =================
 const getProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.userId, {
@@ -38,24 +40,27 @@ const getProfile = async (req, res) => {
   }
 };
 
+// ================= UPDATE PROFILE =================
 const updateProfile = async (req, res) => {
   try {
-    const { username, firstName, lastName, phone, address, avatar, dateOfBirth, gender } = req.body;
+    const { username, email } = req.body;
     
     const user = await User.findByPk(req.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Check if email is already taken by another user
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+    }
+
     const updatedUser = await user.update({
       username: username || user.username,
-      firstName: firstName || user.firstName,
-      lastName: lastName || user.lastName,
-      phone: phone || user.phone,
-      address: address || user.address,
-      avatar: avatar || user.avatar,
-      dateOfBirth: dateOfBirth || user.dateOfBirth,
-      gender: gender || user.gender
+      email: email || user.email
     });
 
     const { password, ...userWithoutPassword } = updatedUser.toJSON();
@@ -66,6 +71,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// ================= DELETE PROFILE =================
 const deleteProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.userId);
@@ -81,7 +87,7 @@ const deleteProfile = async (req, res) => {
   }
 };
 
-
+// ================= UPDATE PASSWORD =================
 const updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -95,10 +101,13 @@ const updatePassword = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
+
+    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await user.update({ password: hashedPassword });
 
@@ -108,6 +117,8 @@ const updatePassword = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// ================= UPLOAD AVATAR =================
 const uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {
@@ -118,6 +129,8 @@ const uploadAvatar = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // In a real app, you'd save the file and store the path
     const avatarPath = `/uploads/avatars/${req.file.filename}`;
     await user.update({ avatar: avatarPath });
 
