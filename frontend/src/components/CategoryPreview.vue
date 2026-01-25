@@ -9,13 +9,13 @@
           :key="category.id"
           class="relative group rounded-xl overflow-hidden shadow-lg cursor-pointer"
         >
+          <p>{{ category.image }}</p>
           <!-- Image -->
           <img
-            :src="fixImage(category.image)"
+            :src="category.image"
             alt=""
             class="w-full h-64 sm:h-80 lg:h-72 object-cover transition-transform duration-500 group-hover:scale-105"
           />
-
           <!-- Dark Gradient Overlay -->
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -25,7 +25,7 @@
               {{ category.name }}
             </h3>
             <p class="text-sm opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-100">
-              {{ category.description }}
+              {{ category.description }} {{ category.image }}
             </p>
           </div>
         </div>

@@ -24,20 +24,18 @@
     </nav>
     
     <div class="p-4 border-t border-slate-700">
-      <button
-  @click="logout"
-  class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition-colors text-gray-300"
->
-  <LogOut :size="22" />
-  <span v-if="sidebarOpen" class="font-medium">Logout</span>
-</button>
-
+      <button @click="handleLogout" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition-colors text-gray-300">
+        <LogOut :size="22" />
+        <span v-if="sidebarOpen" class="font-medium">Logout</span>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits, markRaw } from 'vue'
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 import { 
   LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder
 } from 'lucide-vue-next'
@@ -73,4 +71,10 @@ const menuItems = [
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },
   { id: 'settings', label: 'Settings', icon: markRaw(Settings) },
 ]
+const authStore = useAuthStore();
+const router = useRouter();
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push({ name: 'login' });
+};
 </script>
