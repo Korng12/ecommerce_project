@@ -11,7 +11,7 @@
         >
           <!-- Image -->
           <img
-            :src="fixImage(category.banner)"
+            :src="fixImage(category.image)"
             alt=""
             class="w-full h-64 sm:h-80 lg:h-72 object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -37,11 +37,37 @@
 <script setup>
 import { useCategory } from '@/stores/categories';
 import { useRoute } from 'vue-router';
+import { onMounted } from 'vue';
+
 const route =useRoute();
 const catName=route.params.catName;
 const categoryStore = useCategory();
 
+onMounted(async () => {
+  if (!categoryStore.categories?.length) {
+    try {
+      await categoryStore.fetchAllCategories();
+    } catch (e) {
+      console.error('Failed to load categories:', e);
+    }
+  }
+});
+
 const fixImage = (path) => {
-  return new URL(path, import.meta.url).href;
+  if (!path) return ''
+  // If it's already a full URL, return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  // If it's a backend path (starts with /), prepend the API base URL
+  if (path.startsWith('/')) {
+    return `http://localhost:3000${path}`
+  }
+  // Otherwise treat as local asset
+  try {
+    return new URL(path, import.meta.url).href
+  } catch {
+    return path
+  }
 };
 </script>

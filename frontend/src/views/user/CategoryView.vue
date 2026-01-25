@@ -1,70 +1,62 @@
 <template>
-  <div>
+  <div class="flex flex-col min-h-screen">
     <Header></Header>
     <div class="mt-32 px-16">
-      <h1>{{ catName }} Prouduct</h1>
+      <h1 class="text-2xl font-bold">{{ catName }} Products</h1>
       <div class="flex justify-between items-center">
-      <div class="flex justify-center mt-10">
-        <div class="relative w-full max-w-md">
-          
-        <input
-          @keyup.exact.enter="onSearch" 
-          type="text"
-          v-model="query"
-          placeholder="Search..."
-          class="w-full pl-4 pr-12 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-        />
-        <button
-          @click="onSearch"
-          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-500 transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-        </button>
+        <div class="flex justify-center mt-10">
+          <div class="relative w-full max-w-md">
+            <input
+              @keyup.exact.enter="onSearch" 
+              type="text"
+              v-model="query"
+              placeholder="Search..."
+              class="w-full pl-4 pr-12 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            />
+            <button
+              @click="onSearch"
+              class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-500 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="flex gap-2 text-gray-700">
-        <select name="all" id="" class="rounded-xl">
-          <option value="brand">All Brand</option>
-          <option value="brand">brand</option>
-          <option value="brand">brand</option>
-          <option value="brand">brand</option>
-        </select>
-        <select name="" id="" class="rounded-xl">
-          <option value="brand">brand</option>
-          <option value="brand">brand</option>
-          <option value="brand">brand</option>
-
-        </select>
-        <div>
-
+        <div class="flex gap-2 text-gray-700">
+          <select name="all" id="" class="rounded-xl">
+            <option value="brand">All Brand</option>
+            <option value="brand">brand</option>
+            <option value="brand">brand</option>
+            <option value="brand">brand</option>
+          </select>
+          <select name="" id="" class="rounded-xl">
+            <option value="brand">brand</option>
+            <option value="brand">brand</option>
+            <option value="brand">brand</option>
+          </select>
         </div>
-      </div>
       </div>
     </div>
-    <!-- <div class="mt-16 flex gap-8 px-16">
-      <div v-for="product in selectedCategory" :key="product.id" class="">
-        <ProductCard :product="product"></ProductCard>
-      </div>
-    </div> -->
-    <template v-if="filteredProducts.length ==0">
-      <div class="mt-16 flex gap-8 px-16">
-        <div v-for="product in filteredProducts" :key="product.id" class="">
+
+    <!-- Products Grid -->
+    <div v-if="filteredProducts.length > 0" class="mt-16 px-16">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div v-for="product in filteredProducts" :key="product.id">
           <ProductCard :product="product"></ProductCard>
         </div>
       </div>
-    </template>
-    <template v-if="filteredProducts.length >0">
-      <div class="mt-16 flex gap-8 px-16">
-        <div v-for="product in filteredProducts" :key="product.id" class="">
-          <ProductCard :product="product"></ProductCard>
-        </div>
-      </div>
-    </template>
-    <Footer class="mt-16"></Footer>
+    </div>
+
+    <!-- No Products Found -->
+    <div v-else class="mt-16 px-16 text-center py-20">
+      <p class="text-gray-500 text-xl">No products found</p>
+    </div>
+
+    <div class="flex-grow"></div>
+    <!-- <Footer class="mt-16"></Footer> -->
   </div>
 </template>
 

@@ -1,35 +1,34 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
-// ✅ ABSOLUTE PATH (VERY IMPORTANT)
-const uploadDir = path.join(__dirname, '..', 'uploads', 'products');
+const upload = (folder) => {
+  const uploadPath = path.join(__dirname,'..', "uploads", folder);
 
-// ✅ AUTO-CREATE FOLDER IF NOT EXISTS
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueName);
+  // create folder if not exist
+  if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
   }
-});
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files allowed'), false);
-  }
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadPath);
+    },
+
+    filename: (req, file, cb) => {
+      const unique =
+        Date.now() + "-" + Math.round(Math.random() * 1e9);
+
+      cb(null, unique + path.extname(file.originalname));
+    }
+  });
+
+  return multer({
+    storage,
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB
+    }
+  });
 };
 
-module.exports = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 2 * 1024 * 1024 } // 2MB
-});
+module.exports = upload;

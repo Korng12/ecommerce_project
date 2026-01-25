@@ -39,7 +39,7 @@
 <script setup>
 import { defineProps, defineEmits, markRaw } from 'vue'
 import { 
-  LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X
+  LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder
 } from 'lucide-vue-next'
 
 import { useRouter } from 'vue-router'
@@ -68,6 +68,7 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
   { id: 'users', label: 'Users', icon: markRaw(Users) },
   { id: 'products', label: 'Products', icon: markRaw(Package) },
+  { id: 'categories', label: 'Categories', icon: markRaw(Folder) },
   { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },
   { id: 'settings', label: 'Settings', icon: markRaw(Settings) },

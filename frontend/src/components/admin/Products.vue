@@ -35,6 +35,7 @@
           <th class="p-3 text-left">Action</th>
         </tr>
       </thead>
+
       <tbody>
         <tr v-for="p in filteredProducts" :key="p.id" class="border-t">
           <td class="p-3">
@@ -58,17 +59,18 @@
     </table>
 
     <!-- Modal -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black/40 flex items-center justify-center"
-    >
+    <div v-if="showModal" class="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div class="bg-white w-full max-w-lg rounded p-6">
         <h2 class="text-xl font-semibold mb-4">
           {{ isEditing ? 'Edit Product' : 'Add Product' }}
         </h2>
 
         <div class="space-y-3">
-          <input v-model="form.name" placeholder="Product name" class="w-full border p-2 rounded" />
+          <input
+            v-model="form.name"
+            placeholder="Product name"
+            class="w-full border p-2 rounded"
+          />
 
           <textarea
             v-model="form.description"
@@ -78,31 +80,74 @@
 
           <input type="file" accept="image/*" @change="handleImage" />
 
-          <img v-if="imagePreview" :src="imagePreview" class="w-24 h-24 rounded object-cover" />
+          <img
+            v-if="imagePreview"
+            :src="imagePreview"
+            class="w-24 h-24 rounded object-cover"
+          />
 
-          <select v-model.number="form.brandId" class="w-full border p-2 rounded">
-            <option :value="null">Select brand</option>
-            <option :value="1">Apple</option>
-            <option :value="2">Asus</option>
-            <option :value="3">Samsung</option>
-            <option :value="4">MSI</option>
+          <select v-model="form.brandId" class="w-full border p-2 rounded">
+            <option value="">Select brand</option>
+            <option
+              v-for="brand in brandStore.brands"
+              :key="brand.id"
+              :value="brand.id"
+            >
+              {{ brand.name }}
+            </option>
           </select>
 
-          <select v-model.number="form.categoryId" class="w-full border p-2 rounded">
+
+          <select v-model="form.categoryId" class="w-full border p-2 rounded">
             <option disabled value="">Select category</option>
-            <option :value="1">Laptops</option>
-            <option :value="2">Desktop</option>
-            <option :value="3">Smartphones</option>
-            <option :value="4">Accessories</option>
+            <option
+              v-for="cat in categoryStore.categories"
+              :key="cat.id"
+              :value="cat.id"
+            >
+              {{ cat.name }}
+            </option>
           </select>
 
-          <input type="number" v-model.number="form.price" placeholder="Price" class="w-full border p-2 rounded" />
-          <input type="number" v-model.number="form.stock" placeholder="Stock" class="w-full border p-2 rounded" />
+
+          <!-- PRICE -->
+          <input
+            type="number"
+            v-model.number="form.price"
+            min="1"
+            step="0.01"
+            placeholder="Price"
+            class="w-full border p-2 rounded"
+          />
+          <p v-if="priceError" class="text-red-600 text-sm">
+            Price must be greater than 0
+          </p>
+
+          <!-- STOCK -->
+          <input
+            type="number"
+            v-model.number="form.stock"
+            min="1"
+            step="1"
+            placeholder="Stock"
+            class="w-full border p-2 rounded"
+          />
+          <p v-if="stockError" class="text-red-600 text-sm">
+            Stock must be greater than 0
+          </p>
         </div>
 
         <div class="flex justify-end gap-3 mt-4">
-          <button @click="closeModal" class="border px-4 py-2 rounded">Cancel</button>
-          <button @click="saveProduct" class="bg-blue-600 text-white px-4 py-2 rounded">
+          <button @click="closeModal" class="border px-4 py-2 rounded">
+            Cancel
+          </button>
+
+          <button
+            @click="saveProduct"
+            :disabled="!isFormValid"
+            class="px-4 py-2 rounded text-white"
+            :class="isFormValid ? 'bg-blue-600' : 'bg-gray-400 cursor-not-allowed'"
+          >
             Save
           </button>
         </div>
@@ -115,8 +160,16 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
+import { useBrand } from "@/stores/brands";
+import { useCategory } from '@/stores/categories'
+
+const brandStore = useBrand()
+const categoryStore = useCategory()
+
+
 const API_URL = 'http://localhost:3000/api/products'
 
+/* ================= STATE ================= */
 const products = ref([])
 const search = ref('')
 const showModal = ref(false)
@@ -129,10 +182,23 @@ const form = ref({
   id: null,
   name: '',
   description: '',
-  price: null,
-  stock: null,
-  categoryId: null,
-  brandId: null
+  price: 1,
+  stock: 1,
+  categoryId: '',
+  brandId: ''
+})
+
+/* ================= VALIDATION ================= */
+const priceError = computed(() => form.value.price <= 0)
+const stockError = computed(() => form.value.stock <= 0)
+
+const isFormValid = computed(() => {
+  return (
+    form.value.name &&
+    form.value.categoryId &&
+    form.value.price > 0 &&
+    form.value.stock > 0
+  )
 })
 
 /* ================= LOAD ================= */
@@ -144,9 +210,9 @@ const fetchProducts = async () => {
     description: p.description,
     price: p.price,
     stock: p.stock,
-    brandId: p.brand?.id ?? null,
+    brandId: p.brand?.id ?? '',
     brandName: p.brand?.name ?? '',
-    categoryId: p.category?.id ?? null,
+    categoryId: p.category?.id ?? '',
     categoryName: p.category?.name ?? '',
     imageUrl: p.images?.[0]?.imageUrl
       ? `http://localhost:3000${p.images[0].imageUrl}`
@@ -156,35 +222,30 @@ const fetchProducts = async () => {
 
 /* ================= IMAGE ================= */
 const handleImage = e => {
-  imageFile.value = e.target.files[0]
-  if (imageFile.value) {
-    imagePreview.value = URL.createObjectURL(imageFile.value)
-  }
+  imageFile.value = e.target.files[0] || null
+  imagePreview.value = imageFile.value
+    ? URL.createObjectURL(imageFile.value)
+    : null
 }
 
 /* ================= SAVE ================= */
 const saveProduct = async () => {
+  if (!isFormValid.value) {
+    alert('Price and stock must be greater than 0')
+    return
+  }
+
+  const fd = new FormData()
+  fd.append('name', form.value.name)
+  fd.append('description', form.value.description || '')
+  fd.append('price', form.value.price)
+  fd.append('stock', form.value.stock)
+  fd.append('categoryId', form.value.categoryId)
+
+  if (form.value.brandId) fd.append('brandId', form.value.brandId)
+  if (imageFile.value) fd.append('image', imageFile.value)
+
   try {
-    if (!form.value.name || !form.value.price || !form.value.categoryId) {
-      alert('Name, price, and category are required')
-      return
-    }
-
-    const fd = new FormData()
-    fd.append('name', form.value.name)
-    fd.append('description', form.value.description || '')
-    fd.append('price', form.value.price)
-    fd.append('stock', form.value.stock || 0)
-    fd.append('categoryId', form.value.categoryId)
-
-    if (form.value.brandId) {
-      fd.append('brandId', form.value.brandId)
-    }
-
-    if (imageFile.value) {
-      fd.append('image', imageFile.value)
-    }
-
     if (isEditing.value) {
       await axios.put(`${API_URL}/${form.value.id}`, fd)
     } else {
@@ -192,10 +253,10 @@ const saveProduct = async () => {
     }
 
     closeModal()
-    fetchProducts()
+    await fetchProducts()
   } catch (err) {
     console.error('❌ Save Error:', err.response?.data || err)
-    alert(err.response?.data?.error || err.response?.data?.message || 'Save failed')
+    alert(err.response?.data?.message || 'Save failed')
   }
 }
 
@@ -220,7 +281,7 @@ const editProduct = p => {
 const deleteProduct = async p => {
   if (!confirm('Delete product?')) return
   await axios.delete(`${API_URL}/${p.id}`)
-  fetchProducts()
+  await fetchProducts()
 }
 
 /* ================= MODAL ================= */
@@ -230,10 +291,10 @@ const openModal = () => {
     id: null,
     name: '',
     description: '',
-    price: null,
-    stock: null,
-    categoryId: null,
-    brandId: null
+    price: 1,
+    stock: 1,
+    categoryId: '',
+    brandId: ''
   }
   imageFile.value = null
   imagePreview.value = null
@@ -252,5 +313,11 @@ const filteredProducts = computed(() =>
   )
 )
 
-onMounted(fetchProducts)
+onMounted(async () => {
+  await fetchProducts()
+  await brandStore.fetchBrands()
+  await categoryStore.fetchCategories()
+})
+
+
 </script>

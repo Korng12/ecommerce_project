@@ -1,31 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const productController = require('../../controllers/productController');
-const upload = require('../../middleware/upload');
+const productController = require("../../controllers/productController");
+const upload = require("../../middleware/upload"); // function
 
-// Create Product
 router.post(
-  '/products',
-  upload.single('image'),
+  "/products",
+  upload("/products").single("image"), // ✅ CORRECT
   productController.createProduct
 );
 
-// Update Product
+// UPDATE PRODUCT
 router.put(
-  '/products/:id',
-  upload.single('image'),
+  "/products/:id",
+  upload("/products").single("image"),
   productController.updateProduct
 );
 
-// Delete Product
+// DELETE PRODUCT
 router.delete(
-  '/products/:id',
+  "/products/:id",
   productController.deleteProduct
 );
 
-// Get Products by Category
-router.get('/products', productController.getAllProducts);
-router.get('/products/:id', productController.getProductById);
+// GET
+router.get("/products", productController.getAllProducts);
+router.get("/products/:id", productController.getProductById);
 
 module.exports = router;

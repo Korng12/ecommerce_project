@@ -29,8 +29,8 @@ const getProductById = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id, {
       include: [
-        { model: Category, as: 'category' },
-        { model: Brand, as: 'brand' },
+        { model: Category, as: 'category', attributes: ['id', 'name'] },
+        { model: Brand, as: 'brand', attributes: ['id', 'name', 'logo'] },
         { model: ProductImage, as: 'images' },
         { model: Specification, as: 'specifications' }
       ]
@@ -50,9 +50,6 @@ const getProductById = async (req, res) => {
 /* ================= CREATE PRODUCT ================= */
 const createProduct = async (req, res) => {
   try {
-    console.log('📝 CREATE PRODUCT - BODY:', req.body);
-    console.log('📝 CREATE PRODUCT - FILE:', req.file);
-
     const {
       name,
       description,
@@ -70,19 +67,28 @@ const createProduct = async (req, res) => {
       });
     }
 
-    const category = await Category.findByPk(categoryId);
+    /* ✅ SAFE CATEGORY CHECK (NO description COLUMN USED) */
+    const category = await Category.findByPk(categoryId, {
+      attributes: ['id']
+    });
     if (!category) {
       return res.status(400).json({ message: 'Invalid category' });
     }
 
-    const parsedBrandId = brandId && String(brandId).trim() ? Number(brandId) : null;
+    /* ✅ SAFE BRAND CHECK (NO description COLUMN USED) */
+    const parsedBrandId =
+      brandId && String(brandId).trim() !== '' ? Number(brandId) : null;
+
     if (parsedBrandId) {
-      const brand = await Brand.findByPk(parsedBrandId);
+      const brand = await Brand.findByPk(parsedBrandId, {
+        attributes: ['id']
+      });
       if (!brand) {
         return res.status(400).json({ message: 'Invalid brand' });
       }
     }
 
+    /* ✅ CREATE PRODUCT */
     const product = await Product.create({
       name,
       description: description || null,
@@ -104,17 +110,13 @@ const createProduct = async (req, res) => {
     /* ✅ IMAGE FROM JSON (OPTIONAL) */
     if (Array.isArray(images) && images.length > 0) {
       await Promise.all(
-        images
-          .filter(img => img && img.url)
-          .map((img, index) =>
-            ProductImage.create({
-              productId: product.id,
-              imageUrl: img.url.startsWith('http')
-                ? img.url
-                : `/uploads/products/${img.url}`,
-              isPrimary: index === 0
-            })
-          )
+        images.map((img, index) =>
+          ProductImage.create({
+            productId: product.id,
+            imageUrl: img.url,
+            isPrimary: index === 0
+          })
+        )
       );
     }
 
@@ -131,11 +133,11 @@ const createProduct = async (req, res) => {
       );
     }
 
-    /* 🔥 FIXED PART (NO STRING ALIASES) */
+    /* ✅ RETURN CREATED PRODUCT */
     const createdProduct = await Product.findByPk(product.id, {
       include: [
-        { model: Category, as: 'category' },
-        { model: Brand, as: 'brand' },
+        { model: Category, as: 'category', attributes: ['id', 'name'] },
+        { model: Brand, as: 'brand', attributes: ['id', 'name', 'logo'] },
         { model: ProductImage, as: 'images' },
         { model: Specification, as: 'specifications' }
       ]
@@ -144,20 +146,13 @@ const createProduct = async (req, res) => {
     res.status(201).json(createdProduct);
   } catch (err) {
     console.error('❌ CREATE PRODUCT ERROR:', err.message);
-    console.error('Stack:', err.stack);
-    res.status(500).json({
-      message: 'Server error',
-      error: err.message
-    });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
 /* ================= UPDATE PRODUCT ================= */
 const updateProduct = async (req, res) => {
   try {
-    console.log('📝 UPDATE PRODUCT - BODY:', req.body);
-    console.log('📝 UPDATE PRODUCT - FILE:', req.file);
-
     const product = await Product.findByPk(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -172,12 +167,9 @@ const updateProduct = async (req, res) => {
       brandId
     } = req.body;
 
-    // ✅ FIX EMPTY STRING & TYPE ISSUES
     categoryId = Number(categoryId);
     brandId =
-      brandId && String(brandId).trim() !== ''
-        ? Number(brandId)
-        : null;
+      brandId && String(brandId).trim() !== '' ? Number(brandId) : null;
 
     if (!name || !price || !categoryId) {
       return res.status(400).json({
@@ -185,13 +177,14 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    const category = await Category.findByPk(categoryId);
+    /* ✅ SAFE CHECKS */
+    const category = await Category.findByPk(categoryId, { attributes: ['id'] });
     if (!category) {
       return res.status(400).json({ message: 'Invalid category' });
     }
 
     if (brandId) {
-      const brand = await Brand.findByPk(brandId);
+      const brand = await Brand.findByPk(brandId, { attributes: ['id'] });
       if (!brand) {
         return res.status(400).json({ message: 'Invalid brand' });
       }
@@ -206,7 +199,7 @@ const updateProduct = async (req, res) => {
       brandId
     });
 
-    // ✅ IMAGE UPDATE
+    /* ✅ IMAGE UPDATE */
     if (req.file) {
       await ProductImage.destroy({ where: { productId: product.id } });
       await ProductImage.create({
@@ -218,8 +211,8 @@ const updateProduct = async (req, res) => {
 
     const updatedProduct = await Product.findByPk(product.id, {
       include: [
-        { model: Category, as: 'category' },
-        { model: Brand, as: 'brand' },
+        { model: Category, as: 'category', attributes: ['id', 'name'] },
+        { model: Brand, as: 'brand', attributes: ['id', 'name', 'logo'] },
         { model: ProductImage, as: 'images' },
         { model: Specification, as: 'specifications' }
       ]
@@ -228,14 +221,9 @@ const updateProduct = async (req, res) => {
     res.json(updatedProduct);
   } catch (err) {
     console.error('❌ UPDATE PRODUCT ERROR:', err.message);
-    console.error(err.stack);
-    res.status(500).json({
-      message: 'Server error',
-      error: err.message
-    });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
-
 
 /* ================= DELETE PRODUCT ================= */
 const deleteProduct = async (req, res) => {
@@ -256,35 +244,11 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-/* ================= FILTER ================= */
-const getProductsByCategory = async (req, res) => {
-  const products = await Product.findAll({
-    where: { categoryId: req.params.categoryId },
-    include: [
-      { model: Category, as: 'category' },
-      { model: Brand, as: 'brand' }
-    ]
-  });
-  res.json(products);
-};
-
-const getProductsByBrand = async (req, res) => {
-  const products = await Product.findAll({
-    where: { brandId: req.params.brandId },
-    include: [
-      { model: Category, as: 'category' },
-      { model: Brand, as: 'brand' }
-    ]
-  });
-  res.json(products);
-};
-
+/* ================= EXPORT ================= */
 module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct,
-  getProductsByCategory,
-  getProductsByBrand
+  deleteProduct
 };

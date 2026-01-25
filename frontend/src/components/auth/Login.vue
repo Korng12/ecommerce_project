@@ -95,13 +95,12 @@ const handleSubmit = async () => {
     const authStore = useAuthStore();
     await authStore.login(formData.email, formData.password);
     if(authStore.user.roleId===ROLES.ADMIN){
-      router.push('/adminView');
+      router.push({name:'adminView'});
       return;
     }
-    router.push('/app');
+    router.push({name:'home'});
   } catch (err) {
     message.value = err.message || 'Login failed';
   }
-
 };
 </script>
