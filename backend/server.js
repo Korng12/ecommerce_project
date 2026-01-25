@@ -4,16 +4,17 @@ const app = express();
 const cors = require("cors");
 const path = require("path");
 
-const productRoutes = require("./routes/api/products");
-const categoryRoutes = require("./routes/api/categories");
-const brandRoutes = require("./routes/api/brands");
+const productRoutes = require('./routes/api/products');
+const categoryRoutes = require('./routes/api/categories');
+const brandRoutes = require('./routes/api/brands');
+const verifyJwt = require('./middleware/authJwt'); 
+const verifyRole = require('./middleware/verifyRoles');
+const cookieParser = require('cookie-parser');
+const authRoutes = require('./routes/authRoutes');
+
 const cartRoutes = require("./routes/api/carts");
 const orderRoutes = require("./routes/api/orders");
 const paymentRoutes = require("./routes/api/payments");
-const verifyJwt = require("./middleware/authJwt");
-const verifyRole = require("./middleware/verifyRoles");
-const cookieParser = require("cookie-parser");
-const authRoutes = require("./routes/authRoutes");
 
 // Serve static files for images
 app.use("/images", express.static(path.join(__dirname, "public", "images","categories")));
@@ -40,10 +41,30 @@ app.use("/api", webhookRouter.webhookOnly);
 app.use(express.json()); // ✅ REQUIRED
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", authRoutes);
-app.use("/hello", (req, res) => {
-  console.log(req.url);
-  res.status(200).json("Hello");
+
+// user management routes
+const userRoutes = require('./routes/users');
+app.use('/api/users', userRoutes)
+
+// Dashboard routes
+const dashboardRoutes = require('./routes/dashboard')
+app.use('/api/dashboard', dashboardRoutes)
+
+// Product Routes
+const productsRoutes = require('./routes/api/products');
+app.use('/api', productsRoutes);
+
+// Serve static files for images
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+// for uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+console.log('📁 Serving static images from:', path.join(__dirname, 'public', 'images'));
+
+app.use('/api', authRoutes);
+app.use('/hello',(req,res)=>{
+  console.log(req.url)
+  res.status(200).json("Hello")
+
 });
 
 app.use('/protected',verifyJwt,(req,res)=>{

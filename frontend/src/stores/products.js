@@ -44,6 +44,25 @@ export const useProduct = defineStore('productStore',{
         this.products = []
         throw err
       }
+    },
+    async createProduct(productData){
+      try{
+        const res = await fetch('http://localhost:3000/api/products',{
+          method:'POST',
+          headers:{
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(productData)
+        })
+        if(!res.ok){
+          throw new Error('Failed to create product')
+        }
+        const newProduct = await res.json()
+        this.products.push(newProduct)
+      }catch(err){
+        console.error('Failed to create product:', err)
+        throw err
+      }
     }
   }
 })
