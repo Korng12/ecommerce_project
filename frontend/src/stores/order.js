@@ -3,24 +3,30 @@ import { defineStore } from "pinia";
 export const useOrder = defineStore("orderStore", {
   state: () => ({
     orders: [],
+    currentReceipt: null,
     error: null,
     loading: false,
   }),
   getters: {
     totalRevenue(state) {
-        return state.orders.reduce((sum, order) => {
-          if (order.status === 'paid') {
-            return sum + order.totalAmount;
-          }
-          return sum;
-        },0);
+      return state.orders.reduce((sum, order) => {
+        if (order.status === "paid") {
+          return sum + order.totalAmount;
+        }
+        return sum;
+      }, 0);
     },
     avgOrderValue(state) {
-        const paidOrders = state.orders.filter(order => order.status === 'paid');
-        if (paidOrders.length === 0) return 0;
-        const total = paidOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-        return total / paidOrders.length;
-    }
+      const paidOrders = state.orders.filter(
+        (order) => order.status === "paid",
+      );
+      if (paidOrders.length === 0) return 0;
+      const total = paidOrders.reduce(
+        (sum, order) => sum + order.totalAmount,
+        0,
+      );
+      return total / paidOrders.length;
+    },
   },
   actions: {
     async fetchOrders() {
@@ -72,6 +78,36 @@ export const useOrder = defineStore("orderStore", {
         this.error = error.message;
         this.loading = false;
         console.error("Get admin orders error:", error);
+      }
+    },
+    async fetchReceipt(orderId) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/orders/${orderId}/receipt`,
+          {
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch receipt (${response.status})`);
+        }
+
+        const data = await response.json();
+        this.currentReceipt = data;
+        this.loading = false;
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        this.loading = false;
+        console.error("Fetch receipt error:", error);
+        throw error;
       }
     },
   },

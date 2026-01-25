@@ -160,9 +160,86 @@ const getAllOrdersAdmin = async (req, res) => {
   }
 };
 
+// Get receipt data for an order
+const getReceipt = async (req, res) => {
+  const userId = req.user.id;
+  const { orderId } = req.params;
+
+  try {
+    if (!orderId) {
+      return res.status(400).json({ msg: "Missing orderId" });
+    }
+
+    // Fetch order with all details
+    const order = await Order.findOne({
+      where: { id: orderId, userId },
+      include: [
+        {
+          model: OrderItem,
+          as: "orderItems",
+          include: [{ model: Product, as: "orderProduct" }],
+        },
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ msg: "Order not found" });
+    }
+
+    // Fetch user info
+    const User = db.user;
+    const user = await User.findOne({ where: { id: userId } });
+
+    // Fetch transaction info
+    const Transaction = db.transaction;
+    const transaction = await Transaction.findOne({ where: { orderId } });
+
+    // Format receipt data
+    const receipt = {
+      orderId: order.id,
+      orderDate: order.createdAt,
+      orderStatus: order.status,
+      customer: {
+        name: user.username,
+        email: user.email,
+      },
+      items: order.orderItems.map((item) => ({
+        productId: item.productId,
+        productName: item.orderProduct.name,
+        quantity: item.quantity,
+        price: parseFloat(item.price),
+        subtotal: parseFloat(item.price) * item.quantity,
+      })),
+      summary: {
+        subtotal: order.orderItems.reduce(
+          (sum, item) => sum + parseFloat(item.price) * item.quantity,
+          0,
+        ),
+        tax:
+          order.orderItems.reduce(
+            (sum, item) => sum + parseFloat(item.price) * item.quantity,
+            0,
+          ) * 0.08,
+        total: parseFloat(order.totalAmount),
+      },
+      payment: {
+        method: transaction?.paymentMethod || "card",
+        status: transaction?.status || "pending",
+        transactionId: transaction?.id,
+      },
+    };
+
+    return res.json(receipt);
+  } catch (err) {
+    console.error("getReceipt error:", err);
+    return res.status(500).json({ msg: "Server error" });
+  }
+};
+
 module.exports = {
   createOrderFromCart,
   reactivateCart,
   getAllOrders,
   getAllOrdersAdmin,
+  getReceipt,
 };

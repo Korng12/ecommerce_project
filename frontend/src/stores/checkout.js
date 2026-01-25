@@ -30,7 +30,13 @@ export const useCheckoutStore = defineStore("checkout", {
         }
 
         if (!res.ok) {
-          throw new Error("Failed to create order from cart");
+          const errorData = await res.json().catch(() => ({}));
+          const errorMsg =
+            errorData.msg ||
+            errorData.message ||
+            errorData.error ||
+            `HTTP ${res.status}: Failed to create order`;
+          throw new Error(errorMsg);
         }
 
         const data = await res.json();
@@ -72,7 +78,14 @@ export const useCheckoutStore = defineStore("checkout", {
         }
 
         if (!res.ok) {
-          throw new Error("Failed to create payment intent");
+          // Try to get error message from backend
+          const errorData = await res.json().catch(() => ({}));
+          const errorMsg =
+            errorData.msg ||
+            errorData.message ||
+            errorData.error ||
+            `HTTP ${res.status}: ${res.statusText}`;
+          throw new Error(errorMsg);
         }
 
         // Backend should respond with clientSecret and paymentIntentId

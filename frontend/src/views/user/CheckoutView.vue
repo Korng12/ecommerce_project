@@ -13,6 +13,7 @@ const cartStore = useCart();
 const checkoutStore = useCheckoutStore();
 // Default to a valid payment method so the form renders
 const paymentMethod = ref("card");
+const checkoutError = ref(null);
 
 // Ensure cart data is loaded when visiting checkout
 onMounted(async () => {
@@ -21,6 +22,7 @@ onMounted(async () => {
 
 // Called from OrderSummary when user clicks Pay Now
 const handleCheckout = async () => {
+  checkoutError.value = null;
   try {
     // Step 1: Create order from cart
     await checkoutStore.createOrderFromCart();
@@ -32,6 +34,7 @@ const handleCheckout = async () => {
     console.log('Order and payment intent created:', checkoutStore.orderId, checkoutStore.clientSecret);
   } catch (err) {
     console.error('Checkout failed:', err);
+    checkoutError.value = err.message || 'Checkout failed. Please try again.';
   }
 };
 </script>
@@ -42,6 +45,11 @@ const handleCheckout = async () => {
 
     <!-- LEFT: Payment Section -->
     <div class="w-full lg:w-2/3 flex flex-col gap-6">
+      <!-- Show checkout error -->
+      <div v-if="checkoutError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <strong>Error:</strong> {{ checkoutError }}
+      </div>
+
       <PaymentMethod v-model="paymentMethod" />
       <PaymentForm :modelValue="paymentMethod" :clientSecret="checkoutStore.clientSecret"
         :loading="checkoutStore.status === 'loading'" :error="checkoutStore.error" />

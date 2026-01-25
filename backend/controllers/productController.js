@@ -1,9 +1,12 @@
-const db = require('../models/index.js');
+const db = require("../models/index.js");
+const { Op } = require("sequelize");
 const Product = db.product;
 const Category = db.category;
 const Brand = db.brand;
 const ProductImage = db.productImage;
 const Specification = db.specification;
+
+const LOW_STOCK_ALERT = 5;
 
 //=== GET ALL PRODUCTS ===
 const getAllProducts = async (req, res) => {
@@ -12,31 +15,31 @@ const getAllProducts = async (req, res) => {
       include: [
         {
           model: Category,
-          as: 'category',
-          attributes: ['id', 'name']
+          as: "category",
+          attributes: ["id", "name"],
         },
         {
           model: Brand,
-          as: 'brand',
-          attributes: ['id', 'name', 'logo']
+          as: "brand",
+          attributes: ["id", "name", "logo"],
         },
         {
           model: ProductImage,
-          as: 'images',
-          attributes: ['id', 'imageUrl', 'isPrimary']
+          as: "images",
+          attributes: ["id", "imageUrl", "isPrimary"],
         },
         {
           model: Specification,
-          as: 'specifications',
-          attributes: ['id', 'key', 'value']
-        }
+          as: "specifications",
+          attributes: ["id", "key", "value"],
+        },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [["createdAt", "DESC"]],
     });
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -47,60 +50,69 @@ const getProductById = async (req, res) => {
       include: [
         {
           model: Category,
-          as: 'category',
-          attributes: ['id', 'name', 'description']
+          as: "category",
+          attributes: ["id", "name", "description"],
         },
         {
           model: Brand,
-          as: 'brand',
-          attributes: ['id', 'name', 'logo', 'description']
+          as: "brand",
+          attributes: ["id", "name", "logo", "description"],
         },
         {
           model: ProductImage,
-          as: 'images',
-          attributes: ['id', 'imageUrl', 'isPrimary']
+          as: "images",
+          attributes: ["id", "imageUrl", "isPrimary"],
         },
         {
           model: Specification,
-          as: 'specifications',
-          attributes: ['id', 'key', 'value']
-        }
-      ]
+          as: "specifications",
+          attributes: ["id", "key", "value"],
+        },
+      ],
     });
 
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
     res.json(product);
   } catch (error) {
-    console.error('Error fetching product:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 // === CREATE PRODUCT ===
 const createProduct = async (req, res) => {
   try {
-    const { name, description, stock, price, categoryId, brandId, images, specifications } = req.body;
-    
+    const {
+      name,
+      description,
+      stock,
+      price,
+      categoryId,
+      brandId,
+      images,
+      specifications,
+    } = req.body;
+
     // Validation
     if (!name || !price || !categoryId) {
-      return res.status(400).json({ 
-        message: 'Name, price, and categoryId are required' 
+      return res.status(400).json({
+        message: "Name, price, and categoryId are required",
       });
     }
 
     // Check if category exists
     const category = await Category.findByPk(categoryId);
     if (!category) {
-      return res.status(400).json({ message: 'Invalid category' });
+      return res.status(400).json({ message: "Invalid category" });
     }
 
     // Check if brand exists (if provided)
     if (brandId) {
       const brand = await Brand.findByPk(brandId);
       if (!brand) {
-        return res.status(400).json({ message: 'Invalid brand' });
+        return res.status(400).json({ message: "Invalid brand" });
       }
     }
 
@@ -111,29 +123,29 @@ const createProduct = async (req, res) => {
       stock: stock || 0,
       price,
       categoryId,
-      brandId: brandId || null
+      brandId: brandId || null,
     });
 
     // Add images if provided
     if (images && Array.isArray(images)) {
-      const imagePromises = images.map((image, index) => 
+      const imagePromises = images.map((image, index) =>
         ProductImage.create({
           productId: product.id,
           imageUrl: image.url,
-          isPrimary: image.isPrimary || (index === 0) // First image is primary by default
-        })
+          isPrimary: image.isPrimary || index === 0, // First image is primary by default
+        }),
       );
       await Promise.all(imagePromises);
     }
 
     // Add specifications if provided
     if (specifications && Array.isArray(specifications)) {
-      const specPromises = specifications.map(spec =>
+      const specPromises = specifications.map((spec) =>
         Specification.create({
           productId: product.id,
           key: spec.key,
-          value: spec.value
-        })
+          value: spec.value,
+        }),
       );
       await Promise.all(specPromises);
     }
@@ -141,17 +153,17 @@ const createProduct = async (req, res) => {
     // Return product with relations
     const createdProduct = await Product.findByPk(product.id, {
       include: [
-        { model: Category, as: 'category' },
-        { model: Brand, as: 'brand' },
-        { model: ProductImage, as: 'images' },
-        { model: Specification, as: 'specifications' }
-      ]
+        { model: Category, as: "category" },
+        { model: Brand, as: "brand" },
+        { model: ProductImage, as: "images" },
+        { model: Specification, as: "specifications" },
+      ],
     });
 
     res.status(201).json(createdProduct);
   } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error creating product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -162,14 +174,14 @@ const updateProduct = async (req, res) => {
     const product = await Product.findByPk(req.params.id);
 
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     // Check if category exists
     if (categoryId) {
       const category = await Category.findByPk(categoryId);
       if (!category) {
-        return res.status(400).json({ message: 'Invalid category' });
+        return res.status(400).json({ message: "Invalid category" });
       }
     }
 
@@ -177,7 +189,7 @@ const updateProduct = async (req, res) => {
     if (brandId) {
       const brand = await Brand.findByPk(brandId);
       if (!brand) {
-        return res.status(400).json({ message: 'Invalid brand' });
+        return res.status(400).json({ message: "Invalid brand" });
       }
     }
 
@@ -188,13 +200,13 @@ const updateProduct = async (req, res) => {
       stock: stock !== undefined ? stock : product.stock,
       price: price || product.price,
       categoryId: categoryId || product.categoryId,
-      brandId: brandId !== undefined ? brandId : product.brandId
+      brandId: brandId !== undefined ? brandId : product.brandId,
     });
 
     res.json(product);
   } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -204,7 +216,7 @@ const deleteProduct = async (req, res) => {
     const product = await Product.findByPk(req.params.id);
 
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     // Delete associated images and specifications first
@@ -214,10 +226,10 @@ const deleteProduct = async (req, res) => {
     // Delete product
     await product.destroy();
 
-    res.json({ message: 'Product deleted successfully' });
+    res.json({ message: "Product deleted successfully" });
   } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -229,20 +241,20 @@ const getProductsByCategory = async (req, res) => {
       include: [
         {
           model: Category,
-          as: 'category',
-          attributes: ['id', 'name']
+          as: "category",
+          attributes: ["id", "name"],
         },
         {
           model: Brand,
-          as: 'brand',
-          attributes: ['id', 'name']
-        }
-      ]
+          as: "brand",
+          attributes: ["id", "name"],
+        },
+      ],
     });
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products by category:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching products by category:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -254,20 +266,20 @@ const getProductsByBrand = async (req, res) => {
       include: [
         {
           model: Category,
-          as: 'category',
-          attributes: ['id', 'name']
+          as: "category",
+          attributes: ["id", "name"],
         },
         {
           model: Brand,
-          as: 'brand',
-          attributes: ['id', 'name']
-        }
-      ]
+          as: "brand",
+          attributes: ["id", "name"],
+        },
+      ],
     });
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products by brand:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching products by brand:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -277,33 +289,32 @@ const addProductImage = async (req, res) => {
     const { productId, imageUrl, isPrimary } = req.body;
 
     if (!productId || !imageUrl) {
-      return res.status(400).json({ message: 'productId and imageUrl are required' });
+      return res
+        .status(400)
+        .json({ message: "productId and imageUrl are required" });
     }
 
     // Check if product exists
     const product = await Product.findByPk(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     // If this is primary, unset other primary images
     if (isPrimary) {
-      await ProductImage.update(
-        { isPrimary: false },
-        { where: { productId } }
-      );
+      await ProductImage.update({ isPrimary: false }, { where: { productId } });
     }
 
     const image = await ProductImage.create({
       productId,
       imageUrl,
-      isPrimary: isPrimary || false
+      isPrimary: isPrimary || false,
     });
 
     res.status(201).json(image);
   } catch (error) {
-    console.error('Error adding product image:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error adding product image:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -313,25 +324,43 @@ const addProductSpecification = async (req, res) => {
     const { productId, key, value } = req.body;
 
     if (!productId || !key || !value) {
-      return res.status(400).json({ message: 'productId, key, and value are required' });
+      return res
+        .status(400)
+        .json({ message: "productId, key, and value are required" });
     }
 
     // Check if product exists
     const product = await Product.findByPk(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     const specification = await Specification.create({
       productId,
       key,
-      value
+      value,
     });
 
     res.status(201).json(specification);
   } catch (error) {
-    console.error('Error adding product specification:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error adding product specification:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// === LOW STOCK ALERTS ===
+const getLowStockProducts = async (_req, res) => {
+  try {
+    const products = await Product.findAll({
+      attributes: ["id", "name", "stock", "updatedAt"],
+      where: { stock: { [Op.lte]: LOW_STOCK_ALERT } },
+      order: [["stock", "ASC"]],
+    });
+
+    return res.json({ threshold: LOW_STOCK_ALERT, products });
+  } catch (error) {
+    console.error("Error fetching low stock products:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -344,5 +373,6 @@ module.exports = {
   getProductsByCategory,
   getProductsByBrand,
   addProductImage,
-  addProductSpecification
+  addProductSpecification,
+  getLowStockProducts,
 };

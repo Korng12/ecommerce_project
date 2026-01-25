@@ -144,9 +144,9 @@ const handlePayment = async () => {
         console.error('Failed to confirm payment on backend:', err);
       }
 
-      // Redirect with payment intent ID in URL
+      // Redirect with payment intent ID in URL (no client_secret for security)
       setTimeout(() => {
-        window.location.href = `/payment-success?payment_intent=${paymentIntent.id}&payment_intent_client_secret=${paymentIntent.client_secret}`;
+        window.location.href = `/payment-success?payment_intent=${paymentIntent.id}`;
       }, 1000);
     }
   } catch (err) {

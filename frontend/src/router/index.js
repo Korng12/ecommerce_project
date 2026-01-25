@@ -19,6 +19,7 @@ const routes = [
       {
         path: "contactUsView",
         name: "contactUsView",
+        
         component: () => import("@/views/ContactUsView.vue"),
       },
       {
@@ -69,11 +70,13 @@ const routes = [
     name: "cartView",
     path: "/cartView",
     component: () => import("@/views/user/CartView.vue"),
+    meta: { requiresAuth: true, requiredRole: ROLES.USER },
   },
   {
     name: "checkoutView",
     path: "/checkoutView",
     component: () => import("@/views/user/CheckoutView.vue"),
+    meta: { requiresAuth: true, requiredRole: ROLES.USER},
   },
   {
     name: "paymentSuccess",
@@ -81,10 +84,15 @@ const routes = [
     component: () => import("@/views/user/PaymentSuccessView.vue"),
   },
   {
-    name: "categoryView",
-    path: "/product/categoryView/:catName",
-    component: () => import("@/views/user/CategoryView.vue"),
+    name: "receipt",
+    path: "/receipt/:orderId",
+    component: () => import("@/components/order/Receipt.vue"),
   },
+  // {
+  //   name: "categoryView",
+  //   path: "/product/categoryView/:catName",
+  //   component: () => import("@/views/user/CategoryView.vue"),
+  // },
   { path: "/:catchAll(.*)", redirect: "/" },
 ];
 

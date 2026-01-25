@@ -54,8 +54,8 @@ app.use("/api", categoryRoutes);
 app.use("/api", brandRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
+app.use("/api", webhookRouter.apiRoutes); // Payment routes BEFORE analytics
 app.use("/api", analyticsRoutes);
-app.use("/api", webhookRouter.apiRoutes);
 app.use(
   "/users",
   verifyJwt,
