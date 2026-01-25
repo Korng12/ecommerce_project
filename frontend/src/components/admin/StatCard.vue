@@ -82,7 +82,8 @@ const iconComponent = computed(() => {
     ShoppingCart,
     Activity,
     Globe,
-    ShoppingBag
+    ShoppingBag,
+    Users
   }
 
   return icons[props.icon] || DollarSign

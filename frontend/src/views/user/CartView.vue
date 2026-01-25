@@ -6,11 +6,21 @@ import OrderSummary from "@/components/order/OrderSummary.vue";
 import Header from "@/components/layout/Header.vue";
 import Footer from "@/components/layout/Footer.vue";
 import { useCart } from "@/stores/carts";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
 
 const cartStore = useCart();
+const authStore = useAuthStore();
+const router = useRouter();
 
 // Fetch cart data when component is mounted
 onMounted(async () => {
+  // Verify user is authenticated
+  if (!authStore.isAuthenticated) {
+    router.push({ name: "login" });
+    return;
+  }
+
   await cartStore.getCart();
 });
 </script>

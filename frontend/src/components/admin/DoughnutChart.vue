@@ -5,6 +5,7 @@
 <script setup>
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js'
+import { computed } from 'vue'
 
 // Register ChartJS components
 ChartJS.register(Title, Tooltip, Legend, ArcElement)
@@ -20,10 +21,10 @@ const props = defineProps({
   }
 })
 
-const chartData = {
+const chartData = computed(() => ({
   labels: props.data.labels || [],
   datasets: props.data.datasets || []
-}
+}))
 
 const chartOptions = {
   responsive: true,
@@ -62,7 +63,7 @@ const chartOptions = {
       padding: 12,
       boxPadding: 6,
       callbacks: {
-        label: function(context) {
+        label: function (context) {
           const label = context.label || '';
           const value = context.raw || 0;
           const total = context.dataset.data.reduce((a, b) => a + b, 0);

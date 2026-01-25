@@ -33,6 +33,47 @@ onMounted(async () => {
   }
   stripe.value = await loadStripe(stripeKey);
   console.log('Stripe loaded');
+
+  // If clientSecret already exists from props (e.g., returning to checkout), mount the form now
+  if (props.clientSecret) {
+    console.log('ClientSecret already exists, triggering mount');
+    // Small delay to ensure DOM is ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    paymentElementReady.value = false;
+    paymentError.value = null;
+
+    try {
+      // Create Elements instance
+      elements.value = stripe.value.elements({
+        clientSecret: props.clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: {
+            colorPrimary: "#2563eb",
+            colorBackground: "#ffffff",
+            colorText: "#30313d",
+            colorDanger: "#fa755a",
+            fontFamily: 'Ideal Sans, system-ui, sans-serif',
+            spacingUnit: "4px",
+            borderRadius: "4px",
+          },
+        },
+      });
+
+      const paymentElementInstance = elements.value.create("payment");
+      paymentElementInstance.mount("#payment-element");
+      paymentElement.value = paymentElementInstance;
+
+      setTimeout(() => {
+        paymentElementReady.value = true;
+        console.log('Card element ready');
+      }, 300);
+    } catch (err) {
+      console.error('Mount error:', err);
+      paymentError.value = "Failed to load payment form: " + (err.message || err);
+    }
+  }
 });
 
 // Watch for clientSecret and mount Stripe Elements
@@ -144,9 +185,9 @@ const handlePayment = async () => {
         console.error('Failed to confirm payment on backend:', err);
       }
 
-      // Redirect with payment intent ID in URL
+      // Redirect with payment intent ID in URL (no client_secret for security)
       setTimeout(() => {
-        window.location.href = `/payment-success?payment_intent=${paymentIntent.id}&payment_intent_client_secret=${paymentIntent.client_secret}`;
+        window.location.href = `/payment-success?payment_intent=${paymentIntent.id}`;
       }, 1000);
     }
   } catch (err) {

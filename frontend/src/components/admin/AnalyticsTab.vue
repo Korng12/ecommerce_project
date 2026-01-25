@@ -1,72 +1,62 @@
 <template>
   <div>
     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">Analytics Dashboard</h1>
-    
+
+    <!-- Loading State -->
+    <div v-if="analyticsStore.loading" class="bg-blue-50 p-4 rounded-lg mb-6">
+      <p class="text-blue-700">Loading analytics data...</p>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="analyticsStore.error" class="bg-red-50 p-4 rounded-lg mb-6">
+      <p class="text-red-700">Error: {{ analyticsStore.error }}</p>
+    </div>
+
     <!-- Key Metrics -->
     <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <StatCard 
-        title="Page Views"
-        value="45.2K"
-        change="+18.2% vs last week"
-        icon="Activity"
-        icon-color="blue"
-      />
-      
-      <StatCard 
-        title="Bounce Rate"
-        value="32.5%"
-        change="-5.1% improvement"
-        icon="TrendingUp"
-        icon-color="red"
-      />
-      
-      <StatCard 
-        title="Avg. Session"
-        value="4m 32s"
-        change="+22s increase"
-        icon="Globe"
-        icon-color="purple"
-      />
-      
-      <StatCard 
-        title="Conversions"
-        value="1,234"
-        change="+8.4% vs last week"
-        icon="ShoppingBag"
-        icon-color="green"
-      />
+      <StatCard title="Total Revenue" :value="formatRevenue(analyticsStore.keyMetrics.totalRevenue)"
+        change="From completed orders" icon="DollarSign" icon-color="green" />
+
+      <StatCard title="Total Orders" :value="formatNumber(analyticsStore.keyMetrics.totalOrders)"
+        change="Completed orders" icon="ShoppingBag" icon-color="blue" />
+
+      <StatCard title="Active Users" :value="formatNumber(analyticsStore.keyMetrics.totalUsers)"
+        change="Users with orders" icon="Users" icon-color="purple" />
+
+      <StatCard title="Cart Abandonment" :value="formatPercentage(analyticsStore.keyMetrics.cartAbandonmentRate)"
+        change="Abandoned carts" icon="ShoppingCart" icon-color="red" />
     </div>
-    
+
     <!-- Charts Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <ChartContainer title="Traffic Sources">
+      <ChartContainer title="Revenue by Brand">
         <div class="h-60 sm:h-80">
-          <BarChart :data="trafficChartData" :title="''" />
+          <BarChart :data="brandChartData" :title="''" />
         </div>
       </ChartContainer>
-      
-      <ChartContainer title="Daily Visitors">
+
+      <ChartContainer title="Daily Orders (Last 7 Days)">
         <div class="h-60 sm:h-80">
-          <LineChart :data="dailyVisitorsChartData" :title="''" />
+          <LineChart :data="dailyOrdersChartData" :title="''" />
         </div>
       </ChartContainer>
     </div>
 
     <!-- Charts Row 2 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <ChartContainer title="Sales by Region">
+      <ChartContainer title="Revenue by Category">
         <div class="h-60 sm:h-80">
-          <DoughnutChart :data="regionChartData" :title="''" />
+          <DoughnutChart :data="categoryChartData" :title="''" />
         </div>
       </ChartContainer>
 
-      <ChartContainer title="Revenue Trend (6 Months)">
+      <ChartContainer title="Revenue Trend (Last 6 Months)">
         <div class="h-60 sm:h-80">
           <LineChart :data="revenueTrendChartData" :title="''" />
         </div>
       </ChartContainer>
     </div>
-    
+
     <!-- Performance Table -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-4 sm:p-6 border-b border-gray-100">
@@ -88,10 +78,17 @@
               <td class="px-4 sm:px-6 py-4 text-gray-600">{{ product.sales }}</td>
               <td class="px-4 sm:px-6 py-4 text-gray-800 font-semibold">{{ product.revenue }}</td>
               <td class="px-4 sm:px-6 py-4">
-                <span :class="['px-3 py-1 rounded-full text-xs sm:text-sm', 
-                             product.growth >= 10 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700']">
+                <span :class="['px-3 py-1 rounded-full text-xs sm:text-sm',
+                  product.growth >= 10 ? 'bg-green-100 text-green-700' :
+                    product.growth >= 0 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700']">
                   {{ product.growth > 0 ? '+' : '' }}{{ product.growth }}%
                 </span>
+              </td>
+            </tr>
+            <tr v-if="topProducts.length === 0">
+              <td colspan="4" class="px-4 sm:px-6 py-8 text-center text-gray-500">
+                No product data available
               </td>
             </tr>
           </tbody>
@@ -102,112 +99,38 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, computed } from 'vue'
+import { useAnalytics } from '@/stores/analytics'
 import StatCard from '@/components/admin/StatCard.vue'
 import ChartContainer from '@/components/admin/ChartContainer.vue'
 import BarChart from '@/components/admin/BarChart.vue'
 import LineChart from '@/components/admin/LineChart.vue'
 import DoughnutChart from '@/components/admin/DoughnutChart.vue'
 
-// Mock data
-const topProducts = [
-  { id: 1, name: 'Wireless Headphones', sales: '1,234', revenue: '$98,720', growth: 24 },
-  { id: 2, name: 'Smart Watch Pro', sales: '892', revenue: '$71,360', growth: 18 },
-  { id: 3, name: 'Laptop Stand', sales: '756', revenue: '$45,360', growth: 12 },
-  { id: 4, name: 'USB-C Hub', sales: '623', revenue: '$31,150', growth: 5 },
-  { id: 5, name: 'Wireless Mouse', sales: '512', revenue: '$20,480', growth: -2 },
-]
+const analyticsStore = useAnalytics()
 
-// Traffic Sources Chart Data
-const trafficChartData = ref({
-  labels: ['Direct', 'Social Media', 'Search', 'Email', 'Referral'],
-  datasets: [
-    {
-      label: 'Visitors',
-      data: [4200, 3800, 3200, 2400, 1800],
-      backgroundColor: [
-        '#3B82F6',
-        '#10B981',
-        '#F59E0B',
-        '#EF4444',
-        '#8B5CF6'
-      ],
-      borderRadius: 6,
-    }
-  ]
+// Fetch all analytics data on mount
+onMounted(() => {
+  analyticsStore.fetchAllAnalytics()
 })
 
-// Daily Visitors Chart Data
-const dailyVisitorsChartData = ref({
-  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  datasets: [
-    {
-      label: 'Visitors',
-      data: [320, 380, 290, 450, 520, 480, 410],
-      borderColor: '#3B82F6',
-      backgroundColor: 'rgba(59, 130, 246, 0.1)',
-      borderWidth: 3,
-      tension: 0.4,
-      fill: true,
-      pointBackgroundColor: '#ffffff',
-      pointBorderColor: '#3B82F6',
-      pointBorderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6
-    }
-  ]
-})
+// Computed properties for reactive data
+const topProducts = computed(() => analyticsStore.topProducts)
+const brandChartData = computed(() => analyticsStore.brandChartData)
+const dailyOrdersChartData = computed(() => analyticsStore.dailyOrdersChartData)
+const categoryChartData = computed(() => analyticsStore.categoryChartData)
+const revenueTrendChartData = computed(() => analyticsStore.revenueTrendChartData)
 
-// Region Chart Data
-const regionChartData = ref({
-  labels: ['North America', 'Europe', 'Asia', 'South America', 'Africa'],
-  datasets: [
-    {
-      data: [5200, 4100, 6800, 2300, 1500],
-      backgroundColor: [
-        '#3B82F6',
-        '#10B981',
-        '#F59E0B',
-        '#EF4444',
-        '#8B5CF6'
-      ],
-      borderColor: '#ffffff',
-      borderWidth: 2,
-      hoverOffset: 15
-    }
-  ]
-})
+// Format numbers for display
+const formatRevenue = (value) => {
+  return `$${parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
 
-// Revenue Trend Chart Data
-const revenueTrendChartData = ref({
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [
-    {
-      label: 'Revenue',
-      data: [4200, 5100, 3800, 6200, 5800, 7200],
-      borderColor: '#3B82F6',
-      backgroundColor: 'transparent',
-      borderWidth: 3,
-      tension: 0.4,
-      pointBackgroundColor: '#ffffff',
-      pointBorderColor: '#3B82F6',
-      pointBorderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6
-    },
-    {
-      label: 'Profit',
-      data: [1800, 2300, 1600, 3100, 2900, 3800],
-      borderColor: '#10B981',
-      backgroundColor: 'transparent',
-      borderWidth: 3,
-      tension: 0.4,
-      pointBackgroundColor: '#ffffff',
-      pointBorderColor: '#10B981',
-      pointBorderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6
-    }
-  ]
-})
+const formatNumber = (value) => {
+  return parseFloat(value).toLocaleString('en-US')
+}
+
+const formatPercentage = (value) => {
+  return `${parseFloat(value).toFixed(1)}%`
+}
 </script>
