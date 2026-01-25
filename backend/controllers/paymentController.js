@@ -51,12 +51,8 @@ const createPaymentIntent = async (req, res) => {
       transactionId: transaction.id,
     });
   } catch (error) {
-    console.error("Error creating payment intent:", error.message || error);
-    console.error("Full error:", error);
-    return res.status(500).json({
-      msg: "Server error",
-      error: error.message || "Unknown error",
-    });
+    console.error("Error creating payment intent:", error);
+    return res.status(500).json({ msg: "Server error" });
   }
 };
 

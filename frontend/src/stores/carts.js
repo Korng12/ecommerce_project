@@ -99,14 +99,11 @@ export const useCart = defineStore("cartStore", {
           throw new Error("Please login first");
         }
 
-        const result = await response.json();
-
         if (!response.ok) {
-          // Handle stock validation errors from backend
-          throw new Error(result.msg || "Failed to add to cart");
+          throw new Error("Failed to add to cart");
         }
 
-        const { item } = result;
+        const { item } = await response.json();
     
     // Update state directly instead of refetching entire cart
     const existingItem = this.cart.find(i => i.productId === productId);

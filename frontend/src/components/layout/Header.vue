@@ -21,13 +21,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          <ul
-            class="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-            <!-- <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Phones</a></li>
-            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Laptops</a></li>
-            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100">Accessories</a></li> -->
-            <li v-for="cat in categoriesStore.categories" :key="cat.id" class="block px-4 py-2 hover:bg-gray-100">
-              <router-link :to="{ name: 'categoryView', params: { catName: cat.name } }">
+          <ul class="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+               <li v-for="cat in categoriesStore.categories" :key="cat.id" class="block px-4 py-2 hover:bg-gray-100">
+               <router-link :to="{name:'categoryView',params:{catName:cat.name}}">
                 {{ cat.name }}
               </router-link>
             </li>
@@ -117,11 +113,11 @@ import { useCategory } from '@/stores/categories'
 import { useProduct } from '@/stores/products';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import { useCart } from '@/stores/carts';
+import { useCart} from '@/stores/carts';
 
-const cartStore = useCart();
-const categoriesStore = useCategory();
-const authStore = useAuthStore();
+const cartStore=useCart();
+const categoriesStore=useCategory();
+const authStore=useAuthStore();
 const router = useRouter();
 
 // Fetch cart on mount if user is authenticated

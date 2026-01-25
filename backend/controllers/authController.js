@@ -1,15 +1,17 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../models/index.js');
-
 const User = db.user;
+console.log('--- DB CONTENTS ---');
+console.log(db); // Check your terminal to see the keys!
+console.log('-------------------');
 
 // ================= REGISTER =================
 const register = async (req, res) => {
   try {
-    const { username, email, password, roleId } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!username || !email || !password || !roleId) {
+    if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -24,7 +26,7 @@ const register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      roleId
+      roleId :2 // Default role as 'user'
     });
 
     if (!process.env.JWT_SECRET) {

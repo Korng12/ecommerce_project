@@ -37,9 +37,21 @@
 <script setup>
 import { useCategory } from '@/stores/categories';
 import { useRoute } from 'vue-router';
+import { onMounted } from 'vue';
+
 const route =useRoute();
 const catName=route.params.catName;
 const categoryStore = useCategory();
+
+onMounted(async () => {
+  if (!categoryStore.categories?.length) {
+    try {
+      await categoryStore.fetchAllCategories();
+    } catch (e) {
+      console.error('Failed to load categories:', e);
+    }
+  }
+});
 
 const fixImage = (path) => {
   if (!path) return ''

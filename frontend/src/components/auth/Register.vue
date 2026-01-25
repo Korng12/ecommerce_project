@@ -73,6 +73,8 @@
             </router-link>
           </p>
 
+          <p v-if="error" class="text-red-500 text-center">{{ error }}</p>
+
         </form>
       </div>
     </div>
@@ -80,38 +82,49 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
-import axios from 'axios';
+import { reactive, ref } from 'vue';
+
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
-
+const authStore = useAuthStore();
+const error = ref('');
 const formData = reactive({
   username: '',
   email: '',
   password: '',
-  confirmPassword: '',
-  roleId: 1   // DEFAULT USER ROLE
+  confirmPassword: ''
 });
 
 const handleSubmit = async () => {
+  if (!formData.username || !formData.email || !formData.password) {
+    error.value = 'All fields are required';
+    return;
+  }
+
+  if (formData.password.length < 6) {
+    error.value = 'Password must be at least 6 characters';
+    return;
+  }
+
   if (formData.password !== formData.confirmPassword) {
-    alert('Passwords do not match');
+    error.value = 'Passwords do not match';
     return;
   }
 
   try {
-    const res = await axios.post('http://localhost:3000/api/register', {
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      roleId: 1
-    });
+    await authStore.register(
+      formData.username,
+      formData.email,
+      formData.password,
+    );
 
-    localStorage.setItem('token', res.data.token);
-    router.push('/home');
+    router.push('/app');
+
   } catch (err) {
-    alert(err.response?.data?.message || 'Registration failed');
+    error.value = err?.message || 'Registration failed';
   }
 };
+
 </script>

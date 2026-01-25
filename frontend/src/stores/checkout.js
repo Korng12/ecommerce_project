@@ -30,13 +30,7 @@ export const useCheckoutStore = defineStore("checkout", {
         }
 
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          const errorMsg =
-            errorData.msg ||
-            errorData.message ||
-            errorData.error ||
-            `HTTP ${res.status}: Failed to create order`;
-          throw new Error(errorMsg);
+          throw new Error("Failed to create order from cart");
         }
 
         const data = await res.json();
@@ -78,14 +72,7 @@ export const useCheckoutStore = defineStore("checkout", {
         }
 
         if (!res.ok) {
-          // Try to get error message from backend
-          const errorData = await res.json().catch(() => ({}));
-          const errorMsg =
-            errorData.msg ||
-            errorData.message ||
-            errorData.error ||
-            `HTTP ${res.status}: ${res.statusText}`;
-          throw new Error(errorMsg);
+          throw new Error("Failed to create payment intent");
         }
 
         // Backend should respond with clientSecret and paymentIntentId
@@ -128,6 +115,34 @@ export const useCheckoutStore = defineStore("checkout", {
       } catch (err) {
         console.error("confirmPaymentSuccess error:", err);
         throw err;
+      }
+    },
+
+    async abandonPendingOrder(orderId = this.orderId) {
+      if (!orderId) {
+        console.warn("No orderId to abandon");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3000/api/orders/abandon", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orderId }),
+        });
+
+        if (!res.ok) {
+          console.error("Failed to abandon order:", await res.json());
+          return;
+        }
+
+        console.log("Order cancelled, cart reactivated");
+        return await res.json();
+      } catch (err) {
+        console.error("abandonPendingOrder error:", err);
       }
     },
 

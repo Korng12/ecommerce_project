@@ -38,7 +38,6 @@ import OrdersTab from '@/components/admin/OrdersTab.vue'
 import NotificationsTab from '@/components/admin/NotificationsTab.vue'
 import AnalyticsTab from '@/components/admin/AnalyticsTab.vue'
 import SettingsTab from '@/components/admin/SettingsTab.vue'
-import AuthForm from '@/components/AuthForm.vue'
 
 // State
 const sidebarOpen = ref(true)

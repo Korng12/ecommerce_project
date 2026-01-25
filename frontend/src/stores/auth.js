@@ -26,6 +26,27 @@ export const useAuthStore = defineStore("auth", {
       this.isAuthenticated = true;
       this.checkedAuth = true;
     },
+    async register(username, email, password) {
+        const response = await fetch('http://localhost:3000/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await response.json(); // ✅ read once
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Registration failed');
+        }
+
+        this.user = data.user;
+        this.isAuthenticated = true;
+        this.checkedAuth = true;
+
+        return data;
+      },
+
 
     async fetchCurrentUser() {
       try {

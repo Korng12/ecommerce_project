@@ -115,11 +115,15 @@ const toggleReceipt = () => {
                     </button>
                 </RouterLink>
             </div>
+<<<<<<< HEAD
         </div>
 
         <!-- Receipt -->
         <div v-if="isSuccess && showReceipt && orderInfo">
             <Receipt :orderId="orderInfo.orderId" />
+=======
+
+>>>>>>> main
         </div>
     </div>
 </template>

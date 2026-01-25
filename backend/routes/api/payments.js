@@ -17,10 +17,19 @@ webhookRouter.post(
 
 // API routes - can use JSON parser
 const apiRouter = express.Router();
+apiRouter.post(
+  "/payments/create-intent",
+  verifyJWT,
+  express.json(),
+  createPaymentIntent,
+);
 
-apiRouter.post("/payments/create-intent", verifyJWT, createPaymentIntent);
-
-apiRouter.post("/payments/confirm-success", verifyJWT, confirmPaymentSuccess);
+apiRouter.post(
+  "/payments/confirm-success",
+  verifyJWT,
+  express.json(),
+  confirmPaymentSuccess,
+);
 
 module.exports = {
   webhookOnly: webhookRouter,
