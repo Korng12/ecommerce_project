@@ -2,11 +2,15 @@
 import { onMounted, ref } from 'vue';
 import { useCheckoutStore } from '@/stores/checkout';
 import { useCart } from '@/stores/carts';
+import { useOrder } from '@/stores/order';
+import Receipt from '@/components/order/Receipt.vue';
 
 const checkoutStore = useCheckoutStore();
 const cartStore = useCart();
+const orderStore = useOrder();
 const isSuccess = ref(false);
 const orderInfo = ref(null);
+const showReceipt = ref(false);
 
 onMounted(async () => {
     // Get payment_intent from URL
@@ -15,21 +19,48 @@ onMounted(async () => {
 
     isSuccess.value = intent && intent.includes('pi_');
 
-    if (isSuccess.value && checkoutStore.orderId) {
-        orderInfo.value = {
-            orderId: checkoutStore.orderId,
-            amount: checkoutStore.orderTotal,
-        };
+    if (isSuccess.value) {
+        // Try to get orderId from checkout store or fetch recent orders
+        let orderId = checkoutStore.orderId;
+        let amount = checkoutStore.orderTotal;
+
+        if (!orderId || !amount) {
+            // If state was lost after reload, pull latest order as a fallback
+            await orderStore.fetchOrders();
+            const latestOrder = orderStore.orders.reduce((latest, order) => {
+                if (!latest) return order;
+                const latestDate = new Date(latest.createdAt || 0);
+                const orderDate = new Date(order.createdAt || 0);
+                return orderDate > latestDate ? order : latest;
+            }, null);
+
+            if (latestOrder) {
+                orderId = latestOrder.id;
+                amount = Number(latestOrder.totalAmount) || amount;
+            }
+        }
+
+        if (orderId) {
+            orderInfo.value = {
+                orderId: orderId,
+                amount: Number(amount) || 0,
+            };
+        }
 
         // Refresh cart to clear items after successful payment
         await cartStore.getCart();
     }
 });
+
+const toggleReceipt = () => {
+    showReceipt.value = !showReceipt.value;
+};
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+    <div class="min-h-screen bg-gray-50 py-12">
+        <!-- Success Card -->
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8 text-center mb-8">
 
             <!-- Success State -->
             <div v-if="isSuccess" class="space-y-4">
@@ -51,11 +82,17 @@ onMounted(async () => {
 
                 <p class="text-sm text-gray-500">You will receive a confirmation email shortly.</p>
 
-                <RouterLink to="/" class="block mt-6">
-                    <button class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
-                        Continue Shopping
+                <div class="flex gap-3">
+                    <button @click="toggleReceipt"
+                        class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+                        View Receipt
                     </button>
-                </RouterLink>
+                    <RouterLink to="/" class="flex-1">
+                        <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                            Continue Shopping
+                        </button>
+                    </RouterLink>
+                </div>
             </div>
 
             <!-- Failed/Pending State -->
@@ -78,7 +115,15 @@ onMounted(async () => {
                     </button>
                 </RouterLink>
             </div>
+<<<<<<< HEAD
+        </div>
 
+        <!-- Receipt -->
+        <div v-if="isSuccess && showReceipt && orderInfo">
+            <Receipt :orderId="orderInfo.orderId" />
+=======
+
+>>>>>>> main
         </div>
     </div>
 </template>

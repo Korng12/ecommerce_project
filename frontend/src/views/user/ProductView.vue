@@ -54,10 +54,20 @@
         <!-- Description -->
         <p class="text-gray-700 leading-relaxed">{{ product.description }}</p>
 
+        <!-- Stock Information -->
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-gray-700">Stock:</span>
+          <span v-if="product.stock === 0" class="text-red-600 font-bold">Out of Stock</span>
+          <span v-else-if="product.stock > 0 && product.stock <= 5" class="text-orange-500 font-semibold">
+            Only {{ product.stock }} left in stock!
+          </span>
+          <span v-else class="text-green-600 font-semibold">{{ product.stock }} available</span>
+        </div>
+
         <!-- Options (optional) -->
         <div class="flex items-center gap-4">
           <label class="font-semibold text-gray-700">Color:</label>
-          <select class="border border-gray-300 rounded-lg px-3 py-2">
+          <select class="border border-gray-300 rounded-lg px-3 py-2" :disabled="product.stock === 0">
             <option>Black</option>
             <option>White</option>
             <option>Silver</option>
@@ -66,10 +76,13 @@
 
         <!-- Add to Cart -->
         <button @click="handleAddToCart"
-          :disabled="cartStore.loading"
-          class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="cartStore.loading || product.stock === 0"
+          class="mt-4 px-6 py-3 rounded-xl shadow-lg transition transform active:scale-95"
+          :class="product.stock === 0 
+            ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+            : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'"
         >
-          {{ cartStore.loading ? 'Adding...' : 'Add to Cart' }}
+          {{ product.stock === 0 ? 'Out of Stock' : (cartStore.loading ? 'Adding...' : 'Add to Cart') }}
         </button>
         
         <!-- Error Message -->
@@ -99,7 +112,7 @@ import { useRoute } from 'vue-router'
 import { useProduct } from '@/stores/products'
 import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/layout/Footer.vue'
-import { computed, onMounted } from 'vue'
+import { computed ,onMounted } from 'vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 import { useCart } from '@/stores/carts'
 

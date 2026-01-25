@@ -1,15 +1,16 @@
 <template>
-  <Bar :data="chartData" :options="chartOptions" />
+    <Bar :data="chartData" :options="chartOptions" />
 </template>
 
 <script setup>
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+import { computed } from 'vue'
 
-    // Register ChartJS components
-    ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+// Register ChartJS components
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-    const props = defineProps({
+const props = defineProps({
     data: {
         type: Object,
         required: true
@@ -18,81 +19,81 @@ import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, Li
         type: String,
         default: ''
     }
-    })
+})
 
-    const chartData = {
+const chartData = computed(() => ({
     labels: props.data.labels || [],
     datasets: props.data.datasets || []
-    }
+}))
 
-    const chartOptions = {
+const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
-        position: 'top',
-        labels: {
-            font: {
-            size: 12
-            },
-            boxWidth: 12,
-            padding: 10
-        }
+            position: 'top',
+            labels: {
+                font: {
+                    size: 12
+                },
+                boxWidth: 12,
+                padding: 10
+            }
         },
         title: {
-        display: !!props.title,
-        text: props.title,
-        font: {
-            size: 14,
-            weight: 'bold'
-        },
-        padding: {
-            top: 10,
-            bottom: 20
-        }
+            display: !!props.title,
+            text: props.title,
+            font: {
+                size: 14,
+                weight: 'bold'
+            },
+            padding: {
+                top: 10,
+                bottom: 20
+            }
         },
         tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        titleColor: '#1f2937',
-        bodyColor: '#374151',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12,
-        boxPadding: 6,
-        titleFont: {
-            size: 12
-        },
-        bodyFont: {
-            size: 12
-        }
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            titleColor: '#1f2937',
+            bodyColor: '#374151',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            cornerRadius: 8,
+            padding: 12,
+            boxPadding: 6,
+            titleFont: {
+                size: 12
+            },
+            bodyFont: {
+                size: 12
+            }
         }
     },
     scales: {
         y: {
-        beginAtZero: true,
-        grid: {
-            color: 'rgba(229, 231, 235, 0.5)',
-            drawBorder: false
-        },
-        ticks: {
-            font: {
-            size: 11
+            beginAtZero: true,
+            grid: {
+                color: 'rgba(229, 231, 235, 0.5)',
+                drawBorder: false
             },
-            padding: 8
-        }
+            ticks: {
+                font: {
+                    size: 11
+                },
+                padding: 8
+            }
         },
         x: {
-        grid: {
-            display: false,
-            drawBorder: false
-        },
-        ticks: {
-            font: {
-            size: 11
+            grid: {
+                display: false,
+                drawBorder: false
             },
-            padding: 8
-        }
+            ticks: {
+                font: {
+                    size: 11
+                },
+                padding: 8
+            }
         }
     }
 }

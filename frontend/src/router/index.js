@@ -12,12 +12,12 @@ const routes = [
         component: () => import("@/views/LandingPage.vue"),
       },
       {
-        path: "aboutUsView",
+        path: "aboutus",
         name: "aboutUsView",
         component: () => import("@/views/AboutUsView.vue"),
       },
       {
-        path: "contactUsView",
+        path: "contactus",
         name: "contactUsView",
         
         component: () => import("@/views/ContactUsView.vue"),
@@ -73,16 +73,23 @@ const routes = [
     name: "cartView",
     path: "/cartView",
     component: () => import("@/views/user/CartView.vue"),
+    meta: { requiresAuth: true, requiredRole: ROLES.USER },
   },
   {
     name: "checkoutView",
     path: "/checkoutView",
     component: () => import("@/views/user/CheckoutView.vue"),
+    meta: { requiresAuth: true, requiredRole: ROLES.USER},
   },
   {
     name: "paymentSuccess",
     path: "/payment-success",
     component: () => import("@/views/user/PaymentSuccessView.vue"),
+  },
+  {
+    name: "receipt",
+    path: "/receipt/:orderId",
+    component: () => import("@/components/order/Receipt.vue"),
   },
   // {
   //   name: "categoryView",
