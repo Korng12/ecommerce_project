@@ -17,11 +17,12 @@ const orderRoutes = require("./routes/api/orders");
 const paymentRoutes = require("./routes/api/payments");
 
 // Serve static files for images
-app.use("/images", express.static(path.join(__dirname, "public", "images")));
+app.use("/images", express.static(path.join(__dirname, "public", "images","categories")));
 console.log(
   "📁 Serving static images from:",
   path.join(__dirname, "public", "images"),
 );
+app.use("/categories", express.static(path.join(__dirname, "uploads")));
 
 app.use(cookieParser());
 app.use(

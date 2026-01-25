@@ -1,5 +1,6 @@
 
 import { defineStore } from "pinia";
+import  getImageUrl from "../utils/convertImagePath";
 
 const API_URL = 'http://localhost:3000/api';
 
@@ -29,7 +30,7 @@ export const useCategory=defineStore('categoryStore',{
           id:c.id,
           name:c.name,
           description:c.description,
-          image:c.image
+          image:c.image? getImageUrl(c.image) : ''
         })) : []
       }catch(err){
         console.error('Failed to fetch categories:',err)
@@ -44,23 +45,40 @@ export const useCategory=defineStore('categoryStore',{
     async createCategory(categoryData) {
       this.loading = true
       this.error = null
+
       try {
-        const res = await fetch(`${API_URL}/categories`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(categoryData)
-        })
-        
+        const options = {
+          method: 'POST'
+        }
+
+        // If FormData (image upload)
+        if (categoryData instanceof FormData) {
+          options.body = categoryData
+          // ❌ do not set Content-Type
+        } else {
+          options.headers = {
+            'Content-Type': 'application/json'
+          }
+          options.body = JSON.stringify(categoryData)
+        }
+
+        const res = await fetch(
+          `${API_URL}/categories?subdir=categories`,
+          options
+        )
+
         if (!res.ok) {
           const error = await res.json()
           throw new Error(error.message || 'Failed to create category')
         }
-        
+
         const newCategory = await res.json()
+
+        // update store state
         this.categories.push(newCategory)
+
         return newCategory
+
       } catch (err) {
         console.error('Failed to create category:', err)
         this.error = err.message
@@ -70,17 +88,27 @@ export const useCategory=defineStore('categoryStore',{
       }
     },
 
+
     async updateCategory(id, categoryData) {
       this.loading = true
       this.error = null
       try {
-        const res = await fetch(`${API_URL}/categories/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(categoryData)
-        })
+        const options = {
+          method: 'PUT'
+        }
+
+        // Handle FormData with file uploads
+        if (categoryData instanceof FormData) {
+          options.body = categoryData
+          // Don't set Content-Type header for FormData, browser will set it with boundary
+        } else {
+          options.headers = {
+            'Content-Type': 'application/json'
+          }
+          options.body = JSON.stringify(categoryData)
+        }
+
+        const res = await fetch(`${API_URL}/categories/${id}?subdir=categories`, options)
         
         if (!res.ok) {
           const error = await res.json()
