@@ -15,6 +15,7 @@
         <!-- Dynamic Content based on Active Tab -->
         <DashboardTab v-if="activeTab === 'dashboard'" />
         <UsersTab v-else-if="activeTab === 'users'" />
+        <Products v-else-if="activeTab === 'products'" />
         <CategoriesTab v-else-if="activeTab === 'categories'" />
         <OrdersTab v-else-if="activeTab === 'orders'" />
         <NotificationsTab v-else-if="activeTab === 'notifications'" :notifications="notifications"
@@ -38,6 +39,8 @@ import OrdersTab from '@/components/admin/OrdersTab.vue'
 import NotificationsTab from '@/components/admin/NotificationsTab.vue'
 import AnalyticsTab from '@/components/admin/AnalyticsTab.vue'
 import SettingsTab from '@/components/admin/SettingsTab.vue'
+//import AuthForm from '@/components/AuthForm.vue'
+import Products from '@/components/admin/Products.vue'
 
 // State
 const sidebarOpen = ref(true)

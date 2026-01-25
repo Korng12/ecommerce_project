@@ -3,13 +3,32 @@
     <div class="flex items-center justify-between">
       <div>
         <p class="text-gray-500 text-sm">{{ title }}</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">{{ value }}</p>
+
+        <!-- VALUE -->
+        <p class="text-2xl font-bold text-gray-800 mt-1">
+          {{ value }}
+        </p>
       </div>
-      <div :class="[iconColorClasses[iconColor], 'p-3 rounded-lg']">
+
+      <!-- ICON -->
+      <div
+        :class="[
+          iconColorClasses[iconColor] || iconColorClasses.blue,
+          'p-3 rounded-lg'
+        ]"
+      >
         <component :is="iconComponent" class="text-white" :size="24" />
       </div>
     </div>
-    <p :class="[change.includes('-') ? 'text-red-600' : 'text-green-600', 'text-sm mt-4']">
+
+    <!-- CHANGE -->
+    <p
+      v-if="change"
+      :class="[
+        change.startsWith('-') ? 'text-red-600' : 'text-green-600',
+        'text-sm mt-4'
+      ]"
+    >
       {{ change }}
     </p>
   </div>
@@ -18,23 +37,42 @@
 <script setup>
 import { defineProps, computed } from 'vue'
 
-// this icon use lucide-vue-text "run: npm lucide-vue-next"
-import { 
-  DollarSign, UserCheck, Package, TrendingUp, ShoppingCart, 
-  Activity, Globe, ShoppingBag, Users
+// lucide icons
+import {
+  DollarSign,
+  UserCheck,
+  Package,
+  TrendingUp,
+  ShoppingCart,
+  Activity,
+  Globe,
+  ShoppingBag
 } from 'lucide-vue-next'
 
 const props = defineProps({
-  title: String,
-  value: String,
-  change: String,
-  icon: String,
+  title: {
+    type: String,
+    required: true
+  },
+  value: {
+    type: [String, Number], // ✅ FIX: accept Number
+    required: true
+  },
+  change: {
+    type: String,
+    default: ''
+  },
+  icon: {
+    type: String,
+    default: 'DollarSign'
+  },
   iconColor: {
     type: String,
     default: 'blue'
   }
 })
 
+// ICON MAP
 const iconComponent = computed(() => {
   const icons = {
     DollarSign,
@@ -47,14 +85,16 @@ const iconComponent = computed(() => {
     ShoppingBag,
     Users
   }
+
   return icons[props.icon] || DollarSign
 })
 
+// COLOR MAP
 const iconColorClasses = {
-  blue: 'bg-blue-400 text-blue-600',
-  green: 'bg-green-400 text-green-600',
-  purple: 'bg-purple-400 text-purple-600',
-  orange: 'bg-orange-400 text-orange-600',
-  red: 'bg-red-400 text-red-600'
+  blue: 'bg-blue-500',
+  green: 'bg-green-500',
+  purple: 'bg-purple-500',
+  orange: 'bg-orange-500',
+  red: 'bg-red-500'
 }
 </script>

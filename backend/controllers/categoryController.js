@@ -1,25 +1,10 @@
 const db = require('../models/index.js');
 const Category = db.category;
 const Product = db.product;
+const path = require('path');
+const fs = require('fs');
 
 // ================= GET ALL CATEGORIES =================
-// const getAllCategories = async (req, res) => {
-//   try {
-//     const categories = await Category.findAll({
-//       include: [{
-//         model: Product,
-//         as: 'products',
-//         attributes: ['id', 'name', 'price'],
-//         limit: 5
-//       }],
-//       order: [['name', 'ASC']]
-//     });
-//     res.json(categories);
-//   } catch (error) {
-//     console.error('Error fetching categories:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
 const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll({
@@ -36,7 +21,7 @@ const getAllCategories = async (req, res) => {
       }],
       order: [['name', 'ASC']]
     });
-    res.json(categories);
+    res.status(200).json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);
     res.status(500).json({ message: 'Server error' });
@@ -63,7 +48,7 @@ const getCategoryById = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
-    res.json(category);
+    res.status(200).json(category);
   } catch (error) {
     console.error('Error fetching category:', error);
     res.status(500).json({ message: 'Server error' });
@@ -73,28 +58,35 @@ const getCategoryById = async (req, res) => {
 // ================= CREATE CATEGORY =================
 const createCategory = async (req, res) => {
   try {
-    const { name, description, image } = req.body;
+    const { name, description } = req.body;
+    const imagePath = req.file ? `/uploads/categories/${req.file.filename}` : null;
     
-    if (!name) {
-      return res.status(400).json({ message: 'Name is required' });
-    }
-
-    // Check if category already exists
+    // Check for existing category with the same name
     const existingCategory = await Category.findOne({ where: { name } });
     if (existingCategory) {
-      return res.status(400).json({ message: 'Category already exists' });
+      // Clean up uploaded file if name already exists
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({ message: 'Category name already exists' });
     }
-
     const category = await Category.create({
       name,
-      description,
-      image
+      description: description || null,
+      image: imagePath
     });
 
-    res.status(201).json(category);
+    res.status(201).json({
+      message: 'Category created successfully',
+      category
+    });
   } catch (error) {
+    // Clean up uploaded file if error occurs
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
     console.error('Error creating category:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -104,14 +96,63 @@ const updateCategory = async (req, res) => {
     const category = await Category.findByPk(req.params.id);
 
     if (!category) {
+      // Clean up uploaded file if category not found
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
       return res.status(404).json({ message: 'Category not found' });
     }
 
-    await category.update(req.body);
-    res.json(category);
+    const { name, description } = req.body;
+    const updateData = {};
+
+    // Update name if provided
+    if (name) {
+      // Check if new name is unique
+      const existingCategory = await Category.findOne({ 
+        where: { name, id: { [db.sequelize.Op.ne]: req.params.id } }
+      });
+      if (existingCategory) {
+        // Clean up uploaded file if name already exists
+        if (req.file) {
+          fs.unlinkSync(req.file.path);
+        }
+        return res.status(400).json({ message: 'Category name already exists' });
+      }
+      updateData.name = name;
+    }
+
+    // Update description if provided
+    if (description !== undefined) {
+      updateData.description = description || null;
+    }
+
+    // Handle image upload
+    if (req.file) {
+      // Delete old image if it exists
+      if (category.image) {
+        const oldImagePath = path.join(__dirname, '..', 'uploads', 'categories', path.basename(category.image));
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      // Store new image path
+      updateData.image = `/uploads/categories/${req.file.filename}`;
+    }
+
+    await category.update(updateData);
+
+    res.status(200).json({
+      message: 'Category updated successfully',
+      category
+    });
   } catch (error) {
+    // Clean up uploaded file if error occurs
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
     console.error('Error updating category:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -134,7 +175,7 @@ const deleteCategory = async (req, res) => {
     }
 
     await category.destroy();
-    res.json({ message: 'Category deleted successfully' });
+    res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
     console.error('Error deleting category:', error);
     res.status(500).json({ message: 'Server error' });
@@ -160,14 +201,14 @@ const getCategoryStats = async (req, res) => {
       raw: true
     });
 
-    res.json(categories);
+    res.status(200).json(categories);
   } catch (error) {
     console.error('Error fetching category stats:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-module.exports = {
+module.exports = { 
   getAllCategories,
   getCategoryById,
   createCategory,

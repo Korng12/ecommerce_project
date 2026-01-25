@@ -20,8 +20,7 @@
     </nav>
 
     <div class="p-4 border-t border-slate-700">
-      <button @click="authStore.logout"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition-colors text-gray-300">
+      <button @click="handleLogout" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition-colors text-gray-300">
         <LogOut :size="22" />
         <span v-if="sidebarOpen" class="font-medium">Logout</span>
       </button>
@@ -31,10 +30,26 @@
 
 <script setup>
 import { defineProps, defineEmits, markRaw } from 'vue'
-import {
-  LayoutDashboard, Users, ShoppingCart, BarChart3, Settings, LogOut, Menu, X, Folder, Bell
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
+import { 
+  LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder,Bell
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+const logout = () => {
+  // remove JWT token
+  localStorage.removeItem('token')
+
+  // optional: remove user info
+  localStorage.removeItem('user')
+
+  // redirect to login page
+  router.push('/login')
+}
 
 defineProps({
   sidebarOpen: Boolean,
@@ -48,10 +63,17 @@ const authStore = useAuthStore();
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
   { id: 'users', label: 'Users', icon: markRaw(Users) },
+  { id: 'products', label: 'Products', icon: markRaw(Package) },
   { id: 'categories', label: 'Categories', icon: markRaw(Folder) },
   { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
   { id: 'notifications', label: 'Notifications', icon: markRaw(Bell) },
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },
   { id: 'settings', label: 'Settings', icon: markRaw(Settings) },
 ]
+const authStore = useAuthStore();
+const router = useRouter();
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push({ name: 'login' });
+};
 </script>
