@@ -41,7 +41,7 @@ import {
 } from 'lucide-vue-next'
 
 import { useRouter } from 'vue-router'
-const router = useRouter()
+//const router = useRouter()
 
 const logout = () => {
   // remove JWT token
