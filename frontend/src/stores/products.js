@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import getImageUrl from "../utils/convertImagePath";
 
 export const useProduct = defineStore('productStore',{
   state:()=>({
@@ -27,7 +28,7 @@ export const useProduct = defineStore('productStore',{
           const primaryImage = (p.images && Array.isArray(p.images)) ? (p.images.find(i => i.isPrimary) || p.images[0]) : null
           // Construct full backend URL for images
           const imageUrl = primaryImage?.imageUrl || ''
-          const image = imageUrl ? `http://localhost:3000${imageUrl}` : ''
+          const image = imageUrl ? getImageUrl(imageUrl) : ''
           return {
             id: p.id,
             name: p.name,
@@ -58,7 +59,10 @@ export const useProduct = defineStore('productStore',{
           throw new Error('Failed to create product')
         }
         const newProduct = await res.json()
-        this.products.push(newProduct)
+        this.products.push({
+          ...newProduct,
+          image: newProduct.images && newProduct.images.length > 0 ? getImageUrl(newProduct.images[0].imageUrl) : ''
+        })
       }catch(err){
         console.error('Failed to create product:', err)
         throw err

@@ -17,12 +17,11 @@
       <!-- Product Image -->
       <div class="overflow-hidden rounded-2xl">
         <img
-          :src="fixImage(product.image)"
+          :src="product.image"
           alt=""
           class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
         />
       </div>
-      <!-- <img src="../../assets/small_img/mac_book.jpg" alt=""> -->
 
       <!-- Product Info -->
       <div class="mt-4 space-y-1">
