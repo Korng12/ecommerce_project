@@ -15,6 +15,11 @@ const authRoutes = require('./routes/authRoutes');
 const cartRoutes = require("./routes/api/carts");
 const orderRoutes = require("./routes/api/orders");
 const paymentRoutes = require("./routes/api/payments");
+const analyticsRoutes = require("./routes/api/analytics");
+const verifyJwt = require("./middleware/authJwt");
+const verifyRole = require("./middleware/verifyRoles");
+const cookieParser = require("cookie-parser");
+const authRoutes = require("./routes/authRoutes");
 
 // Serve static files for images
 app.use("/images", express.static(path.join(__dirname, "public", "images","categories")));
@@ -75,7 +80,8 @@ app.use("/api", categoryRoutes);
 app.use("/api", brandRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
-app.use("/api", webhookRouter.apiRoutes);
+app.use("/api", webhookRouter.apiRoutes); // Payment routes BEFORE analytics
+app.use("/api", analyticsRoutes);
 app.use(
   "/users",
   verifyJwt,

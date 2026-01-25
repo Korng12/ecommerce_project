@@ -62,6 +62,7 @@ export const useCart = defineStore("cartStore", {
           name: item.product?.name || "Unknown Product",
           description: item.product?.description || "",
           price: parseFloat(item.product?.price) || 0,
+          stock: item.product?.stock || 0,
           image: (() => {
             const primary = item.product?.images?.find((img) => img.isPrimary) || item.product?.images?.[0];
             const url = primary?.imageUrl;
@@ -135,8 +136,11 @@ export const useCart = defineStore("cartStore", {
           body: JSON.stringify({ productId, quantity})
         });
 
+        const result = await response.json();
+
         if(!response.ok){
-          throw new Error('Failed to update cart item');
+          // Handle stock validation errors from backend
+          throw new Error(result.msg || 'Failed to update cart item');
         }
 
         // Update cart state directly

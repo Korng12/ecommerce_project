@@ -1,26 +1,45 @@
-const db = require('../models/index.js');
+const db = require("../models/index.js");
+const { Op } = require("sequelize");
 const Product = db.product;
 const Category = db.category;
 const Brand = db.brand;
 const ProductImage = db.productImage;
 const Specification = db.specification;
 
-/* ================= GET ALL PRODUCTS ================= */
+const LOW_STOCK_ALERT = 5;
+
+//=== GET ALL PRODUCTS ===
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.findAll({
       include: [
-        { model: Category, as: 'category', attributes: ['id', 'name'] },
-        { model: Brand, as: 'brand', attributes: ['id', 'name', 'logo'] },
-        { model: ProductImage, as: 'images', attributes: ['id', 'imageUrl', 'isPrimary'] },
-        { model: Specification, as: 'specifications', attributes: ['id', 'key', 'value'] }
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name"],
+        },
+        {
+          model: Brand,
+          as: "brand",
+          attributes: ["id", "name", "logo"],
+        },
+        {
+          model: ProductImage,
+          as: "images",
+          attributes: ["id", "imageUrl", "isPrimary"],
+        },
+        {
+          model: Specification,
+          as: "specifications",
+          attributes: ["id", "key", "value"],
+        },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [["createdAt", "DESC"]],
     });
     res.json(products);
-  } catch (err) {
-    console.error('Error fetching products:', err);
-    res.status(500).json({ message: 'Server error' });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -29,21 +48,37 @@ const getProductById = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id, {
       include: [
-        { model: Category, as: 'category', attributes: ['id', 'name'] },
-        { model: Brand, as: 'brand', attributes: ['id', 'name', 'logo'] },
-        { model: ProductImage, as: 'images' },
-        { model: Specification, as: 'specifications' }
-      ]
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name", "description"],
+        },
+        {
+          model: Brand,
+          as: "brand",
+          attributes: ["id", "name", "logo", "description"],
+        },
+        {
+          model: ProductImage,
+          as: "images",
+          attributes: ["id", "imageUrl", "isPrimary"],
+        },
+        {
+          model: Specification,
+          as: "specifications",
+          attributes: ["id", "key", "value"],
+        },
+      ],
     });
 
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     res.json(product);
-  } catch (err) {
-    console.error('Error fetching product:', err);
-    res.status(500).json({ message: 'Server error' });
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -72,7 +107,7 @@ const createProduct = async (req, res) => {
       attributes: ['id']
     });
     if (!category) {
-      return res.status(400).json({ message: 'Invalid category' });
+      return res.status(400).json({ message: "Invalid category" });
     }
 
     /* ✅ SAFE BRAND CHECK (NO description COLUMN USED) */
@@ -84,7 +119,7 @@ const createProduct = async (req, res) => {
         attributes: ['id']
       });
       if (!brand) {
-        return res.status(400).json({ message: 'Invalid brand' });
+        return res.status(400).json({ message: "Invalid brand" });
       }
     }
 
@@ -155,7 +190,7 @@ const updateProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     let {
@@ -186,7 +221,7 @@ const updateProduct = async (req, res) => {
     if (brandId) {
       const brand = await Brand.findByPk(brandId, { attributes: ['id'] });
       if (!brand) {
-        return res.status(400).json({ message: 'Invalid brand' });
+        return res.status(400).json({ message: "Invalid brand" });
       }
     }
 
@@ -230,17 +265,35 @@ const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    await ProductImage.destroy({ where: { productId: product.id } });
-    await Specification.destroy({ where: { productId: product.id } });
-    await product.destroy();
+    const specification = await Specification.create({
+      productId,
+      key,
+      value,
+    });
 
-    res.json({ message: 'Product deleted successfully' });
-  } catch (err) {
-    console.error('Error deleting product:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(201).json(specification);
+  } catch (error) {
+    console.error("Error adding product specification:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// === LOW STOCK ALERTS ===
+const getLowStockProducts = async (_req, res) => {
+  try {
+    const products = await Product.findAll({
+      attributes: ["id", "name", "stock", "updatedAt"],
+      where: { stock: { [Op.lte]: LOW_STOCK_ALERT } },
+      order: [["stock", "ASC"]],
+    });
+
+    return res.json({ threshold: LOW_STOCK_ALERT, products });
+  } catch (error) {
+    console.error("Error fetching low stock products:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -250,5 +303,11 @@ module.exports = {
   getProductById,
   createProduct,
   updateProduct,
+  deleteProduct,
+  getProductsByCategory,
+  getProductsByBrand,
+  addProductImage,
+  addProductSpecification,
+  getLowStockProducts,
   deleteProduct
 };
