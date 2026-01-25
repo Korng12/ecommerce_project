@@ -9,7 +9,6 @@
           :key="category.id"
           class="relative group rounded-xl overflow-hidden shadow-lg cursor-pointer"
         >
-          <p>{{ category.image }}</p>
           <!-- Image -->
           <img
             :src="category.image"
@@ -25,7 +24,7 @@
               {{ category.name }}
             </h3>
             <p class="text-sm opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-100">
-              {{ category.description }} {{ category.image }}
+              {{ category.description }} 
             </p>
           </div>
         </div>

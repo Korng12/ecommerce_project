@@ -280,7 +280,55 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// ===GET PRODUCTS BY CATEGORY ===
+const getProductsByCategory = async (req, res) => {
+  try {
+    const products = await Product.findAll({
+      where: { categoryId: req.params.categoryId },
+      include: [
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name"],
+        },
+        {
+          model: Brand,
+          as: "brand",
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
+// ==== GET PRODUCTS BY BRAND ===
+const getProductsByBrand = async (req, res) => {
+  try {
+    const products = await Product.findAll({
+      where: { brandId: req.params.brandId },
+      include: [
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name"],
+        },
+        {
+          model: Brand,
+          as: "brand",
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products by brand:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 // === LOW STOCK ALERTS ===
 const getLowStockProducts = async (_req, res) => {
   try {
@@ -306,8 +354,8 @@ module.exports = {
   deleteProduct,
   getProductsByCategory,
   getProductsByBrand,
-  addProductImage,
-  addProductSpecification,
+  // addProductImage,
+  // addProductSpecification,
   getLowStockProducts,
-  deleteProduct
+
 };
