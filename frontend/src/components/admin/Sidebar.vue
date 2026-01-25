@@ -33,7 +33,7 @@ import { defineProps, defineEmits, markRaw } from 'vue'
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { 
-  LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder,Bell
+  LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder,Bell, Image
 } from 'lucide-vue-next'
 const router = useRouter()
 
@@ -62,6 +62,7 @@ const menuItems = [
   { id: 'users', label: 'Users', icon: markRaw(Users) },
   { id: 'products', label: 'Products', icon: markRaw(Package) },
   { id: 'categories', label: 'Categories', icon: markRaw(Folder) },
+  { id: 'banners', label: 'Banners', icon: markRaw(Image) },
   { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
   { id: 'notifications', label: 'Notifications', icon: markRaw(Bell) },
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },

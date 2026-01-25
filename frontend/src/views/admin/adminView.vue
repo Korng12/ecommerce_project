@@ -17,6 +17,7 @@
         <UsersTab v-else-if="activeTab === 'users'" />
         <Products v-else-if="activeTab === 'products'" />
         <CategoriesTab v-else-if="activeTab === 'categories'" />
+        <Banner v-else-if="activeTab === 'banners'" />
         <OrdersTab v-else-if="activeTab === 'orders'" />
         <NotificationsTab v-else-if="activeTab === 'notifications'" :notifications="notifications"
           :onUpdate="updateNotifications" />
@@ -41,6 +42,7 @@ import AnalyticsTab from '@/components/admin/AnalyticsTab.vue'
 import SettingsTab from '@/components/admin/SettingsTab.vue'
 //import AuthForm from '@/components/AuthForm.vue'
 import Products from '@/components/admin/Products.vue'
+import Banner from '@/components/admin/Banner.vue'
 
 // State
 const sidebarOpen = ref(true)
