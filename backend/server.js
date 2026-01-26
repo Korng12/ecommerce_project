@@ -17,6 +17,7 @@ const dashboardRoutes = require('./routes/dashboard')
 const productsRoutes = require('./routes/api/products');
 const categoriesRoutes = require('./routes/api/categories');
 const brandsRoutes = require('./routes/api/brands');
+const reviewRoutes = require('./routes/reviewRoutes');
 // Serve static files for images
 app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
 app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
@@ -59,6 +60,7 @@ app.use('/protected',verifyJwt,(req,res)=>{
 app.use("/api", productsRoutes);
 app.use("/api", categoriesRoutes);
 app.use("/api", brandsRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
 app.use("/api", webhookRouter.apiRoutes); // Payment routes BEFORE analytics

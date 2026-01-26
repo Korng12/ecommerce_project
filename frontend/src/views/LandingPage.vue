@@ -11,6 +11,7 @@
     </div>
 
     <!-- Only show "Popular Products" section -->
+    
     <ProductSection title="Popular Products" :show="true" />
     <ProductSection title="Best Selling" :show="false" />
     <ProductSection title="Recommended" :show="false" />
@@ -24,6 +25,14 @@ import ProductSection from '@/components/product/ProductSection.vue';
 import BannerHero from '@/components/BannerHero.vue';
 import HeroSection from '@/components/HeroSection.vue';
 import CategoryPreview from '@/components/CategoryPreview.vue';
+import { onMounted } from 'vue';
+import { useProduct } from '@/stores/products';
+const productsStore = useProduct();
+onMounted(async () => {
+  if (!productsStore.products?.length) {
+    try { await productsStore.fetchAllProducts() } catch (e) { /* noop */ }
+  }
+});
 </script>
 
 <style>

@@ -2,13 +2,70 @@ const db = require("../models/index.js");
 const { Op } = require("sequelize");
 const Product = db.product;
 const Category = db.category;
+const Review =db.review;
 const Brand = db.brand;
 const ProductImage = db.productImage;
 const Specification = db.specification;
-
+const sequelize=db.sequelize
+const Promotion = db.promotion;
 const LOW_STOCK_ALERT = 5;
 
 //=== GET ALL PRODUCTS ===
+// const getAllProducts = async (req, res) => {
+//   try {
+//     const products = await Product.findAll({
+//       include: [
+//         {
+//           model: Category,
+//           as: "category",
+//           attributes: ["id", "name"],
+//         },
+//         {
+//           model: Brand,
+//           as: "brand",
+//           attributes: ["id", "name", "logo"],
+//         },
+//         {
+//           model: ProductImage,
+//           as: "images",
+//           attributes: ["id", "imageUrl", "isPrimary"],
+//         },
+//         {
+//           model: Specification,
+//           as: "specifications",
+//           attributes: ["id", "key", "value"],
+//         }
+//       ],
+      
+//       order: [["createdAt", "DESC"]],
+      
+//     });
+//     const productsWithRatings = await Promise.all(
+//       products.map(async (product) => {
+//       const rating = await Review.findOne({
+//         where: { productId: product.id },
+//         attributes: [
+//           [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
+//           [sequelize.fn("COUNT", sequelize.col("id")), "totalReviews"]
+//         ],
+//         raw: true
+//       });
+
+//       return {
+//         ...product.toJSON(),
+//         averageRating: rating.averageRating
+//           ? Number(rating.averageRating).toFixed(1)
+//           : 0,
+//         totalReviews: rating.totalReviews || 0
+//       };
+//       })
+//     );
+//     res.json(productsWithRatings);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.findAll({
@@ -33,15 +90,71 @@ const getAllProducts = async (req, res) => {
           as: "specifications",
           attributes: ["id", "key", "value"],
         },
+        {
+          model: Promotion,
+          as: "promotions",
+          required: false,
+          where: {
+            isActive: true,
+            startDate: { [Op.lte]: new Date() },
+            endDate: { [Op.gte]: new Date() }
+          }
+        }
       ],
       order: [["createdAt", "DESC"]],
     });
-    res.json(products);
+
+    const result = await Promise.all(
+      products.map(async (product) => {
+        const rating = await Review.findOne({
+          where: { productId: product.id },
+          attributes: [
+            [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
+            [sequelize.fn("COUNT", sequelize.col("id")), "totalReviews"]
+          ],
+          raw: true
+        });
+
+        const productJson = product.toJSON();
+
+        // 🔥 PROMOTION LOGIC
+        let finalPrice = productJson.price;
+        let promotion = null;
+
+        if (productJson.promotions && productJson.promotions.length > 0) {
+          const promo = productJson.promotions[0];
+
+          promotion = promo;
+
+          if (promo.type === "percentage") {
+            finalPrice = productJson.price * (1 - promo.value / 100);
+          } else {
+            finalPrice = productJson.price - promo.value;
+          }
+        }
+
+        return {
+          ...productJson,
+          averageRating: rating.averageRating
+            ? Number(rating.averageRating).toFixed(1)
+            : 0,
+          totalReviews: rating.totalReviews || 0,
+
+          // 👇 promotion fields
+          originalPrice: productJson.price,
+          finalPrice: Math.max(finalPrice, 0),
+          promotion
+        };
+      })
+    );
+
+    res.json(result);
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /* ================= GET PRODUCT BY ID ================= */
 const getProductById = async (req, res) => {
@@ -68,6 +181,15 @@ const getProductById = async (req, res) => {
           as: "specifications",
           attributes: ["id", "key", "value"],
         },
+        {          model: Promotion,
+          as: "promotions",
+          required: false,
+          where: {
+            isActive: true,
+            startDate: { [Op.lte]: new Date() },
+            endDate: { [Op.gte]: new Date() }
+          }
+        }
       ],
     });
 

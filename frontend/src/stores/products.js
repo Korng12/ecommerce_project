@@ -13,6 +13,16 @@ export const useProduct = defineStore('productStore',{
     searchSuggestions:(state)=>(query)=>{
       if(!query) return []
       return state.products.filter(p=> (p.name || '').toLowerCase().includes(query.toLowerCase())).slice(0,5)
+    },
+    getProductsByBrand:(state)=>(brandName)=>{
+      if(!brandName) return state.products
+      return state.products.filter(p=> (p.brand || '').toLowerCase()===brandName.toLowerCase())
+    },
+    getPopularProducts:(state)=>{
+      return state.products
+        .slice()
+        .sort((a,b)=> b.totalReviews - a.totalReviews)
+        .slice(0,10)
     }
   },
   actions:{
@@ -36,7 +46,8 @@ export const useProduct = defineStore('productStore',{
             image,
             brand: p.brand?.name || '',
             category: p.category?.name || '',
-            rating: p.rating || 0,
+            rating: Number(p.averageRating || 0),
+            totalReviews: p.totalReviews || 0,
             description: p.description || ''
           }
         }) : []

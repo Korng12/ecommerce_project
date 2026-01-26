@@ -2,9 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../models/index.js');
 const User = db.user;
-console.log('--- DB CONTENTS ---');
-console.log(db); // Check your terminal to see the keys!
-console.log('-------------------');
+// console.log('--- DB CONTENTS ---');
+// console.log(db); // Check your terminal to see the keys!
+// console.log('-------------------');
 
 // ================= REGISTER =================
 const register = async (req, res) => {

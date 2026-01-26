@@ -46,7 +46,8 @@ import {
   ShoppingCart,
   Activity,
   Globe,
-  ShoppingBag
+  ShoppingBag,
+  Users
 } from 'lucide-vue-next'
 
 const props = defineProps({
