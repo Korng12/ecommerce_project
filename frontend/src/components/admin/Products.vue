@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold">Product Inventory</h1>
       <p class="text-gray-600">Manage products and stock</p>
     </div>
-
+    
     <!-- Action -->
     <div class="flex justify-between mb-4">
       <input
@@ -13,13 +13,7 @@
         placeholder="Search product..."
         class="border px-4 py-2 rounded w-1/3"
       />
-      <button
-        @click="openModal"
-        class="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        + Add Product
-      </button>
-        <div class="flex gap-2 text-gray-700">
+       <div class="flex gap-2 text-gray-700">
           <select v-model="selectedCategory" class="rounded-xl border-gray-300">
             <option value="default">All Categories</option>
             <option v-for="category in categoryStore.categories" :key="category.id" :value="category.name">
@@ -38,6 +32,13 @@
             <option value="high-low">Price: High to Low</option>
           </select>
         </div>
+      <button
+        @click="openModal"
+        class="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        + Add Product
+      </button>
+       
     </div>
 
     <!-- Table -->

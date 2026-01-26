@@ -8,10 +8,11 @@
      </div>
    
     <!-- Show all product sections -->
-    <ProductSection title="Popular Products" :show="true" />
+    <ProductSection title="Popular Products" :products="productsStore.getPopularProducts" :show="true" />
+
     <ProductSection title="Best Selling" :show="true" />
     <ProductSection title="Recommended" :show="true" />
-    <ProductSection title="Accessories" :show="true" />
+    <ProductSection title="Accessories"  :show="true" />
      <div>
       <SpecialKind></SpecialKind>
     </div>
@@ -19,7 +20,7 @@
       <SpecialProduct></SpecialProduct>
     </div>
     <div>
-      <!-- <Footer></Footer> -->
+   
     </div>
   </div>
 </template>
@@ -28,11 +29,16 @@
 import ProductSection from '@/components/product/ProductSection.vue';
 import Header from '@/components/layout/Header.vue';
 import HeroSection from '@/components/BannerHero.vue';
-import Footer from '@/components/layout/Footer.vue';
 import SpecialProduct from '@/components/SpecialProduct.vue';
 import SpecialKind from '@/components/SpecialKind.vue';
+import { onMounted } from 'vue'; 
+import { useProduct } from '@/stores/products';
+import { useBrand } from '@/stores/brands';
+const productsStore = useProduct();
+const brandsStore = useBrand();
+onMounted(async()=>{
+  if(!productsStore.products?.length){
+    try{ await productsStore.fetchAllProducts()} catch(e){/*no op*/}
+  }
+})
 </script>
-
-<style>
-/* Add any necessary styles here */
-</style>

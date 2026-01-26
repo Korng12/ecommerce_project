@@ -3,8 +3,8 @@
     <div class="flex flex-col gap-4 items-center w-full mb-8">
       <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
       <button class="view-more text-sm text-blue-500">View More</button>
-      <div v-if="productsStore.products.length" class="grid grid-cols-3 gap-4">
-        <ProductCard v-for="product in productsStore.getPopularProducts" :key="product.id" :product="product"></ProductCard>
+      <div v-if="props.products?.length" class="grid grid-cols-3 gap-4">
+        <ProductCard v-for="product in props.products" :key="product.id" :product="product"></ProductCard>
       </div>
       <div v-else class="text-gray-500 py-8">
         Loading products...
@@ -15,10 +15,13 @@
 
 <script setup>
 import ProductCard from '@/components/product/ProductCard.vue';
-import { useProduct } from '@/stores/products';
-import { onMounted } from 'vue';
+
 
 const props = defineProps({
+  products: {
+    type: Array,
+    default: () => []
+  },
   title: {
     type: String,
     default: 'Product Section'
@@ -28,9 +31,6 @@ const props = defineProps({
     default: true
   }
 });
-
-const productsStore = useProduct();
-
 
 </script>
 
