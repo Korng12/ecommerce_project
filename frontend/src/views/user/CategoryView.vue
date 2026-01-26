@@ -26,18 +26,18 @@
           </div>
         </div>
         <div class="flex gap-2 text-gray-700">
-       <select v-model="selectedBrand" class="rounded-xl border-gray-300">
-          <option value="">All Brands</option>
-          <option v-for="brand in brandsStore.brands" :key="brand.id" :value="brand.name">
-            {{ brand.name }}
-          </option>
-        </select>
-          <select name="" id="" class="rounded-xl">
-            <option value="brand">brand</option>
-            <option value="brand">brand</option>
-            <option value="brand">brand</option>
+        <select v-model="selectedBrand" class="rounded-xl border-gray-300">
+            <option value="">All Brands</option>
+            <option v-for="brand in brandsStore.brands" :key="brand.id" :value="brand.name">
+              {{ brand.name }}
+            </option>
           </select>
-        </div>
+          <select v-model="sortBy" class="rounded-xl border-gray-300">
+            <option value="default">Sort by: Featured</option>
+            <option value="low-high">Price: Low to High</option>
+            <option value="high-low">Price: High to Low</option>
+          </select>
+          </div>
       </div>
     </div>
 
@@ -75,6 +75,7 @@ const query = ref(''); // also bind with model // that is mean whenever this var
 const searchText=ref('')
 const brandsStore=useBrand();
 const selectedBrand = ref('');
+const sortBy = ref('default');
 // const filteredProducts=ref(''); 
 const selectedCategory=computed(()=>
   productsStore.getByCategory(catName.value)
@@ -84,9 +85,14 @@ const onSearch=()=>{
   searchText.value=query.value.trim().toLowerCase();
 }
 const filteredProducts = computed(()=>{
-  let products = selectedCategory.value;
+  let products = [...selectedCategory.value];
   if(selectedBrand.value){
     products = products.filter(p=>p.brand.toLowerCase()===selectedBrand.value.toLowerCase())
+  }
+  if(sortBy.value==='low-high'){
+    products.sort((a,b)=>a.price - b.price)
+  } else if(sortBy.value==='high-low'){
+    products.sort((a,b)=>b.price - a.price)
   }
  
   return  products.filter(p=>p.name.toLowerCase().includes(searchText.value))
