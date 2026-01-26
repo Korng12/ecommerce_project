@@ -55,10 +55,10 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import 'swiper/css/autoplay'
-import { useBanner } from '@/stores/banners'
+import { useBannerStore } from '@/stores/banners'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 
-const bannerStore = useBanner();
+const bannerStore = useBannerStore()
 // const fixImage = (path) => new URL(path, import.meta.url).href
 </script>
 

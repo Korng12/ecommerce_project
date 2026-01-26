@@ -17,11 +17,18 @@ const dashboardRoutes = require('./routes/dashboard')
 const productsRoutes = require('./routes/api/products');
 const categoriesRoutes = require('./routes/api/categories');
 const brandsRoutes = require('./routes/api/brands');
+// banner routes
+const bannerRoutes = require('./routes/api/banners');
+
+// Use banner routes
+app.use('/api/banners', bannerRoutes);
+
 // Serve static files for images
 app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
 app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
 
 app.use("/categories", express.static(path.join(__dirname, "uploads","categories")));
+
 
 app.use(cookieParser());
 app.use(
@@ -40,8 +47,8 @@ app.use(express.json()); // ✅ REQUIRED
 app.use(express.urlencoded({ extended: true }));
 
 
-// user management routes
 
+// user management routes
 app.use('/api/users', userRoutes)
 
 // Dashboard routes

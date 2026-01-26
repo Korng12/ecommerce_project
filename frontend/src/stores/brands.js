@@ -3,8 +3,13 @@ import brands from "@/model/brands.json";
 
 export const useBrand = defineStore("useBrand", {
   state: () => ({
-    brands
+    brands: []
   }),
-  getters: {},
-  actions: {}
+
+  actions: {
+    async fetchBrands() {
+      // simulate async for consistency
+      this.brands = brands
+    }
+  }
 });

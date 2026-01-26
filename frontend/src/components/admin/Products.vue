@@ -40,14 +40,14 @@
         <tr v-for="p in filteredProducts" :key="p.id" class="border-t">
           <td class="p-3">
             <img
-              :src="p.imageUrl || 'https://via.placeholder.com/50'"
+              :src="p.image || 'https://via.placeholder.com/50'"
               class="w-12 h-12 rounded object-cover"
             />
           </td>
           <td class="p-3">{{ p.name }}</td>
           <td class="p-3">{{ p.description || '-' }}</td>
-          <td class="p-3">{{ p.brandName || '-' }}</td>
-          <td class="p-3">{{ p.categoryName || '-' }}</td>
+          <td class="p-3">{{ p.brand || '-' }}</td>
+          <td class="p-3">{{ p.category || '-' }}</td>
           <td class="p-3">${{ p.price }}</td>
           <td class="p-3">{{ p.stock }}</td>
           <td class="p-3 space-x-2">
@@ -66,11 +66,7 @@
         </h2>
 
         <div class="space-y-3">
-          <input
-            v-model="form.name"
-            placeholder="Product name"
-            class="w-full border p-2 rounded"
-          />
+          <input v-model="form.name" placeholder="Product name" class="w-full border p-2 rounded" />
 
           <textarea
             v-model="form.description"
@@ -80,68 +76,39 @@
 
           <input type="file" accept="image/*" @change="handleImage" />
 
-          <img
-            v-if="imagePreview"
-            :src="imagePreview"
-            class="w-24 h-24 rounded object-cover"
-          />
+          <img v-if="imagePreview" :src="imagePreview" class="w-24 h-24 rounded object-cover" />
 
-          <select v-model="form.brandId" class="w-full border p-2 rounded">
-            <option value="">Select brand</option>
-            <option
-              v-for="brand in brandStore.brands"
-              :key="brand.id"
-              :value="brand.id"
-            >
-              {{ brand.name }}
+          <!-- BRAND -->
+          <select v-model.number="form.brandId" class="w-full border p-2 rounded">
+            <option :value="null">Select brand</option>
+            <option v-for="b in brandStore.brands" :key="b.id" :value="b.id">
+              {{ b.name }}
             </option>
           </select>
 
-
-          <select v-model="form.categoryId" class="w-full border p-2 rounded">
-            <option disabled value="">Select category</option>
-            <option
-              v-for="cat in categoryStore.categories"
-              :key="cat.id"
-              :value="cat.id"
-            >
-              {{ cat.name }}
+          <!-- CATEGORY (FIXED) -->
+          <select v-model.number="form.categoryId" class="w-full border p-2 rounded">
+            <option :value="null">Select category</option>
+            <option v-for="c in categoryStore.categories" :key="c.id" :value="c.id">
+              {{ c.name }}
             </option>
           </select>
-
 
           <!-- PRICE -->
-          <input
-            type="number"
-            v-model.number="form.price"
-            min="1"
-            step="0.01"
-            placeholder="Price"
-            class="w-full border p-2 rounded"
-          />
+          <input type="number" v-model.number="form.price" placeholder="Price" class="w-full border p-2 rounded" />
           <p v-if="priceError" class="text-red-600 text-sm">
             Price must be greater than 0
           </p>
 
           <!-- STOCK -->
-          <input
-            type="number"
-            v-model.number="form.stock"
-            min="1"
-            step="1"
-            placeholder="Stock"
-            class="w-full border p-2 rounded"
-          />
+          <input type="number" v-model.number="form.stock" placeholder="Stock" class="w-full border p-2 rounded" />
           <p v-if="stockError" class="text-red-600 text-sm">
             Stock must be greater than 0
           </p>
         </div>
 
         <div class="flex justify-end gap-3 mt-4">
-          <button @click="closeModal" class="border px-4 py-2 rounded">
-            Cancel
-          </button>
-
+          <button @click="closeModal" class="border px-4 py-2 rounded">Cancel</button>
           <button
             @click="saveProduct"
             :disabled="!isFormValid"
@@ -158,19 +125,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
-
-import { useBrand } from "@/stores/brands";
+import { useProduct } from '@/stores/products'
+import { useBrand } from '@/stores/brands'
 import { useCategory } from '@/stores/categories'
 
+const productStore = useProduct()
 const brandStore = useBrand()
 const categoryStore = useCategory()
 
-
-const API_URL = 'http://localhost:3000/api/products'
-
-/* ================= STATE ================= */
-const products = ref([])
 const search = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -182,119 +144,70 @@ const form = ref({
   id: null,
   name: '',
   description: '',
-  price: 1,
-  stock: 1,
-  categoryId: '',
-  brandId: ''
+  price: null,
+  stock: null,
+  categoryId: null,
+  brandId: null
 })
 
-/* ================= VALIDATION ================= */
-const priceError = computed(() => form.value.price <= 0)
-const stockError = computed(() => form.value.stock <= 0)
+/* VALIDATION */
+const priceError = computed(() => form.value.price !== null && form.value.price <= 0)
+const stockError = computed(() => form.value.stock !== null && form.value.stock <= 0)
 
-const isFormValid = computed(() => {
-  return (
-    form.value.name &&
-    form.value.categoryId &&
-    form.value.price > 0 &&
-    form.value.stock > 0
+const isFormValid = computed(() =>
+  form.value.name &&
+  form.value.categoryId !== null &&
+  form.value.price > 0 &&
+  form.value.stock > 0
+)
+
+/* COMPUTED */
+const filteredProducts = computed(() =>
+  productStore.products.filter(p =>
+    p.name.toLowerCase().includes(search.value.toLowerCase())
   )
-})
+)
 
-/* ================= LOAD ================= */
-const fetchProducts = async () => {
-  const res = await axios.get(API_URL)
-  products.value = res.data.map(p => ({
-    id: p.id,
-    name: p.name,
-    description: p.description,
-    price: p.price,
-    stock: p.stock,
-    brandId: p.brand?.id ?? '',
-    brandName: p.brand?.name ?? '',
-    categoryId: p.category?.id ?? '',
-    categoryName: p.category?.name ?? '',
-    imageUrl: p.images?.[0]?.imageUrl
-      ? `http://localhost:3000${p.images[0].imageUrl}`
-      : ''
-  }))
-}
-
-/* ================= IMAGE ================= */
+/* IMAGE */
 const handleImage = e => {
   imageFile.value = e.target.files[0] || null
-  imagePreview.value = imageFile.value
-    ? URL.createObjectURL(imageFile.value)
-    : null
+  imagePreview.value = imageFile.value ? URL.createObjectURL(imageFile.value) : null
 }
 
-/* ================= SAVE ================= */
+/* CRUD */
 const saveProduct = async () => {
-  if (!isFormValid.value) {
-    alert('Price and stock must be greater than 0')
-    return
+  if (!isFormValid.value) return
+  if (isEditing.value) {
+    await productStore.updateProduct(form.value.id, form.value, imageFile.value)
+  } else {
+    await productStore.createProduct(form.value, imageFile.value)
   }
-
-  const fd = new FormData()
-  fd.append('name', form.value.name)
-  fd.append('description', form.value.description || '')
-  fd.append('price', form.value.price)
-  fd.append('stock', form.value.stock)
-  fd.append('categoryId', form.value.categoryId)
-
-  if (form.value.brandId) fd.append('brandId', form.value.brandId)
-  if (imageFile.value) fd.append('image', imageFile.value)
-
-  try {
-    if (isEditing.value) {
-      await axios.put(`${API_URL}/${form.value.id}`, fd)
-    } else {
-      await axios.post(API_URL, fd)
-    }
-
-    closeModal()
-    await fetchProducts()
-  } catch (err) {
-    console.error('❌ Save Error:', err.response?.data || err)
-    alert(err.response?.data?.message || 'Save failed')
-  }
+  closeModal()
 }
 
-/* ================= EDIT ================= */
 const editProduct = p => {
   isEditing.value = true
-  form.value = {
-    id: p.id,
-    name: p.name,
-    description: p.description,
-    price: p.price,
-    stock: p.stock,
-    categoryId: p.categoryId,
-    brandId: p.brandId
-  }
-  imagePreview.value = p.imageUrl
-  imageFile.value = null
+  form.value = { ...p }
+  imagePreview.value = p.image
   showModal.value = true
 }
 
-/* ================= DELETE ================= */
 const deleteProduct = async p => {
-  if (!confirm('Delete product?')) return
-  await axios.delete(`${API_URL}/${p.id}`)
-  await fetchProducts()
+  if (confirm('Delete product?')) {
+    await productStore.deleteProduct(p.id)
+  }
 }
 
-/* ================= MODAL ================= */
 const openModal = () => {
   isEditing.value = false
   form.value = {
     id: null,
     name: '',
     description: '',
-    price: 1,
-    stock: 1,
-    categoryId: '',
-    brandId: ''
+    price: null,
+    stock: null,
+    categoryId: null,
+    brandId: null
   }
   imageFile.value = null
   imagePreview.value = null
@@ -306,18 +219,9 @@ const closeModal = () => {
   isEditing.value = false
 }
 
-/* ================= SEARCH ================= */
-const filteredProducts = computed(() =>
-  products.value.filter(p =>
-    (p.name || '').toLowerCase().includes(search.value.toLowerCase())
-  )
-)
-
 onMounted(async () => {
-  await fetchProducts()
-  await brandStore.fetchBrands()
+  await productStore.fetchAllProducts()
+  await brandStore.fetchBrands() 
   await categoryStore.fetchCategories()
 })
-
-
 </script>

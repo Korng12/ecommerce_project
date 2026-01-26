@@ -23,11 +23,11 @@ const upload = (folder) => {
   });
 
   const fileFilter = (req, file, cb) => {
-    // Only allow image files
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
+    const allowedTypes = ['image/jpeg', 'image/png']
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true)
     } else {
-      cb(new Error('Only image files are allowed'), false);
+      cb(new Error('Only JPG and PNG images are allowed'), false)
     }
   };
 

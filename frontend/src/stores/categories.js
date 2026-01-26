@@ -1,42 +1,45 @@
+import { defineStore } from 'pinia'
+import getImageUrl from '@/utils/convertImagePath'
 
-import { defineStore } from "pinia";
-import  getImageUrl from "../utils/convertImagePath";
+const API_URL = '/api'
 
-const API_URL = 'http://localhost:3000/api';
-
-export const useCategory=defineStore('categoryStore',{
-  state:()=>({
-    categories:[],
+export const useCategory = defineStore('categories', {
+  state: () => ({
+    categories: [],
     loading: false,
     error: null
   }),
-  getters:{
+
+  getters: {
     getCategoryById: (state) => (id) => {
       return state.categories.find(c => c.id === id)
     },
     totalCategories: (state) => state.categories.length
   },
-  actions:{
-    async fetchAllCategories(){
+
+  actions: {
+    async fetchCategories() {
       this.loading = true
       this.error = null
-      try{
+
+      try {
         const res = await fetch(`${API_URL}/categories`)
-        if(!res.ok){
-          throw new Error('Failed to fetch categories')
-        }
+        if (!res.ok) throw new Error('Failed to fetch categories')
+
         const data = await res.json()
-        this.categories = Array.isArray(data) ? data.map(c=>({
-          id:c.id,
-          name:c.name,
-          description:c.description,
-          image:c.image? getImageUrl(c.image) : ''
-        })) : []
-      }catch(err){
-        console.error('Failed to fetch categories:',err)
+
+        this.categories = Array.isArray(data)
+          ? data.map(c => ({
+              id: c.id,
+              name: c.name,
+              description: c.description || '',
+              image: c.image ? getImageUrl(c.image) : ''
+            }))
+          : []
+      } catch (err) {
+        console.error('Failed to fetch categories:', err)
         this.error = err.message
-        this.categories=[]
-        throw err
+        this.categories = []
       } finally {
         this.loading = false
       }
@@ -47,26 +50,16 @@ export const useCategory=defineStore('categoryStore',{
       this.error = null
 
       try {
-        const options = {
-          method: 'POST'
-        }
+        const options = { method: 'POST' }
 
-        // If FormData (image upload)
         if (categoryData instanceof FormData) {
           options.body = categoryData
-          // ❌ do not set Content-Type
         } else {
-          options.headers = {
-            'Content-Type': 'application/json'
-          }
+          options.headers = { 'Content-Type': 'application/json' }
           options.body = JSON.stringify(categoryData)
         }
 
-        const res = await fetch(
-          `${API_URL}/categories?subdir=categories`,
-          options
-        )
-
+        const res = await fetch(`${API_URL}/categories?subdir=categories`, options)
         if (!res.ok) {
           const error = await res.json()
           throw new Error(error.message || 'Failed to create category')
@@ -74,11 +67,14 @@ export const useCategory=defineStore('categoryStore',{
 
         const newCategory = await res.json()
 
-        // update store state
-        this.categories.push(newCategory)
+        this.categories.push({
+          id: newCategory.id,
+          name: newCategory.name,
+          description: newCategory.description || '',
+          image: newCategory.image ? getImageUrl(newCategory.image) : ''
+        })
 
         return newCategory
-
       } catch (err) {
         console.error('Failed to create category:', err)
         this.error = err.message
@@ -88,39 +84,43 @@ export const useCategory=defineStore('categoryStore',{
       }
     },
 
-
     async updateCategory(id, categoryData) {
       this.loading = true
       this.error = null
-      try {
-        const options = {
-          method: 'PUT'
-        }
 
-        // Handle FormData with file uploads
+      try {
+        const options = { method: 'PUT' }
+
         if (categoryData instanceof FormData) {
           options.body = categoryData
-          // Don't set Content-Type header for FormData, browser will set it with boundary
         } else {
-          options.headers = {
-            'Content-Type': 'application/json'
-          }
+          options.headers = { 'Content-Type': 'application/json' }
           options.body = JSON.stringify(categoryData)
         }
 
-        const res = await fetch(`${API_URL}/categories/${id}?subdir=categories`, options)
-        
+        const res = await fetch(
+          `${API_URL}/categories/${id}?subdir=categories`,
+          options
+        )
+
         if (!res.ok) {
           const error = await res.json()
           throw new Error(error.message || 'Failed to update category')
         }
-        
-        const updatedCategory = await res.json()
+
+        const updated = await res.json()
         const index = this.categories.findIndex(c => c.id === id)
+
         if (index !== -1) {
-          this.categories[index] = updatedCategory
+          this.categories[index] = {
+            id: updated.id,
+            name: updated.name,
+            description: updated.description || '',
+            image: updated.image ? getImageUrl(updated.image) : ''
+          }
         }
-        return updatedCategory
+
+        return updated
       } catch (err) {
         console.error('Failed to update category:', err)
         this.error = err.message
@@ -133,16 +133,17 @@ export const useCategory=defineStore('categoryStore',{
     async deleteCategory(id) {
       this.loading = true
       this.error = null
+
       try {
         const res = await fetch(`${API_URL}/categories/${id}`, {
           method: 'DELETE'
         })
-        
+
         if (!res.ok) {
           const error = await res.json()
           throw new Error(error.message || 'Failed to delete category')
         }
-        
+
         this.categories = this.categories.filter(c => c.id !== id)
         return true
       } catch (err) {
