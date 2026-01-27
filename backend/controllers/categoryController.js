@@ -3,7 +3,7 @@ const Category = db.category;
 const Product = db.product;
 const path = require('path');
 const fs = require('fs');
-
+const ProductImage = db.productImage;
 // ================= GET ALL CATEGORIES =================
 const getAllCategories = async (req, res) => {
   try {
@@ -16,6 +16,13 @@ const getAllCategories = async (req, res) => {
             model: db.brand,
             as: 'brand',
             attributes: ['id', 'name']
+          },
+          {
+            model: ProductImage,
+            as: 'images',
+            required: false,
+            where: { isPrimary: true },
+            attributes: ['id', 'imageUrl']
           }
         ]
       }],

@@ -35,7 +35,7 @@
 
           <!-- Content -->
           <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
-            <h3 class="text-lg md:text-xl font-bold mb-1">{{ category.name }}</h3>
+            <h3 class="text-lg md:text-xl font-bold mb-1">{{ category.name }}{{ category.image }}</h3>
             <p class="text-sm text-gray-200">{{ category.description }}</p>
             <!-- <div class="mt-3 inline-block">
               <span class="text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full group-hover:bg-white/30 transition-colors">

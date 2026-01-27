@@ -67,7 +67,7 @@
               </span>
             </div>
             <span class="ml-2 text-xs text-gray-600 font-medium">
-              {{ product.rating }}/5 | {{ product.totalReviews }} reviews | {{ }} wishLists
+              {{ product.rating }}/5 | {{ product.totalReviews }} reviews | {{ wishlistStore.wishlistCountByProductId}} wishLists
             </span>
           </div>
         </div>
@@ -105,6 +105,7 @@
 import { defineProps, computed } from "vue";
 import { useProduct } from "@/stores/products";
 import { useCart } from "@/stores/carts";
+import { useWishlist } from "@/stores/wishlist";
 
 const props = defineProps({
   product: {
@@ -115,7 +116,7 @@ const props = defineProps({
 
 const productStore = useProduct();
 const cartStore = useCart();
-
+const wishlistStore = useWishlist();
 // Calculate promotional price based on promotion data
 const promotionalPrice = computed(() => {
   if (!props.product.promotion || !props.product.promotionDiscount) return null;

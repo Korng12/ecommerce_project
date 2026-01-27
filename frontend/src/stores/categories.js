@@ -30,7 +30,8 @@ export const useCategory=defineStore('categoryStore',{
           id:c.id,
           name:c.name,
           description:c.description,
-          image:c.image? getImageUrl(c.image) : ''
+          image:c.image? getImageUrl(c.image) : '',
+          products: c.products ? c.products : []
         })) : []
       }catch(err){
         console.error('Failed to fetch categories:',err)

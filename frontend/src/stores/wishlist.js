@@ -12,6 +12,11 @@ export const useWishlist = defineStore("wishlistStore", {
       return state.wishlist.some((item) => item.id === productId);
     },
     wishlistCount: (state) => state.wishlist.length,
+    getters: {
+    wishlistCountByProductId: (state) => (productId) =>
+      state.wishlist.filter(item => item.id === productId).length,
+  }
+
   },
   actions: {
     // Load wishlist from localStorage
@@ -73,5 +78,10 @@ export const useWishlist = defineStore("wishlistStore", {
       this.wishlist = [];
       this.saveToLocalStorage();
     },
+
+    getWishListByProductId(productId){
+      const item = this.wishlist.find(item => item.id === productId);
+      return item.length || 0;
+    }
   },
 });

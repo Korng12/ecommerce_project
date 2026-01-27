@@ -7,23 +7,21 @@ const upload = require("../../middleware/upload"); // function
 router.post(
   "/products",
   upload("/products").single("image"), // ✅ CORRECT
-  productController.createProduct
+  productController.createProduct,
 );
 
 // UPDATE PRODUCT
 router.put(
   "/products/:id",
   upload("/products").single("image"),
-  productController.updateProduct
+  productController.updateProduct,
 );
 
 // DELETE PRODUCT
-router.delete(
-  "/products/:id",
-  productController.deleteProduct
-);
+router.delete("/products/:id", productController.deleteProduct);
 
-// GET
+// GET - IMPORTANT: specific routes must come before parameterized routes
+router.get("/products/low-stock", productController.getLowStockProducts);
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
 
