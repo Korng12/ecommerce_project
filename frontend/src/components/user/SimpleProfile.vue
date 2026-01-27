@@ -252,10 +252,78 @@
               </span>
             </div>
 
-            <div class="space-y-2 mb-4">
-              <div v-for="item in order.orderItems" :key="item.id" class="flex justify-between text-sm">
-                <span class="text-gray-600">{{ item.orderProduct?.name || 'Product' }} × {{ item.quantity }}</span>
-                <span class="font-semibold">${{ formatPrice(item.price * item.quantity) }}</span>
+            <div class="space-y-3 mb-4">
+              <div v-for="item in order.orderItems" :key="item.id" 
+                class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all border border-gray-200">
+                
+                <!-- Product Image -->
+                <div class="flex-shrink-0">
+                  <img 
+                    :src="getOrderProductImage(item.orderProduct)" 
+                    :alt="item.orderProduct?.name || 'Product'"
+                    class="w-16 h-16 object-cover rounded-lg border-2 border-gray-300"
+                    @error="handleProductImageError"
+                  />
+                </div>
+                
+                <!-- Product Details -->
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-semibold text-gray-900 truncate">{{ item.orderProduct?.name || 'Product' }}</h4>
+                  <p class="text-sm text-gray-500">{{ item.orderProduct?.brand || 'Brand' }}</p>
+                  <div class="flex items-center space-x-4 mt-2">
+                    <span class="text-sm text-gray-600">Qty: {{ item.quantity }}</span>
+                    <span class="text-sm font-semibold text-indigo-600">${{ formatPrice(item.price) }} each</span>
+                  </div>
+                  
+                  <!-- Availability Status -->
+                  <div class="mt-2">
+                    <span v-if="getProductAvailability(item.orderProduct?.id)" 
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      In Stock ({{ getProductStock(item.orderProduct?.id) }} available)
+                    </span>
+                    <span v-else 
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                      </svg>
+                      Out of Stock
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Price and Buy Again -->
+                <div class="flex flex-col items-end space-y-2">
+                  <div class="text-right">
+                    <p class="font-bold text-gray-900">${{ formatPrice(item.price * item.quantity) }}</p>
+                  </div>
+                  
+                  <!-- Buy Again Button - Only show if product is available -->
+                  <button 
+                    v-if="getProductAvailability(item.orderProduct?.id)"
+                    @click="buyAgain(item.orderProduct)"
+                    class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center space-x-1"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span>Buy Again</span>
+                  </button>
+                  
+                  <!-- Out of Stock Button -->
+                  <button 
+                    v-else
+                    disabled
+                    class="px-3 py-1.5 bg-gray-300 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed flex items-center space-x-1"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Out of Stock</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -277,12 +345,15 @@ import { useRouter } from 'vue-router'
 import { useOrder } from '@/stores/order'
 import { useCart } from '@/stores/carts'
 import { useProfile } from '@/stores/profile'
+import { useProduct } from '@/stores/products'
+import getImageUrl from '@/utils/convertImagePath'
 
 const isEditing = ref(false)
 const router = useRouter()
 const orderStore = useOrder()
 const cartStore = useCart()
 const profileStore = useProfile()
+const productStore = useProduct()
 
 const user = computed(() => ({
   username: profileStore.user.username,
@@ -301,6 +372,9 @@ const getInitials = (username) =>
 const loadUserData = async () => {
   // Load profile from server
   await profileStore.fetchProfile()
+
+  // Load products to check availability
+  await productStore.fetchAllProducts()
 
   // Load orders and cart
   await Promise.all([
@@ -361,13 +435,78 @@ const updateProfile = async () => {
   }
 }
 
+const handleProductImageError = (event) => {
+  event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zMiA0MEM0MC44MzY2IDQwIDQ4IDMyLjgzNjYgNDggMjRDNDggMTUuMTYzNCA0MC44MzY2IDggMzIgOEMyMy4xNjM0IDggMTYgMTUuMTYzNCAxNiAyNEMxNiAzMi44MzY2IDIzLjE2MzQgNDAgMzIgNDBaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K'
+}
+
 const handleImageError = (event) => {
   event.target.style.display = 'none';
   event.target.parentElement.innerHTML = `
     <div class="w-full h-full flex items-center justify-center text-white text-3xl font-bold bg-gradient-to-br from-indigo-500 to-purple-600">
-      ${getInitials(user.username)}
+      ${getInitials(user.value.username)}
     </div>
   `;
+}
+
+const getOrderProductImage = (orderProduct) => {
+  if (!orderProduct) return '/placeholder.png'
+  
+  // First try to get image from images array (now included from backend)
+  if (orderProduct.images && Array.isArray(orderProduct.images) && orderProduct.images.length > 0) {
+    const primaryImage = orderProduct.images.find(img => img.isPrimary) || orderProduct.images[0]
+    const imagePath = primaryImage.imageUrl || primaryImage.image || primaryImage.url
+    if (imagePath) {
+      return getImageUrl(imagePath)
+    }
+  }
+  
+  // Fallback to direct image field if exists
+  const imagePath = orderProduct.image || orderProduct.imageUrl || orderProduct.primaryImage
+  if (imagePath) {
+    return getImageUrl(imagePath)
+  }
+  
+  // Final fallback
+  return '/placeholder.png'
+}
+
+const getProductAvailability = (productId) => {
+  if (!productId) return false
+  const product = productStore.products.find(p => p.id === productId)
+  return product && product.stock > 0
+}
+
+const getProductStock = (productId) => {
+  if (!productId) return 0
+  const product = productStore.products.find(p => p.id === productId)
+  return product ? product.stock : 0
+}
+
+const buyAgain = async (product) => {
+  if (!product) {
+    alert('Product information not available')
+    return
+  }
+
+  // Check if product is still available
+  if (!getProductAvailability(product.id)) {
+    alert('This product is currently out of stock')
+    return
+  }
+
+  try {
+    // Add product to cart using the correct addToCart signature
+    await cartStore.addToCart(product.id, 1)
+
+    alert(`${product.name} has been added to your cart!`)
+    
+    // Refresh cart to show updated items
+    await cartStore.getCart()
+    
+  } catch (error) {
+    console.error('Failed to add product to cart:', error)
+    alert('Failed to add product to cart. Please try again.')
+  }
 }
 
 onMounted(loadUserData)

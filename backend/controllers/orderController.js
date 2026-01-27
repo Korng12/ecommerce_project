@@ -196,7 +196,18 @@ const getAllOrders = async (req, res) => {
         {
           model: OrderItem,
           as: "orderItems",
-          include: [{ model: Product, as: "orderProduct" }],
+          include: [
+            { 
+              model: Product, 
+              as: "orderProduct",
+              include: [
+                {
+                  model: db.productImage,
+                  as: "images"
+                }
+              ]
+            }
+          ],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -218,7 +229,18 @@ const getAllOrdersAdmin = async (req, res) => {
         {
           model: OrderItem,
           as: "orderItems",
-          include: [{ model: Product, as: "orderProduct" }],
+          include: [
+            { 
+              model: Product, 
+              as: "orderProduct",
+              include: [
+                {
+                  model: db.productImage,
+                  as: "images"
+                }
+              ]
+            }
+          ],
         },
         {
           model: db.user,
