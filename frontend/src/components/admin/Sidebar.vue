@@ -10,10 +10,14 @@
     </div>
 
     <nav class="flex-1 p-4">
-      <button v-for="item in menuItems" :key="item.id" @click="$emit('change-tab', item.id)" :class="['w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all',
-        activeTab === item.id
-          ? 'bg-blue-600 text-white shadow-lg'
-          : 'hover:bg-slate-700 text-gray-300']">
+      <button 
+        v-for="item in menuItems" 
+        :key="item.id" 
+        @click="navigateTo(item.id)"
+        :class="['w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all',
+          isActive(item.id)
+            ? 'bg-blue-600 text-white shadow-lg'
+            : 'hover:bg-slate-700 text-gray-300']">
         <component :is="item.icon" :size="22" />
         <span v-if="sidebarOpen" class="font-medium">{{ item.label }}</span>
       </button>
@@ -29,38 +33,44 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, markRaw } from 'vue'
+import { defineProps, defineEmits, markRaw, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { 
-  LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder,Bell, Image
+  LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X, Folder, Bell, Image
 } from 'lucide-vue-next'
+
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore();
 
-
-
 defineProps({
-  sidebarOpen: Boolean,
-  activeTab: String
+  sidebarOpen: Boolean
 })
 
-defineEmits(['toggle-sidebar', 'change-tab'])
-
+defineEmits(['toggle-sidebar'])
 
 // Menu items configuration
 const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
-  { id: 'users', label: 'Users', icon: markRaw(Users) },
-  { id: 'categories', label: 'Categories', icon: markRaw(Folder) },
-  { id: 'banners', label: 'Banners', icon: markRaw(Image) },
-  { id: 'products', label: 'Products', icon: markRaw(Package) },
-  { id: 'promotions', label: 'Promotions', icon: markRaw(Package) },
-  { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
-  { id: 'notifications', label: 'Notifications', icon: markRaw(Bell) },
-  { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },
-  { id: 'settings', label: 'Settings', icon: markRaw(Settings) },
+  { id: 'adminDashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
+  { id: 'adminUsers', label: 'Users', icon: markRaw(Users) },
+  { id: 'adminCategories', label: 'Categories', icon: markRaw(Folder) },
+  { id: 'adminBanners', label: 'Banners', icon: markRaw(Image) },
+  { id: 'adminProducts', label: 'Products', icon: markRaw(Package) },
+  { id: 'adminPromotions', label: 'Promotions', icon: markRaw(Package) },
+  { id: 'adminOrders', label: 'Orders', icon: markRaw(ShoppingCart) },
+  { id: 'adminNotifications', label: 'Notifications', icon: markRaw(Bell) },
+  { id: 'adminAnalytics', label: 'Analytics', icon: markRaw(BarChart3) },
+  { id: 'adminSettings', label: 'Settings', icon: markRaw(Settings) },
 ]
+
+const navigateTo = (routeName) => {
+  router.push({ name: routeName })
+}
+
+const isActive = (routeName) => {
+  return route.name === routeName
+}
 
 const handleLogout = async () => {
   await authStore.logout();

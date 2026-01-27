@@ -58,11 +58,6 @@ const routes = [
     meta: { requiresAuth: true, requiredRole: ROLES.ADMIN },
     children: [
       {
-        path: '',
-        name: 'adminDashboard',
-        component: () => import("@/components/admin/DashboardTab.vue"),
-      },
-      {
         path: 'dashboard',
         name: 'adminDashboard',
         component: () => import("@/components/admin/DashboardTab.vue"),
@@ -87,11 +82,16 @@ const routes = [
         name: 'adminOrders',
         component: () => import("@/components/admin/OrdersTab.vue"),
       },
-      // {
-      //   path: 'promotions',
-      //   name: 'adminPromotions',
-      //   component: () => import("@/components/admin/"),
-      // },
+      {
+        path: 'promotions',
+        name: 'adminPromotions',
+        component: () => import("@/components/admin/Promotions.vue"),
+      },
+      {
+        path: 'banners',
+        name: 'adminBanners',
+        component: () => import("@/components/admin/Banner.vue"),
+      },
       {
         path: 'notifications',
         name: 'adminNotifications',

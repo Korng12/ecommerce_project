@@ -30,13 +30,13 @@ const unreadCount = computed(
   () => notifications.value.filter((n) => !n.read).length,
 );
 
-// const toggleNotifications = () => {
-//   // placeholder - child pages or TopNav may manage actual notification actions
-// };
+const toggleNotifications = () => {
+  // placeholder - child pages or TopNav may manage actual notification actions
+};
 
-// onMounted(() => {
-//   // optionally fetch notifications
-// });
+onMounted(() => {
+  // optionally fetch notifications
+});
 
-// onBeforeUnmount(() => {});
+onBeforeUnmount(() => {});
 </script>

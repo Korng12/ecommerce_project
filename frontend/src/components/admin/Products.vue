@@ -20,9 +20,11 @@
               {{ category.name }}
             </option>
           </select>
+          
           <select v-model="selectedBrand" class="rounded-xl border-gray-300">
             <option value="">All Brands</option>
             <option v-for="brand in brandStore.brands" :key="brand.id" :value="brand.name">
+
               {{ brand.name }}
             </option>
           </select>
@@ -97,18 +99,17 @@
           <input type="file" accept="image/*" @change="handleImage" />
 
           <img v-if="imagePreview" :src="imagePreview" class="w-24 h-24 rounded object-cover" />
-
           <!-- BRAND -->
-          <select v-model.number="form.brandId" class="w-full border p-2 rounded">
-            <option :value="null">Select brand</option>
+          <select v-model="form.brandId" class="w-full border p-2 rounded">
+            <option value="">Select brand</option>
             <option v-for="b in brandStore.brands" :key="b.id" :value="b.id">
               {{ b.name }}
             </option>
           </select>
 
-          <!-- CATEGORY (FIXED) -->
-          <select v-model.number="form.categoryId" class="w-full border p-2 rounded">
-            <option :value="null">Select category</option>
+          <!-- CATEGORY -->
+          <select v-model="form.categoryId" class="w-full border p-2 rounded">
+            <option value="">Select category</option>
             <option v-for="c in categoryStore.categories" :key="c.id" :value="c.id">
               {{ c.name }}
             </option>
@@ -169,9 +170,10 @@ const form = ref({
   description: '',
   price: null,
   stock: null,
-  categoryId: null,
-  brandId: null
+  categoryId: '',
+  brandId: ''
 })
+
 
 /* ================= VALIDATION ================= */
 const priceError = computed(
@@ -308,7 +310,7 @@ onMounted(async () => {
       await productStore.fetchAllProducts()
     } catch(e){/* silent */} 
   }
-  if(!brandStore.brands.length){
+  if(!brandStore.brands?.length){
     try{
       await brandStore.fetchAllBrands()
     } catch(e){/* silent */} 

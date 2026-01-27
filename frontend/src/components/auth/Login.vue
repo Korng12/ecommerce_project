@@ -95,7 +95,7 @@ const handleSubmit = async () => {
     const authStore = useAuthStore();
     await authStore.login(formData.email, formData.password);
     if(authStore.user.roleId===ROLES.ADMIN){
-      router.push({name:'/adminView/adminDashboard'});
+      router.push({name:'adminDashboard'});
       return;
     }
     router.push({name:'home'});

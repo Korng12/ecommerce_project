@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import getImageUrl from '@/utils/convertImagePath'
 
-const API_URL = '/api'
+const API_URL = '/api/categories'
 
 export const useCategory = defineStore('categories', {
   state: () => ({
@@ -11,19 +11,20 @@ export const useCategory = defineStore('categories', {
   }),
 
   getters: {
-    getCategoryById: (state) => (id) => {
-      return state.categories.find(c => c.id === id)
-    },
+    getCategoryById: (state) => (id) =>
+      state.categories.find(c => c.id === id),
+
     totalCategories: (state) => state.categories.length
   },
 
   actions: {
-    async fetchCategories() {
+    /* ================= FETCH ================= */
+    async fetchAllCategories() {
       this.loading = true
       this.error = null
 
       try {
-        const res = await fetch(`${API_URL}/categories`)
+        const res = await fetch(API_URL)
         if (!res.ok) throw new Error('Failed to fetch categories')
 
         const data = await res.json()
@@ -37,14 +38,15 @@ export const useCategory = defineStore('categories', {
             }))
           : []
       } catch (err) {
-        console.error('Failed to fetch categories:', err)
-        this.error = err.message
+        console.error('❌ Failed to fetch categories:', err)
         this.categories = []
+        this.error = err.message
       } finally {
         this.loading = false
       }
     },
 
+    /* ================= CREATE ================= */
     async createCategory(categoryData) {
       this.loading = true
       this.error = null
@@ -59,11 +61,8 @@ export const useCategory = defineStore('categories', {
           options.body = JSON.stringify(categoryData)
         }
 
-        const res = await fetch(`${API_URL}/categories?subdir=categories`, options)
-        if (!res.ok) {
-          const error = await res.json()
-          throw new Error(error.message || 'Failed to create category')
-        }
+        const res = await fetch(`${API_URL}?subdir=categories`, options)
+        if (!res.ok) throw new Error('Failed to create category')
 
         const newCategory = await res.json()
 
@@ -76,14 +75,14 @@ export const useCategory = defineStore('categories', {
 
         return newCategory
       } catch (err) {
-        console.error('Failed to create category:', err)
+        console.error('❌ Failed to create category:', err)
         this.error = err.message
-        throw err
       } finally {
         this.loading = false
       }
     },
 
+    /* ================= UPDATE ================= */
     async updateCategory(id, categoryData) {
       this.loading = true
       this.error = null
@@ -98,19 +97,12 @@ export const useCategory = defineStore('categories', {
           options.body = JSON.stringify(categoryData)
         }
 
-        const res = await fetch(
-          `${API_URL}/categories/${id}?subdir=categories`,
-          options
-        )
-
-        if (!res.ok) {
-          const error = await res.json()
-          throw new Error(error.message || 'Failed to update category')
-        }
+        const res = await fetch(`${API_URL}/${id}?subdir=categories`, options)
+        if (!res.ok) throw new Error('Failed to update category')
 
         const updated = await res.json()
-        const index = this.categories.findIndex(c => c.id === id)
 
+        const index = this.categories.findIndex(c => c.id === id)
         if (index !== -1) {
           this.categories[index] = {
             id: updated.id,
@@ -122,34 +114,27 @@ export const useCategory = defineStore('categories', {
 
         return updated
       } catch (err) {
-        console.error('Failed to update category:', err)
+        console.error('❌ Failed to update category:', err)
         this.error = err.message
-        throw err
       } finally {
         this.loading = false
       }
     },
 
+    /* ================= DELETE ================= */
     async deleteCategory(id) {
       this.loading = true
       this.error = null
 
       try {
-        const res = await fetch(`${API_URL}/categories/${id}`, {
-          method: 'DELETE'
-        })
-
-        if (!res.ok) {
-          const error = await res.json()
-          throw new Error(error.message || 'Failed to delete category')
-        }
+        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' })
+        if (!res.ok) throw new Error('Failed to delete category')
 
         this.categories = this.categories.filter(c => c.id !== id)
         return true
       } catch (err) {
-        console.error('Failed to delete category:', err)
+        console.error('❌ Failed to delete category:', err)
         this.error = err.message
-        throw err
       } finally {
         this.loading = false
       }
