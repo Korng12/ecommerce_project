@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold">Product Inventory</h1>
       <p class="text-gray-600">Manage products and stock</p>
     </div>
-
+    
     <!-- Action -->
     <div class="flex justify-between mb-4">
       <input
@@ -13,12 +13,32 @@
         placeholder="Search product..."
         class="border px-4 py-2 rounded w-1/3"
       />
+       <div class="flex gap-2 text-gray-700">
+          <select v-model="selectedCategory" class="rounded-xl border-gray-300">
+            <option value="default">All Categories</option>
+            <option v-for="category in categoryStore.categories" :key="category.id" :value="category.name">
+              {{ category.name }}
+            </option>
+          </select>
+          <select v-model="selectedBrand" class="rounded-xl border-gray-300">
+            <option value="">All Brands</option>
+            <option v-for="brand in brandStore.brands" :key="brand.id" :value="brand.name">
+              {{ brand.name }}
+            </option>
+          </select>
+          <select v-model="sortBy" class="rounded-xl border-gray-300">
+            <option value="default">Sort by: Featured</option>
+            <option value="low-high">Price: Low to High</option>
+            <option value="high-low">Price: High to Low</option>
+          </select>
+        </div>
       <button
         @click="openModal"
         class="bg-blue-600 text-white px-4 py-2 rounded"
       >
         + Add Product
       </button>
+       
     </div>
 
     <!-- Table -->
@@ -40,14 +60,14 @@
         <tr v-for="p in filteredProducts" :key="p.id" class="border-t">
           <td class="p-3">
             <img
-              :src="p.imageUrl || 'https://via.placeholder.com/50'"
+              :src="p.image || 'https://via.placeholder.com/50'"
               class="w-12 h-12 rounded object-cover"
             />
           </td>
           <td class="p-3">{{ p.name }}</td>
           <td class="p-3">{{ p.description || '-' }}</td>
-          <td class="p-3">{{ p.brandName || '-' }}</td>
-          <td class="p-3">{{ p.categoryName || '-' }}</td>
+          <td class="p-3">{{ p.brand || '-' }}</td>
+          <td class="p-3">{{ p.category || '-' }}</td>
           <td class="p-3">${{ p.price }}</td>
           <td class="p-3">{{ p.stock }}</td>
           <td class="p-3 space-x-2">
@@ -85,18 +105,6 @@
             :src="imagePreview"
             class="w-24 h-24 rounded object-cover"
           />
-
-          <select v-model="form.brandId" class="w-full border p-2 rounded">
-            <option value="">Select brand</option>
-            <option
-              v-for="brand in brandStore.brands"
-              :key="brand.id"
-              :value="brand.id"
-            >
-              {{ brand.name }}
-            </option>
-          </select>
-
 
           <select v-model="form.categoryId" class="w-full border p-2 rounded">
             <option disabled value="">Select category</option>
@@ -158,23 +166,26 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { useProduct } from '@/stores/products'
 
 import { useBrand } from "@/stores/brands";
 import { useCategory } from '@/stores/categories'
 
 const brandStore = useBrand()
 const categoryStore = useCategory()
+const productStore = useProduct()
 
 
-const API_URL = 'http://localhost:3000/api/products'
+// const API_URL = 'http://localhost:3000/api/products'
 
 /* ================= STATE ================= */
-const products = ref([])
+// const products = ref([])
 const search = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
-
+const sortBy = ref('default');
+const selectedBrand = ref('');
+const selectedCategory = ref('default');
 const imageFile = ref(null)
 const imagePreview = ref(null)
 
@@ -201,24 +212,6 @@ const isFormValid = computed(() => {
   )
 })
 
-/* ================= LOAD ================= */
-const fetchProducts = async () => {
-  const res = await axios.get(API_URL)
-  products.value = res.data.map(p => ({
-    id: p.id,
-    name: p.name,
-    description: p.description,
-    price: p.price,
-    stock: p.stock,
-    brandId: p.brand?.id ?? '',
-    brandName: p.brand?.name ?? '',
-    categoryId: p.category?.id ?? '',
-    categoryName: p.category?.name ?? '',
-    imageUrl: p.images?.[0]?.imageUrl
-      ? `http://localhost:3000${p.images[0].imageUrl}`
-      : ''
-  }))
-}
 
 /* ================= IMAGE ================= */
 const handleImage = e => {
@@ -247,13 +240,12 @@ const saveProduct = async () => {
 
   try {
     if (isEditing.value) {
-      await axios.put(`${API_URL}/${form.value.id}`, fd)
+      await productStore.updateProduct(form.value.id, fd)
     } else {
-      await axios.post(API_URL, fd)
+      await productStore.addProduct(fd) 
     }
 
     closeModal()
-    await fetchProducts()
   } catch (err) {
     console.error('❌ Save Error:', err.response?.data || err)
     alert(err.response?.data?.message || 'Save failed')
@@ -280,8 +272,7 @@ const editProduct = p => {
 /* ================= DELETE ================= */
 const deleteProduct = async p => {
   if (!confirm('Delete product?')) return
-  await axios.delete(`${API_URL}/${p.id}`)
-  await fetchProducts()
+  productStore.deleteProduct(p.id)
 }
 
 /* ================= MODAL ================= */
@@ -307,16 +298,42 @@ const closeModal = () => {
 }
 
 /* ================= SEARCH ================= */
-const filteredProducts = computed(() =>
-  products.value.filter(p =>
-    (p.name || '').toLowerCase().includes(search.value.toLowerCase())
+const filteredProducts = computed(() =>{
+  let products=[...productStore.products];
+  if(selectedBrand.value){
+    products = products.filter(p=>p.brand.toLowerCase()===selectedBrand.value.toLowerCase())
+  }
+  if(sortBy.value==='low-high'){
+    products.sort((a,b)=>a.price - b.price)
+  } else if(sortBy.value==='high-low'){
+    products.sort((a,b)=>b.price - a.price) 
+  }
+  if(selectedCategory.value !=='default'){
+    products = products.filter(p=>p.category.toLowerCase()===selectedCategory.value.toLowerCase())
+  }
+  return products.filter(p =>
+    p.name.toLowerCase().includes(search.value.trim().toLowerCase())  
+
   )
-)
+})
 
 onMounted(async () => {
-  await fetchProducts()
-  await brandStore.fetchBrands()
-  await categoryStore.fetchCategories()
+  if(!productStore.products.length){
+    try{
+      await productStore.fetchAllProducts()
+    } catch(e){/* silent */} 
+  }
+  if(!brandStore.brands.length){
+    try{
+      await brandStore.fetchAllBrands()
+    } catch(e){/* silent */} 
+  }
+  if(!categoryStore.categories.length){
+    try{
+      await categoryStore.fetchAllCategories()
+    } catch(e){/* silent */} 
+  }
+  
 })
 
 

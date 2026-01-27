@@ -20,11 +20,13 @@ const brandsRoutes = require('./routes/api/brands');
 const reviewRoutes = require('./routes/reviewRoutes');
 const profileRoutes = require('./routes/profileRoutes')
 const statisticsRoutes = require('./routes/statisticsRoutes')
+const promotionsRoutes = require('./routes/api/promotions');
 // Serve static files for images
 app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
 app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
 
 app.use("/uploads/categories", express.static(path.join(__dirname, "uploads","categories")));
+app.use("/categories", express.static(path.join(__dirname, "uploads","categories")));
 
 app.use(cookieParser());
 app.use(
@@ -67,6 +69,7 @@ app.use("/api", brandsRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
+app.use("/api", promotionsRoutes);
 app.use("/api", webhookRouter.apiRoutes); // Payment routes BEFORE analytics
 app.use("/api", analyticsRoutes);
 app.use(

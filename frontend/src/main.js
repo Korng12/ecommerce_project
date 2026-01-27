@@ -17,11 +17,17 @@ axios.defaults.withCredentials = true
 import { faUser, faHome, faEnvelope,faSearch,faShoppingCart,faXmark,faLocation,faPhone} from '@fortawesome/free-solid-svg-icons'
 import { faFacebook,faInstagram,faTiktok,faXTwitter } from '@fortawesome/free-brands-svg-icons';
 import { Chart, registerables } from 'chart.js'
+import { useWishlist } from './stores/wishlist'
 
 Chart.register(...registerables)
 library.add(faUser, faHome, faEnvelope,faSearch,faShoppingCart,faFacebook,faInstagram,faTiktok,faXTwitter,faXmark)
 const app = createApp(App)
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(router)
 app.mount('#app')
+
+// Load wishlist from localStorage after app is mounted
+const wishlistStore = useWishlist()
+wishlistStore.loadFromLocalStorage()

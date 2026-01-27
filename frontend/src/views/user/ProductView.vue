@@ -112,15 +112,16 @@
           </select>
         </div>
 
-        <!-- Add to Cart -->
         <div class="flex items-center gap-4">
+          <!-- Add to Cart -->
           <button @click="handleAddToCart" :disabled="cartStore.loading || product.stock === 0"
-            class="mt-4 px-6 py-3 rounded-xl shadow-lg transition transform active:scale-95"
-            :class="product.stock === 0
+            class="mt-4 px-6 py-3 rounded-xl shadow-lg transition transform active:scale-95" :class="product.stock === 0
               ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
               : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'">
             {{ product.stock === 0 ? 'Out of Stock' : (cartStore.loading ? 'Adding...' : 'Add to Cart') }}
           </button>
+
+          <!-- Buy Now -->
           <RouterLink :to="{ name: 'checkoutView' }">
             <button @click="checkout" :disabled="cartStore.loading || product.stock === 0"
               class="mt-4 px-6 py-3 rounded-xl shadow-lg transition transform active:scale-95"
@@ -130,7 +131,17 @@
               Buy Now
             </button>
           </RouterLink>
+
+          <!-- Heart icon -->
+          <button 
+            @click="wishlistStore.toggleWishlist(product)"
+            class="mt-4 w-12 h-12 flex items-center justify-center border rounded-full shadow transition hover:bg-gray-200 active:scale-95"
+            :class="wishlistStore.isInWishlist(product.id) ? 'bg-red-50 border-red-300' : ''">
+            <i class="pi text-lg transition-colors" 
+               :class="wishlistStore.isInWishlist(product.id) ? 'pi-heart-fill text-red-500' : 'pi-heart text-gray-600'"></i>
+          </button>
         </div>
+
 
         <!-- Error Message -->
         <p v-if="cartStore.error" class="text-red-600 text-sm">{{ cartStore.error }}</p>
@@ -166,11 +177,13 @@ import { useCart } from '@/stores/carts'
 import { RouterLink } from 'vue-router'
 import ProductTab from '@/components/product/ProductTab.vue'
 import { useReview } from '@/stores/review'
+import { useWishlist } from '@/stores/wishlist'
 
 const reviewStore = useReview()
 const authStore = useAuthStore()
 const cartStore = useCart()
 const productStore = useProduct()
+const wishlistStore = useWishlist()
 const route = useRoute()
 
 const activeTab = ref('overview')

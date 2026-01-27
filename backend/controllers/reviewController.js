@@ -1,9 +1,9 @@
 const db = require("../models/index.js");
 const { Op } = require("sequelize");
+const sequelize = db.sequelize;
 const Review = db.review;
 const Product = db.product;
 const User = db.user;
-const sequelize = db.sequelize;
 
 /* ================= GET REVIEWS FOR PRODUCT ================= */
 const getProductReviews = async (req, res) => {

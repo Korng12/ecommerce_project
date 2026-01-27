@@ -19,7 +19,7 @@ const routes = [
       {
         path: "contactus",
         name: "contactUsView",
-        
+
         component: () => import("@/views/ContactUsView.vue"),
       },
       {
@@ -32,18 +32,20 @@ const routes = [
         path: "login",
         name: "login",
         // component: () => import("@/views/LoginView.vue"),
-        component:()=> import("@/components/auth/Login.vue"),
+        component: () => import("@/components/auth/Login.vue"),
       },
     ],
   },
   {
     path: "/app",
     component: () => import("@/layouts/MainLayout.vue"),
-    
+
     meta: { requiresAuth: true, ROLES: [ROLES.USER, ROLES.ADMIN] },
     children: [
       {
-        path: '', name: "home",component: () => import("@/views/user/HomePage.vue"), 
+        path: "",
+        name: "home",
+        component: () => import("@/views/user/HomePage.vue"),
       },
       {
         path: "category/:catName",
@@ -69,6 +71,10 @@ const routes = [
         name: "adminView",
         component: () => import("@/views/admin/adminView.vue"),
       },
+      // {
+      //   path:"promotions",
+      //   name:""
+      // }
     ],
   },
   {
@@ -83,10 +89,16 @@ const routes = [
     meta: { requiresAuth: true, requiredRole: ROLES.USER },
   },
   {
+    name: "wishlist",
+    path: "/wishlist",
+    component: () => import("@/views/user/WishlistView.vue"),
+    meta: { requiresAuth: true, requiredRole: ROLES.USER },
+  },
+  {
     name: "checkoutView",
     path: "/checkoutView",
     component: () => import("@/views/user/CheckoutView.vue"),
-    meta: { requiresAuth: true, requiredRole: ROLES.USER},
+    meta: { requiresAuth: true, requiredRole: ROLES.USER },
   },
   {
     name: "paymentSuccess",

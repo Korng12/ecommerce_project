@@ -148,7 +148,7 @@ const getAllProducts = async (req, res) => {
       })
     );
 
-    res.json(result);
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -197,7 +197,7 @@ const getProductById = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(product);
+    res.status(200).json(product);
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({ message: "Server error" });

@@ -36,7 +36,7 @@ import {
   LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder,Bell
 } from 'lucide-vue-next'
 
-import { useRouter } from 'vue-router'
+
 const router = useRouter()
 const authStore = useAuthStore();
 

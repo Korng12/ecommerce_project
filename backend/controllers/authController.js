@@ -6,10 +6,6 @@ const User = db.user;
 // console.log(db); // Check your terminal to see the keys!
 // console.log('-------------------');
 
-if (!User) {
-  console.error('ERROR: User model not found in db object');
-}
-
 // ================= REGISTER =================
 const register = async (req, res) => {
   try {
