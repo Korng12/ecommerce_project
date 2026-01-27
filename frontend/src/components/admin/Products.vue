@@ -129,17 +129,19 @@ import { useProduct } from '@/stores/products'
 import { useBrand } from '@/stores/brands'
 import { useCategory } from '@/stores/categories'
 
+/* ================= STORES ================= */
 const productStore = useProduct()
 const brandStore = useBrand()
 const categoryStore = useCategory()
 
+/* ================= UI STATE ================= */
 const search = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
-
 const imageFile = ref(null)
 const imagePreview = ref(null)
 
+/* ================= FORM ================= */
 const form = ref({
   id: null,
   name: '',
@@ -150,9 +152,13 @@ const form = ref({
   brandId: null
 })
 
-/* VALIDATION */
-const priceError = computed(() => form.value.price !== null && form.value.price <= 0)
-const stockError = computed(() => form.value.stock !== null && form.value.stock <= 0)
+/* ================= VALIDATION ================= */
+const priceError = computed(
+  () => form.value.price !== null && form.value.price <= 0
+)
+const stockError = computed(
+  () => form.value.stock !== null && form.value.stock <= 0
+)
 
 const isFormValid = computed(() =>
   form.value.name &&
@@ -161,43 +167,73 @@ const isFormValid = computed(() =>
   form.value.stock > 0
 )
 
-/* COMPUTED */
+/* ================= COMPUTED ================= */
 const filteredProducts = computed(() =>
   productStore.products.filter(p =>
     p.name.toLowerCase().includes(search.value.toLowerCase())
   )
 )
 
-/* IMAGE */
-const handleImage = e => {
-  imageFile.value = e.target.files[0] || null
-  imagePreview.value = imageFile.value ? URL.createObjectURL(imageFile.value) : null
+/* ================= IMAGE ================= */
+const handleImage = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  imageFile.value = file
+  imagePreview.value = URL.createObjectURL(file)
 }
 
-/* CRUD */
+/* ================= CRUD ================= */
 const saveProduct = async () => {
   if (!isFormValid.value) return
-  if (isEditing.value) {
-    await productStore.updateProduct(form.value.id, form.value, imageFile.value)
-  } else {
-    await productStore.createProduct(form.value, imageFile.value)
+
+  try {
+    if (isEditing.value) {
+      await productStore.updateProduct(
+        form.value.id,
+        form.value,
+        imageFile.value
+      )
+    } else {
+      await productStore.createProduct(
+        form.value,
+        imageFile.value
+      )
+    }
+    closeModal()
+  } catch (err) {
+    alert(productStore.error || 'Action failed')
   }
-  closeModal()
 }
 
-const editProduct = p => {
+const editProduct = (p) => {
   isEditing.value = true
-  form.value = { ...p }
+
+  // ✅ MAP CORRECT FIELDS
+  form.value = {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: p.price,
+    stock: p.stock,
+    categoryId: p.categoryId,
+    brandId: p.brandId
+  }
+
   imagePreview.value = p.image
+  imageFile.value = null
   showModal.value = true
 }
 
-const deleteProduct = async p => {
-  if (confirm('Delete product?')) {
+const deleteProduct = async (p) => {
+  if (!confirm('Delete product?')) return
+  try {
     await productStore.deleteProduct(p.id)
+  } catch (err) {
+    alert(productStore.error || 'Delete failed')
   }
 }
 
+/* ================= MODAL ================= */
 const openModal = () => {
   isEditing.value = false
   form.value = {
@@ -219,9 +255,10 @@ const closeModal = () => {
   isEditing.value = false
 }
 
+/* ================= LOAD ================= */
 onMounted(async () => {
   await productStore.fetchAllProducts()
-  await brandStore.fetchBrands() 
+  await brandStore.fetchBrands()
   await categoryStore.fetchCategories()
 })
 </script>

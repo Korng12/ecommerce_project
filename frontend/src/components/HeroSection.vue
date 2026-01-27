@@ -7,7 +7,6 @@
 
       <!-- TEXT -->
       <div class="space-y-6">
-
         <!-- Typing Animation -->
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
           <span ref="typingText"></span>
@@ -17,11 +16,8 @@
           {{ currentBanner.title }}
         </p>
 
-        <!-- BUTTON -->
-        <router-link
-          v-if="currentBanner.link"
-          :to="currentBanner.link"
-        >
+        <!-- BUTTON (SAFE DEFAULT LINK) -->
+        <router-link :to="currentBanner.link || '/products'">
           <button
             class="mt-4 px-8 py-3 text-lg bg-blue-600 text-white rounded-xl
                    hover:scale-105 transition-all duration-300 animate-btn-glow"
@@ -33,11 +29,15 @@
 
       <!-- IMAGE -->
       <div class="relative flex justify-center items-center">
-        <div class="absolute w-[450px] h-[450px] bg-blue-300 blur-[140px] opacity-40"></div>
+        <div
+          class="absolute w-[450px] h-[450px] bg-blue-300 blur-[140px] opacity-40"
+        ></div>
 
         <img
+          v-if="currentBanner.image_url"
           :src="`http://localhost:3000/uploads/banners/${currentBanner.image_url}`"
           class="relative w-full max-w-xl rounded-2xl shadow-lg object-cover float-anim"
+          alt="Banner image"
         />
       </div>
 
@@ -46,49 +46,61 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useBannerStore } from '@/stores/banners'
 
+/* ================= STORE ================= */
 const bannerStore = useBannerStore()
+
+/* ================= STATE ================= */
 const typingText = ref(null)
 const currentIndex = ref(0)
 
+/* ================= FETCH DATA ================= */
 onMounted(async () => {
   await bannerStore.fetchBanners()
-  startTyping()
 })
 
+/* ================= COMPUTED ================= */
 const activeBanners = computed(() =>
-  bannerStore.activeBanners.sort((a, b) => a.position - b.position)
+  bannerStore.activeBanners
+    .slice()
+    .sort((a, b) => a.position - b.position)
 )
 
 const currentBanner = computed(() =>
   activeBanners.value[currentIndex.value]
 )
 
-// animate typing effect
-const startTyping = () => {
-  if (!currentBanner.value) return
+/* ================= TYPING EFFECT ================= */
+const startTyping = async () => {
+  await nextTick()
+  if (!typingText.value) return
 
-  let index = 0
   const text = 'Welcome to Our Store'
+  let i = 0
   typingText.value.textContent = ''
 
   const type = () => {
-    if (index < text.length) {
-      typingText.value.textContent += text[index++]
+    if (i < text.length && typingText.value) {
+      typingText.value.textContent += text[i++]
       setTimeout(type, 60)
     }
   }
+
   type()
 }
 
-// Auto rotate banner
+/* Run typing when banner changes */
+watch(currentBanner, (banner) => {
+  if (banner) startTyping()
+})
+
+/* ================= AUTO ROTATE ================= */
 setInterval(() => {
   if (activeBanners.value.length > 1) {
     currentIndex.value =
       (currentIndex.value + 1) % activeBanners.value.length
-    startTyping()
   }
 }, 6000)
 </script>
