@@ -24,11 +24,16 @@ const bannerRoutes = require('./routes/api/banners');
 app.use('/api/banners', bannerRoutes);
 
 // Serve static files for images
-app.use("/categories", express.static(path.join(__dirname, "public", "images", "categories")));
-app.use("/images/products", express.static(path.join(__dirname, "public", "images", "products")));
+// app.use("/categories", express.static(path.join(__dirname, "public", "images", "categories")));
+// app.use("/images/products", express.static(path.join(__dirname, "public", "images", "products")));
 
 app.use("/categories", express.static(path.join(__dirname, "uploads", "categories")));
 app.use("/uploads/products", express.static(path.join(__dirname, "uploads", "products")));
+const reviewRoutes = require('./routes/reviewRoutes');
+const promotionsRoutes = require('./routes/api/promotions');
+// Serve static files for images
+app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
+app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
 
 
 app.use(cookieParser());
@@ -84,8 +89,10 @@ app.use('/protected', verifyJwt, (req, res) => {
 app.use("/api", productsRoutes);
 app.use("/api", categoriesRoutes);
 app.use("/api", brandsRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
+app.use("/api", promotionsRoutes);
 app.use("/api", webhookRouter.apiRoutes); // Payment routes BEFORE analytics
 app.use("/api", analyticsRoutes);
 app.use(

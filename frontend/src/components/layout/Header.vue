@@ -82,24 +82,71 @@
 
     <!-- Search Dropdown Expands Header -->
     <transition name="fade-slide">
-      <div v-if="searchOpen" class="w-full bg-white border-t border-gray-200 shadow-inner px-6 lg:px-16 py-3">
-        <div class="max-w-7xl mx-auto flex items-center gap-3">
-          <input v-model="searchQuery" type="text" placeholder="Search products..."
-            class="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            autofocus />
-          <button @click="closeSearch" class="p-2 text-gray-500 hover:text-gray-700 transition">
-            <font-awesome-icon icon="xmark" />
-          </button>
-        </div>
+      <div v-if="searchOpen" class="w-full bg-white border-t border-gray-200 shadow-inner px-6 lg:px-16 py-4">
+        <div class="max-w-7xl mx-auto">
+          <!-- Search Input -->
+          <div class="flex items-center gap-3 mb-2">
+            <input 
+              v-model="searchQuery" 
+              type="text" 
+              placeholder="Search products, brands, categories..."
+              class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              @keyup.enter="performSearch"
+              autofocus 
+            />
+            <button @click="closeSearch" class="p-2 text-gray-500 hover:text-gray-700 transition">
+              <font-awesome-icon icon="xmark" />
+            </button>
+          </div>
 
-        <!-- Optional Suggestions -->
-        <ul v-if="suggestions.length"
-          class="max-w-7xl mx-auto mt-2 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-          <li v-for="(item, i) in suggestions" :key="i" class="px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
-            @click="selectSuggestion(item)">
-            {{ item }}
-          </li>
-        </ul>
+          <!-- Search Suggestions Dropdown -->
+          <div v-if="suggestions.length > 0" class="mt-3 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+            <!-- Suggestions Header -->
+            <div class="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+              Suggested Products
+            </div>
+            
+            <!-- Suggestions List -->
+            <ul class="max-h-96 overflow-y-auto">
+              <li 
+                v-for="(product, i) in suggestions" 
+                :key="i" 
+                @click="selectSuggestion(product)"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+              >
+                <!-- Product Image -->
+                <img 
+                  :src="product.image" 
+                  :alt="product.name"
+                  class="w-12 h-12 rounded-lg object-cover bg-gray-100 flex-shrink-0"
+                />
+                
+                <!-- Product Info -->
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ product.name }}</p>
+                  <p class="text-xs text-gray-500">{{ product.brand }}</p>
+                </div>
+                
+                <!-- Price & Rating -->
+                <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                  <p class="text-sm font-bold text-gray-900">${{ parseFloat(product.price).toFixed(2) }}</p>
+                  <div class="flex items-center gap-1 text-xs">
+                    <span class="text-amber-400">★</span>
+                    <span class="text-gray-600">{{ product.rating }}</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- No Results Message -->
+          <div v-else-if="searchQuery && !suggestions.length" class="mt-3 p-6 text-center">
+            <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <p class="text-gray-500 text-sm">No products found for "{{ searchQuery }}"</p>
+          </div>
+        </div>
       </div>
     </transition>
 
@@ -117,6 +164,7 @@ import { useCart} from '@/stores/carts';
 
 const cartStore=useCart();
 const categoriesStore=useCategory();
+const productStore=useProduct();
 const authStore=useAuthStore();
 const router = useRouter();
 
@@ -125,6 +173,7 @@ onMounted(async () => {
   if (authStore.isAuthenticated) {
     await cartStore.getCart();
   }
+  categoriesStore.fetchAllCategories();
 });
 
 const searchOpen = ref(false)
@@ -135,7 +184,16 @@ onMounted(async () => {
   console.log('Fetched categories in header:', categoriesStore.categories);
 });
 
-const toggleSearch = () => searchOpen.value = !searchOpen.value
+const toggleSearch = () => {
+  searchOpen.value = !searchOpen.value
+  if (searchOpen.value) {
+    // Focus input when search opens
+    setTimeout(() => {
+      document.querySelector('input[placeholder*="Search"]')?.focus()
+    }, 0)
+  }
+}
+
 const closeSearch = () => {
   searchOpen.value = false
   searchQuery.value = ''
@@ -147,15 +205,32 @@ const handleLogout = async () => {
   router.push({ name: 'landingPage' });
 }
 
-// Filter suggestions
+// Get real suggestions from product store
 const suggestions = computed(() => {
-  if (!searchQuery.value) return []
-  return products.filter(p => p.toLowerCase().includes(searchQuery.value.toLowerCase()))
+  if (!searchQuery.value.trim()) return []
+  return productStore.searchSuggestions(searchQuery.value)
 })
 
-const selectSuggestion = (item) => {
-  searchQuery.value = item
-  closeSearch()
+// Navigate to product when suggestion is clicked
+const selectSuggestion = (product) => {
+  if (product && product.id) {
+    router.push({ 
+      name: 'productView', 
+      params: { productId: product.id } 
+    })
+    closeSearch()
+  }
+}
+
+// Perform full search when Enter is pressed
+const performSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({ 
+      path: '/products',
+      query: { search: searchQuery.value }
+    })
+    closeSearch()
+  }
 }
 </script>
 

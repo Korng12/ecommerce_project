@@ -3,10 +3,12 @@ const { Op } = require("sequelize");
 
 const Product = db.product;
 const Category = db.category;
+const Review =db.review;
 const Brand = db.brand;
 const ProductImage = db.productImage;
 const Specification = db.specification;
-
+const sequelize=db.sequelize
+const Promotion = db.promotion;
 const LOW_STOCK_ALERT = 5;
 
 /* ================= GET ALL PRODUCTS ================= */
@@ -26,26 +28,106 @@ const getAllProducts = async (req, res) => {
           as: "specifications",
           attributes: ["id", "key", "value"],
         },
+        {
+          model: Promotion,
+          as: "promotions",
+          required: false,
+          where: {
+            isActive: true,
+            startDate: { [Op.lte]: new Date() },
+            endDate: { [Op.gte]: new Date() }
+          }
+        }
       ],
       order: [["createdAt", "DESC"]],
     });
 
-    res.json(products);
-  } catch (err) {
-    console.error("❌ FETCH PRODUCTS ERROR:", err);
+    const result = await Promise.all(
+      products.map(async (product) => {
+        const rating = await Review.findOne({
+          where: { productId: product.id },
+          attributes: [
+            [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
+            [sequelize.fn("COUNT", sequelize.col("id")), "totalReviews"]
+          ],
+          raw: true
+        });
+
+        const productJson = product.toJSON();
+
+        // 🔥 PROMOTION LOGIC
+        let finalPrice = productJson.price;
+        let promotion = null;
+
+        if (productJson.promotions && productJson.promotions.length > 0) {
+          const promo = productJson.promotions[0];
+
+          promotion = promo;
+
+          if (promo.type === "percentage") {
+            finalPrice = productJson.price * (1 - promo.value / 100);
+          } else {
+            finalPrice = productJson.price - promo.value;
+          }
+        }
+
+        return {
+          ...productJson,
+          averageRating: rating.averageRating
+            ? Number(rating.averageRating).toFixed(1)
+            : 0,
+          totalReviews: rating.totalReviews || 0,
+
+          // 👇 promotion fields
+          originalPrice: productJson.price,
+          finalPrice: Math.max(finalPrice, 0),
+          promotion
+        };
+      })
+    );
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /* ================= GET PRODUCT BY ID ================= */
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id, {
       include: [
-        { model: Category, as: "category", attributes: ["id", "name"] },
-        { model: Brand, as: "brand", attributes: ["id", "name", "logo"] },
-        { model: ProductImage, as: "images" },
-        { model: Specification, as: "specifications" },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name", "description"],
+        },
+        {
+          model: Brand,
+          as: "brand",
+          attributes: ["id", "name", "logo", "description"],
+        },
+        {
+          model: ProductImage,
+          as: "images",
+          attributes: ["id", "imageUrl", "isPrimary"],
+        },
+        {
+          model: Specification,
+          as: "specifications",
+          attributes: ["id", "key", "value"],
+        },
+        {          model: Promotion,
+          as: "promotions",
+          required: false,
+          where: {
+            isActive: true,
+            startDate: { [Op.lte]: new Date() },
+            endDate: { [Op.gte]: new Date() }
+          }
+        }
       ],
     });
 
@@ -53,9 +135,9 @@ const getProductById = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(product);
-  } catch (err) {
-    console.error("❌ FETCH PRODUCT ERROR:", err);
+    res.status(200).json(product);
+  } catch (error) {
+    console.error("Error fetching product:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

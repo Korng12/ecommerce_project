@@ -33,6 +33,17 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'productId',
         as: 'orderItems'
       });
+      
+      product.hasMany(models.review, {
+        foreignKey: 'productId',
+        as: 'reviews'
+      });
+      product.belongsToMany(models.promotion, {
+        through: 'promotionProduct', // Must match the modelName in the junction table
+        foreignKey: 'productId',     // The column in the junction table for Product
+        otherKey: 'promotionId',     // The column in the junction table for Promotion
+        as: 'promotions'             // This allows you to use include: [{ as: 'promotions' }]
+      });
     }
   }
   

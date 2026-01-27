@@ -1,24 +1,66 @@
 <template>
-  <div v-if="show">
-    <div class="flex flex-col gap-4 items-center w-full mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
-      <button class="view-more text-sm text-blue-500">View More</button>
-      <div v-if="productsStore.products.length" class="grid grid-cols-3 gap-4">
-        <ProductCard v-for="product in productsStore.products" :key="product.id" :product="product"></ProductCard>
+  <div v-if="show" class="w-full py-12 px-4 md:px-8">
+    <!-- Section Header -->
+    <div class="mb-10 flex items-center justify-between">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
+          {{ title }}
+        </h1>
+        <div class="w-16 h-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"></div>
       </div>
-      <div v-else class="text-gray-500 py-8">
-        Loading products...
-      </div>
+      <router-link
+        v-if="hasMoreProducts"
+        :to="viewMorePath"
+        class="hidden md:inline-flex items-center gap-2 px-6 py-2 text-sm font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
+      >
+        View More
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </router-link>
     </div>
+
+    <!-- Products Grid -->
+    <div v-if="displayedProducts?.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <ProductCard 
+        v-for="product in displayedProducts" 
+        :key="product.id" 
+        :product="product"
+      />
+    </div>
+
+    <!-- Empty State -->
+    <div v-else class="py-16 text-center">
+      <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m0 0L4 7m8 4v10m0 0l-8-4m8 4l8-4"></path>
+      </svg>
+      <p class="text-gray-400 text-lg font-medium">Loading amazing products...</p>
+      <p class="text-gray-400 text-sm mt-2">Please wait while we fetch the latest items</p>
+    </div>
+
+    <!-- Mobile View More Button -->
+    <router-link
+      v-if="hasMoreProducts"
+      :to="viewMorePath"
+      class="md:hidden flex items-center justify-center gap-2 w-full mt-8 px-6 py-3 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300 active:scale-95"
+    >
+      View More
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </router-link>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import ProductCard from '@/components/product/ProductCard.vue';
-import { useProduct } from '@/stores/products';
-import { onMounted } from 'vue';
 
 const props = defineProps({
+  products: {
+    type: Array,
+    default: () => []
+  },
   title: {
     type: String,
     default: 'Product Section'
@@ -26,20 +68,32 @@ const props = defineProps({
   show: {
     type: Boolean,
     default: true
+  },
+  viewMorePath: {
+    type: String,
+    default: '/products'
   }
 });
 
-const productsStore = useProduct();
+// Always display exactly 10 products
+const displayedProducts = computed(() => {
+  return props.products?.slice(0, 10) || [];
+});
 
-onMounted(async () => {
-  if (!productsStore.products?.length) {
-    try { await productsStore.fetchAllProducts() } catch (e) { /* noop */ }
-  }
+// Check if there are more products than the 10 displayed
+const hasMoreProducts = computed(() => {
+  return (props.products?.length || 0) > 10;
 });
 </script>
 
-<style>
-.text-left {
-  text-align: left;
+<style scoped>
+/* Smooth transitions for interactive elements */
+a {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Gradient text effect (optional enhancement) */
+.gradient-text {
+  @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
 }
 </style>

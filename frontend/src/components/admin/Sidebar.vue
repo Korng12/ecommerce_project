@@ -36,17 +36,9 @@ import {
   LayoutDashboard, Users, Package, ShoppingCart, BarChart3, Settings, LogOut, Menu, X,Folder,Bell, Image
 } from 'lucide-vue-next'
 const router = useRouter()
+const authStore = useAuthStore();
 
-const logout = () => {
-  // remove JWT token
-  localStorage.removeItem('token')
 
-  // optional: remove user info
-  localStorage.removeItem('user')
-
-  // redirect to login page
-  router.push('/login')
-}
 
 defineProps({
   sidebarOpen: Boolean,
@@ -54,15 +46,16 @@ defineProps({
 })
 
 defineEmits(['toggle-sidebar', 'change-tab'])
-const authStore = useAuthStore();
+
 
 // Menu items configuration
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
   { id: 'users', label: 'Users', icon: markRaw(Users) },
-  { id: 'products', label: 'Products', icon: markRaw(Package) },
   { id: 'categories', label: 'Categories', icon: markRaw(Folder) },
   { id: 'banners', label: 'Banners', icon: markRaw(Image) },
+  { id: 'products', label: 'Products', icon: markRaw(Package) },
+  { id: 'promotions', label: 'Promotions', icon: markRaw(Package) },
   { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
   { id: 'notifications', label: 'Notifications', icon: markRaw(Bell) },
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },

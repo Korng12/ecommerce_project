@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold">Product Inventory</h1>
       <p class="text-gray-600">Manage products and stock</p>
     </div>
-
+    
     <!-- Action -->
     <div class="flex justify-between mb-4">
       <input
@@ -13,12 +13,32 @@
         placeholder="Search product..."
         class="border px-4 py-2 rounded w-1/3"
       />
+       <div class="flex gap-2 text-gray-700">
+          <select v-model="selectedCategory" class="rounded-xl border-gray-300">
+            <option value="default">All Categories</option>
+            <option v-for="category in categoryStore.categories" :key="category.id" :value="category.name">
+              {{ category.name }}
+            </option>
+          </select>
+          <select v-model="selectedBrand" class="rounded-xl border-gray-300">
+            <option value="">All Brands</option>
+            <option v-for="brand in brandStore.brands" :key="brand.id" :value="brand.name">
+              {{ brand.name }}
+            </option>
+          </select>
+          <select v-model="sortBy" class="rounded-xl border-gray-300">
+            <option value="default">Sort by: Featured</option>
+            <option value="low-high">Price: Low to High</option>
+            <option value="high-low">Price: High to Low</option>
+          </select>
+        </div>
       <button
         @click="openModal"
         class="bg-blue-600 text-white px-4 py-2 rounded"
       >
         + Add Product
       </button>
+       
     </div>
 
     <!-- Table -->
@@ -133,11 +153,12 @@ import { useCategory } from '@/stores/categories'
 const productStore = useProduct()
 const brandStore = useBrand()
 const categoryStore = useCategory()
-
-/* ================= UI STATE ================= */
 const search = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
+const sortBy = ref('default');
+const selectedBrand = ref('');
+const selectedCategory = ref('default');
 const imageFile = ref(null)
 const imagePreview = ref(null)
 
@@ -168,11 +189,11 @@ const isFormValid = computed(() =>
 )
 
 /* ================= COMPUTED ================= */
-const filteredProducts = computed(() =>
-  productStore.products.filter(p =>
-    p.name.toLowerCase().includes(search.value.toLowerCase())
-  )
-)
+// const filteredProducts = computed(() =>
+//   productStore.products.filter(p =>
+//     p.name.toLowerCase().includes(search.value.toLowerCase())
+//   )
+// )
 
 /* ================= IMAGE ================= */
 const handleImage = (e) => {
@@ -256,9 +277,47 @@ const closeModal = () => {
 }
 
 /* ================= LOAD ================= */
+// onMounted(async () => {
+//   await productStore.fetchAllProducts()
+//   await brandStore.fetchBrands()
+//   await categoryStore.fetchCategories()
+// })
+/* ================= SEARCH ================= */
+const filteredProducts = computed(() =>{
+  let products=[...productStore.products];
+  if(selectedBrand.value){
+    products = products.filter(p=>p.brand.toLowerCase()===selectedBrand.value.toLowerCase())
+  }
+  if(sortBy.value==='low-high'){
+    products.sort((a,b)=>a.price - b.price)
+  } else if(sortBy.value==='high-low'){
+    products.sort((a,b)=>b.price - a.price) 
+  }
+  if(selectedCategory.value !=='default'){
+    products = products.filter(p=>p.category.toLowerCase()===selectedCategory.value.toLowerCase())
+  }
+  return products.filter(p =>
+    p.name.toLowerCase().includes(search.value.trim().toLowerCase())  
+
+  )
+})
+
 onMounted(async () => {
-  await productStore.fetchAllProducts()
-  await brandStore.fetchBrands()
-  await categoryStore.fetchCategories()
+  if(!productStore.products.length){
+    try{
+      await productStore.fetchAllProducts()
+    } catch(e){/* silent */} 
+  }
+  if(!brandStore.brands.length){
+    try{
+      await brandStore.fetchAllBrands()
+    } catch(e){/* silent */} 
+  }
+  if(!categoryStore.categories.length){
+    try{
+      await categoryStore.fetchAllCategories()
+    } catch(e){/* silent */} 
+  }
+  
 })
 </script>
