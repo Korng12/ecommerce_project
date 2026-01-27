@@ -1,9 +1,15 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../models/index.js');
-
-// Ensure User model is loaded
 const User = db.user;
+const Role = db.role;
+// console.log('--- DB CONTENTS ---');
+// console.log(db); // Check your terminal to see the keys!
+// console.log('-------------------');
+
+if (!User) {
+  console.error('ERROR: User model not found in db object');
+}
 
 if (!User) {
   console.error('ERROR: User model not found in db object');
@@ -12,11 +18,9 @@ if (!User) {
 // ================= REGISTER =================
 const register = async (req, res) => {
   try {
-    const { username, email, password, roleId } = req.body;
-    
-    console.log('Register request:', { username, email, roleId });
+    const { username, email, password } = req.body;
 
-    if (!username || !email || !password || !roleId) {
+    if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -27,11 +31,23 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Find the USER role (default role for new users) - try both cases
+    let userRole = await Role.findOne({ where: { name: 'USER' } });
+    
+    // If not found, try lowercase
+    if (!userRole) {
+      userRole = await Role.findOne({ where: { name: 'user' } });
+    }
+    
+    if (!userRole) {
+      return res.status(500).json({ message: 'USER role not found in database' });
+    }
+
     const user = await User.create({
       username,
       email,
       password: hashedPassword,
-      roleId
+      roleId: userRole.id // Use the actual ID of the USER role
     });
 
     if (!process.env.JWT_SECRET) {

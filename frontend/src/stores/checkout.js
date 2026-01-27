@@ -118,6 +118,34 @@ export const useCheckoutStore = defineStore("checkout", {
       }
     },
 
+    async abandonPendingOrder(orderId = this.orderId) {
+      if (!orderId) {
+        console.warn("No orderId to abandon");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3000/api/orders/abandon", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orderId }),
+        });
+
+        if (!res.ok) {
+          console.error("Failed to abandon order:", await res.json());
+          return;
+        }
+
+        console.log("Order cancelled, cart reactivated");
+        return await res.json();
+      } catch (err) {
+        console.error("abandonPendingOrder error:", err);
+      }
+    },
+
     resetCheckout() {
       this.orderId = null;
       this.orderTotal = 0;

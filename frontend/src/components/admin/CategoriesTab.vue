@@ -99,7 +99,7 @@
                 </div>
               </td>
               <td class="px-6 py-4">
-                <div class="font-medium text-gray-900">{{ category.name }}</div>
+                <div class="font-medium text-gray-900">{{ category.name  }} {{ category.image }}</div>
               </td>
               <td class="px-6 py-4">
                 <div class="text-sm text-gray-600 max-w-md truncate">
@@ -171,31 +171,45 @@
             ></textarea>
           </div>
 
-          <!-- Image URL Field -->
+          <!-- Image Upload Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Image URL
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Category Image
             </label>
-            <input
-              v-model="formData.image"
-              type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter image URL"
-            />
+            <div class="flex items-center gap-4">
+              <label class="flex-1 flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                <div class="text-center">
+                  <Upload class="mx-auto text-gray-400 mb-1" :size="24" />
+                  <span class="text-sm text-gray-600">Click to upload image</span>
+                  <span class="text-xs text-gray-500 block mt-1">(PNG, JPG, GIF max 5MB)</span>
+                </div>
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  @change="handleImageUpload"
+                  class="hidden"
+                />
+              </label>
+            </div>
           </div>
 
           <!-- Image Preview -->
-          <div v-if="formData.image" class="mt-4">
+          <div v-if="imagePreview || (isEditMode && formData.image && !imageFile)" class="mt-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
-            <div class="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden">
+            <div class="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
               <img 
-                :src="formData.image" 
+                :src="imagePreview || formData.image" 
                 :alt="formData.name"
                 class="w-full h-full object-cover"
                 @error="imageError = true"
               />
             </div>
-            <p v-if="imageError" class="text-sm text-red-500 mt-1">Failed to load image</p>
+            <div v-if="imageFile" class="mt-2 text-sm text-green-600 flex items-center gap-1">
+              <span>✓</span>
+              <span>{{ imageFile.name }}</span>
+            </div>
+            <p v-if="imageError" class="text-sm text-red-500 mt-2">Failed to load image</p>
           </div>
 
           <!-- Error Message -->
@@ -268,7 +282,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useCategory } from '@/stores/categories'
-import { Plus, Search, Edit2, Trash2, Folder, ImageIcon, AlertCircle } from 'lucide-vue-next'
+import { Plus, Search, Edit2, Trash2, Folder, ImageIcon, AlertCircle, Upload } from 'lucide-vue-next'
 
 const categoryStore = useCategory()
 
@@ -279,6 +293,9 @@ const isEditMode = ref(false)
 const categoryToDelete = ref(null)
 const imageError = ref(false)
 const searchQuery = ref('')
+const fileInput = ref(null)
+const imageFile = ref(null)
+const imagePreview = ref(null)
 
 const formData = ref({
   name: '',
@@ -298,6 +315,36 @@ const filteredCategories = computed(() => {
 })
 
 // Methods
+const handleImageUpload = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Validate file size (5MB max)
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    imageError.value = true
+    alert('File size must be less than 5MB')
+    return
+  }
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    imageError.value = true
+    alert('Please select a valid image file')
+    return
+  }
+
+  imageFile.value = file
+  imageError.value = false
+
+  // Create preview
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imagePreview.value = e.target?.result
+  }
+  reader.readAsDataURL(file)
+}
+
 const openCreateModal = () => {
   isEditMode.value = false
   formData.value = {
@@ -305,6 +352,8 @@ const openCreateModal = () => {
     description: '',
     image: ''
   }
+  imageFile.value = null
+  imagePreview.value = null
   imageError.value = false
   showModal.value = true
 }
@@ -317,6 +366,8 @@ const openEditModal = (category) => {
     description: category.description || '',
     image: category.image || ''
   }
+  imageFile.value = null
+  imagePreview.value = null
   imageError.value = false
   showModal.value = true
 }
@@ -328,15 +379,38 @@ const closeModal = () => {
     description: '',
     image: ''
   }
+  imageFile.value = null
+  imagePreview.value = null
   imageError.value = false
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 }
 
 const handleSubmit = async () => {
   try {
-    if (isEditMode.value) {
-      await categoryStore.updateCategory(formData.value.id, formData.value)
+    // If a new image file is selected, create FormData for multipart upload
+    if (imageFile.value) {
+      const formDataForUpload = new FormData()
+      formDataForUpload.append('name', formData.value.name)
+      formDataForUpload.append('description', formData.value.description)
+      formDataForUpload.append('image', imageFile.value)
+
+      if (isEditMode.value) {
+        await categoryStore.updateCategory(formData.value.id, formDataForUpload)
+      } else {
+        await categoryStore.createCategory(formDataForUpload)
+      }
     } else {
-      await categoryStore.createCategory(formData.value)
+      // No new image, send regular data
+      await categoryStore[isEditMode.value ? 'updateCategory' : 'createCategory'](
+        isEditMode.value ? formData.value.id : undefined,
+        {
+          name: formData.value.name,
+          description: formData.value.description,
+          image: formData.value.image
+        }
+      )
     }
     closeModal()
   } catch (error) {

@@ -4,7 +4,7 @@
       <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
       <button class="view-more text-sm text-blue-500">View More</button>
       <div v-if="productsStore.products.length" class="grid grid-cols-3 gap-4">
-        <ProductCard v-for="product in productsStore.products" :key="product.id" :product="product"></ProductCard>
+        <ProductCard v-for="product in productsStore.getPopularProducts" :key="product.id" :product="product"></ProductCard>
       </div>
       <div v-else class="text-gray-500 py-8">
         Loading products...
@@ -31,11 +31,7 @@ const props = defineProps({
 
 const productsStore = useProduct();
 
-onMounted(async () => {
-  if (!productsStore.products?.length) {
-    try { await productsStore.fetchAllProducts() } catch (e) { /* noop */ }
-  }
-});
+
 </script>
 
 <style>

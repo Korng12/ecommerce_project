@@ -73,6 +73,8 @@
             </router-link>
           </p>
 
+          <p v-if="error" class="text-red-500 text-center">{{ error }}</p>
+
         </form>
       </div>
     </div>
@@ -80,64 +82,49 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
-import axios from 'axios';
+import { reactive, ref } from 'vue';
+
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { ROLES } from '@/constants/roles';
 
 const router = useRouter();
-
+const authStore = useAuthStore();
+const error = ref('');
 const formData = reactive({
   username: '',
   email: '',
   password: '',
-  confirmPassword: '',
-  roleId: 2   // DEFAULT USER ROLE (not admin)
+  confirmPassword: ''
 });
 
 const handleSubmit = async () => {
+  if (!formData.username || !formData.email || !formData.password) {
+    error.value = 'All fields are required';
+    return;
+  }
+
+  if (formData.password.length < 6) {
+    error.value = 'Password must be at least 6 characters';
+    return;
+  }
+
   if (formData.password !== formData.confirmPassword) {
-    alert('Passwords do not match');
+    error.value = 'Passwords do not match';
     return;
   }
 
   try {
-    // First check if backend is reachable
-    try {
-      await axios.get('http://localhost:3000/api/health');
-    } catch (healthErr) {
-      alert('Cannot connect to backend server. Please ensure backend is running on port 3000');
-      console.error('Backend connection error:', healthErr.message);
-      return;
-    }
+    await authStore.register(
+      formData.username,
+      formData.email,
+      formData.password,
+    );
 
-    const res = await axios.post('http://localhost:3000/api/register', {
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      roleId: 2  // New users are always USER role, not ADMIN
-    }, {
-      withCredentials: true  // Enable cookies
-    });
+    router.push({name: 'landingPage'});
 
-    console.log('Registration successful:', res.data);
-
-    // Update auth store
-    const authStore = useAuthStore();
-    authStore.user = res.data.user;
-    authStore.isAuthenticated = true;
-    authStore.checkedAuth = true;
-
-    // Redirect based on role
-    if(res.data.user.roleId === ROLES.ADMIN){
-      router.push('/adminView');
-    } else {
-      router.push('/app/profile');
-    }
   } catch (err) {
-    console.error('Registration error:', err.response?.data || err.message);
-    alert(err.response?.data?.message || 'Registration failed: ' + err.message);
+    error.value = err?.message || 'Registration failed';
   }
 };
+
 </script>

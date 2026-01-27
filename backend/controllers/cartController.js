@@ -21,6 +21,7 @@ const getCartByUserId = async (req, res) => {
             {
               model: Product,
               as: "product",
+              attributes: ["id", "name", "description", "price", "stock"],
               include: [
                 {
                   model: ProductImage,
@@ -56,11 +57,29 @@ const AddToCart = async (req, res) => {
   }
 
   try {
+    // Check product stock availability
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ msg: "Product not found" });
+    }
+
     const [cart] = await Cart.findOrCreate({ where: { userId ,status: 'active'} });
 
     let item = await CartItem.findOne({
       where: { cartId: cart.id, productId },
     });
+
+    // Calculate new quantity
+    const newQuantity = item ? item.quantity + quantity : quantity;
+
+    // Check if requested quantity exceeds available stock
+    if (product.stock !== null && newQuantity > product.stock) {
+      return res.status(400).json({ 
+        msg: `Cannot add to cart. Only ${product.stock} items available (you have ${item ? item.quantity : 0} in cart)`,
+        availableStock: product.stock,
+        currentInCart: item ? item.quantity : 0
+      });
+    }
 
     if (!item) {
       item = await CartItem.create({
@@ -92,6 +111,20 @@ const updateCartItem = async (req, res) => {
   }
 
   try {
+    // Check product stock availability
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ msg: "Product not found" });
+    }
+
+    // Check if requested quantity exceeds available stock
+    if (product.stock !== null && quantity > product.stock) {
+      return res.status(400).json({ 
+        msg: `Cannot update quantity. Only ${product.stock} items available`,
+        availableStock: product.stock
+      });
+    }
+
     const cart = await Cart.findOne({ where: { userId ,status: 'active'} });
     if(!cart){return res.status(404).json({ msg: "Cart not found" });}
 

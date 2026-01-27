@@ -3,24 +3,28 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const path = require("path");
-
-const productRoutes = require("./routes/api/products");
-const categoryRoutes = require("./routes/api/categories");
-const brandRoutes = require("./routes/api/brands");
 const cartRoutes = require("./routes/api/carts");
 const orderRoutes = require("./routes/api/orders");
 const paymentRoutes = require("./routes/api/payments");
+const analyticsRoutes = require("./routes/api/analytics");
 const verifyJwt = require("./middleware/authJwt");
 const verifyRole = require("./middleware/verifyRoles");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
-
+const userRoutes = require('./routes/users');
+const webhookRouter = require("./routes/api/payments");
+const dashboardRoutes = require('./routes/dashboard')
+const productsRoutes = require('./routes/api/products');
+const categoriesRoutes = require('./routes/api/categories');
+const brandsRoutes = require('./routes/api/brands');
+const reviewRoutes = require('./routes/reviewRoutes');
+const profileRoutes = require('./routes/profileRoutes')
+const statisticsRoutes = require('./routes/statisticsRoutes')
 // Serve static files for images
-app.use("/images", express.static(path.join(__dirname, "public", "images")));
-console.log(
-  "📁 Serving static images from:",
-  path.join(__dirname, "public", "images"),
-);
+app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
+app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
+
+app.use("/uploads/categories", express.static(path.join(__dirname, "uploads","categories")));
 
 app.use(cookieParser());
 app.use(
@@ -32,20 +36,19 @@ app.use(
 
 // ⚠️ IMPORTANT: Webhook route MUST come before express.json()
 // because it needs the raw body for signature verification
-const webhookRouter = require("./routes/api/payments");
 app.use("/api", webhookRouter.webhookOnly);
 
 // Now apply JSON parser for all other routes
 app.use(express.json()); // ✅ REQUIRED
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Backend is running' });
-});
 
-const profileRoutes = require('./routes/profileRoutes')
-const statisticsRoutes = require('./routes/statisticsRoutes')
+// user management routes
+app.use('/api/users', userRoutes)
+
+// Dashboard routes
+app.use('/api/dashboard', dashboardRoutes)
+
 app.use('/api', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/statistics', statisticsRoutes);
@@ -57,12 +60,14 @@ app.use('/hello',(req,res)=>{
 app.use('/protected',verifyJwt,(req,res)=>{
   res.status(200).json({message:"Protected content",user:req.user});
 });
-app.use("/api", productRoutes);
-app.use("/api", categoryRoutes);
-app.use("/api", brandRoutes);
+app.use("/api", productsRoutes);
+app.use("/api", categoriesRoutes);
+app.use("/api", brandsRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
-app.use("/api", webhookRouter.apiRoutes);
+app.use("/api", webhookRouter.apiRoutes); // Payment routes BEFORE analytics
+app.use("/api", analyticsRoutes);
 app.use(
   "/users",
   verifyJwt,
