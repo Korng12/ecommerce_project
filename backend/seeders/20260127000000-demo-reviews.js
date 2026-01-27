@@ -18,9 +18,9 @@ module.exports = {
         {
           userId: 3, // john
           productId: 1,
-          rating: 4.5,
+          rating: 3.8,
           comment:
-            "Great device overall. Battery life could be better, but the features are amazing.",
+            "Great device overall, but battery life is just average for me. Still very fast and smooth.",
           createdAt: new Date("2026-01-16"),
           updatedAt: new Date("2026-01-16"),
         },
@@ -29,18 +29,18 @@ module.exports = {
         {
           userId: 4, // kakda
           productId: 2,
-          rating: 4.8,
+          rating: 4.6,
           comment:
-            "Fantastic Android flagship. The S-Pen is a game changer and the display is absolutely gorgeous.",
+            "Fantastic Android flagship. The display is gorgeous and the S-Pen is super useful.",
           createdAt: new Date("2026-01-14"),
           updatedAt: new Date("2026-01-14"),
         },
         {
           userId: 2, // user
           productId: 2,
-          rating: 5.0,
+          rating: 3.2,
           comment:
-            "Best phone I've ever owned! Fast, beautiful, and feature-packed.",
+            "Really powerful, but the phone feels bulky and I had to tweak settings to get good battery life.",
           createdAt: new Date("2026-01-17"),
           updatedAt: new Date("2026-01-17"),
         },
@@ -49,18 +49,18 @@ module.exports = {
         {
           userId: 3, // john
           productId: 3,
-          rating: 4.7,
+          rating: 4.4,
           comment:
-            "Innovative gaming laptop with excellent portability. The detachable screen is perfect for different use cases.",
+            "Innovative and portable. Great performance for the size, but fans can get loud under load.",
           createdAt: new Date("2026-01-13"),
           updatedAt: new Date("2026-01-13"),
         },
         {
           userId: 4, // kakda
           productId: 3,
-          rating: 4.5,
+          rating: 3.0,
           comment:
-            "Powerful gaming laptop in a compact form. Gets a bit hot during intensive gaming sessions.",
+            "Cool concept, but it runs hot during heavy gaming and battery life is quite short.",
           createdAt: new Date("2026-01-18"),
           updatedAt: new Date("2026-01-18"),
         },
@@ -69,18 +69,18 @@ module.exports = {
         {
           userId: 2, // user
           productId: 4,
-          rating: 4.5,
+          rating: 4.2,
           comment:
-            "Beautiful OLED display! Perfect for content creation and multimedia. Light and portable too.",
+            "Beautiful OLED display and light design. Great for media and basic editing.",
           createdAt: new Date("2026-01-12"),
           updatedAt: new Date("2026-01-12"),
         },
         {
           userId: 3, // john
           productId: 4,
-          rating: 4.3,
+          rating: 2.9,
           comment:
-            "Good laptop for everyday use. The OLED screen is stunning but battery drains faster than expected.",
+            "Screen is amazing but I expected better battery life. Also gets warm with multiple apps.",
           createdAt: new Date("2026-01-19"),
           updatedAt: new Date("2026-01-19"),
         },
@@ -89,18 +89,18 @@ module.exports = {
         {
           userId: 4, // kakda
           productId: 5,
-          rating: 4.6,
+          rating: 4.1,
           comment:
-            "Solid gaming laptop for the price. Runs all my games smoothly with high settings.",
+            "Solid gaming laptop for the price. Runs most games well, but the chassis feels a bit plasticky.",
           createdAt: new Date("2026-01-11"),
           updatedAt: new Date("2026-01-11"),
         },
         {
           userId: 2, // user
           productId: 5,
-          rating: 4.7,
+          rating: 3.5,
           comment:
-            "Great value gaming laptop! The cooling system works well and the keyboard is comfortable.",
+            "Good value, but the fan noise is noticeable and the screen could be brighter.",
           createdAt: new Date("2026-01-20"),
           updatedAt: new Date("2026-01-20"),
         },
@@ -109,18 +109,18 @@ module.exports = {
         {
           userId: 3, // john
           productId: 6,
-          rating: 5.0,
+          rating: 4.9,
           comment:
-            "The best laptop for professional work. M3 chip is incredibly fast and the battery lasts all day.",
+            "Insanely fast for work and editing. Battery life is excellent and the display is top tier.",
           createdAt: new Date("2026-01-10"),
           updatedAt: new Date("2026-01-10"),
         },
         {
           userId: 4, // kakda
           productId: 6,
-          rating: 4.9,
+          rating: 3.9,
           comment:
-            "Absolutely love this MacBook! Perfect for video editing and coding. The display is gorgeous.",
+            "Performance is amazing, but it's expensive and heavy to carry around daily.",
           createdAt: new Date("2026-01-21"),
           updatedAt: new Date("2026-01-21"),
         },
@@ -129,18 +129,18 @@ module.exports = {
         {
           userId: 2, // user
           productId: 7,
-          rating: 4.8,
+          rating: 4.7,
           comment:
-            "Premium mechanical keyboard with excellent build quality. The wireless connection is flawless.",
+            "Premium feel and great typing. Wireless is stable and latency is excellent.",
           createdAt: new Date("2026-01-09"),
           updatedAt: new Date("2026-01-09"),
         },
         {
           userId: 3, // john
           productId: 7,
-          rating: 4.6,
+          rating: 2.5,
           comment:
-            "Great typing experience! A bit pricey but worth it for the quality and features.",
+            "Nice build quality but too pricey for what you get. Software was also a bit frustrating.",
           createdAt: new Date("2026-01-22"),
           updatedAt: new Date("2026-01-22"),
         },
@@ -149,18 +149,18 @@ module.exports = {
         {
           userId: 4, // kakda
           productId: 8,
-          rating: 4.7,
+          rating: 4.3,
           comment:
-            "Excellent motherboard with all the features I need. Easy to install and BIOS is user-friendly.",
+            "Good board overall. Plenty of ports and easy setup. BIOS is fairly straightforward.",
           createdAt: new Date("2026-01-08"),
           updatedAt: new Date("2026-01-08"),
         },
         {
           userId: 2, // user
           productId: 8,
-          rating: 4.5,
+          rating: 3.3,
           comment:
-            "Solid motherboard for gaming builds. Good connectivity options and stable performance.",
+            "Works fine, but boot time was slower than expected and BIOS update took some effort.",
           createdAt: new Date("2026-01-23"),
           updatedAt: new Date("2026-01-23"),
         },
@@ -169,18 +169,18 @@ module.exports = {
         {
           userId: 3, // john
           productId: 9,
-          rating: 4.8,
+          rating: 4.6,
           comment:
-            "Top-tier gaming motherboard! DDR5 support and WiFi 6E make it future-proof.",
+            "Great motherboard with strong features. Looks good and has solid connectivity.",
           createdAt: new Date("2026-01-07"),
           updatedAt: new Date("2026-01-07"),
         },
         {
           userId: 4, // kakda
           productId: 9,
-          rating: 4.7,
+          rating: 3.7,
           comment:
-            "Great motherboard with excellent overclocking potential. RGB lighting is customizable.",
+            "Good board, but the price is a bit high. Setup was fine after updating BIOS.",
           createdAt: new Date("2026-01-24"),
           updatedAt: new Date("2026-01-24"),
         },
@@ -189,18 +189,18 @@ module.exports = {
         {
           userId: 2, // user
           productId: 10,
-          rating: 5.0,
+          rating: 4.8,
           comment:
-            "Beast of a graphics card! Handles 4K gaming at max settings effortlessly. Cooling is superb.",
+            "Beast for 4K gaming. Runs cool and stable with excellent performance.",
           createdAt: new Date("2026-01-06"),
           updatedAt: new Date("2026-01-06"),
         },
         {
           userId: 3, // john
           productId: 10,
-          rating: 4.9,
+          rating: 3.4,
           comment:
-            "Incredible performance for gaming and rendering. Ray tracing looks amazing!",
+            "Performance is great, but power draw is high and the card is huge—check your case size.",
           createdAt: new Date("2026-01-25"),
           updatedAt: new Date("2026-01-25"),
         },
@@ -209,18 +209,18 @@ module.exports = {
         {
           userId: 4, // kakda
           productId: 11,
-          rating: 4.7,
+          rating: 4.2,
           comment:
-            "Excellent mid-range card for 1440p gaming. Great value for performance.",
+            "Great for 1440p high refresh gaming. Quiet and efficient most of the time.",
           createdAt: new Date("2026-01-05"),
           updatedAt: new Date("2026-01-05"),
         },
         {
           userId: 2, // user
           productId: 11,
-          rating: 4.8,
+          rating: 3.1,
           comment:
-            "Perfect GPU for high refresh rate gaming. Runs cool and quiet.",
+            "Good GPU, but pricing could be better. Some games need tweaking for best temps.",
           createdAt: new Date("2026-01-26"),
           updatedAt: new Date("2026-01-26"),
         },
@@ -231,16 +231,16 @@ module.exports = {
           productId: 12,
           rating: 5.0,
           comment:
-            "The ultimate graphics card! Unmatched performance for 8K gaming and professional workloads.",
+            "Insane performance for heavy workloads and high-end gaming. Absolutely top of the line.",
           createdAt: new Date("2026-01-04"),
           updatedAt: new Date("2026-01-04"),
         },
         {
           userId: 4, // kakda
           productId: 12,
-          rating: 5.0,
+          rating: 3.6,
           comment:
-            "Worth every penny! This card is a powerhouse. Future-proof for years to come.",
+            "Powerful, but the price is hard to justify and it needs a strong PSU + good airflow.",
           createdAt: new Date("2026-01-27"),
           updatedAt: new Date("2026-01-27"),
         },
@@ -249,18 +249,18 @@ module.exports = {
         {
           userId: 2, // user
           productId: 13,
-          rating: 4.9,
+          rating: 4.7,
           comment:
-            "Lightning-fast SSD! Boot times are incredible and file transfers are instant.",
+            "Fast SSD with excellent load times and smooth performance for large files.",
           createdAt: new Date("2026-01-03"),
           updatedAt: new Date("2026-01-03"),
         },
         {
           userId: 3, // john
           productId: 13,
-          rating: 4.8,
+          rating: 3.0,
           comment:
-            "Excellent NVMe drive with impressive read/write speeds. Great for gaming and content creation.",
+            "Speed is good, but it ran a bit warm in my system without a heatsink.",
           createdAt: new Date("2026-01-26"),
           updatedAt: new Date("2026-01-26"),
         },
@@ -269,18 +269,18 @@ module.exports = {
         {
           userId: 4, // kakda
           productId: 14,
-          rating: 4.7,
+          rating: 4.4,
           comment:
-            "Fantastic gaming monitor with smooth 170Hz refresh rate. Colors are vibrant and accurate.",
+            "Smooth refresh rate and great colors. Perfect for competitive gaming.",
           createdAt: new Date("2026-01-02"),
           updatedAt: new Date("2026-01-02"),
         },
         {
           userId: 2, // user
           productId: 14,
-          rating: 4.6,
+          rating: 3.2,
           comment:
-            "Great monitor for competitive gaming. Response time is excellent and no ghosting.",
+            "Good panel, but I noticed some backlight bleed. Still enjoyable for gaming.",
           createdAt: new Date("2026-01-25"),
           updatedAt: new Date("2026-01-25"),
         },
@@ -289,18 +289,18 @@ module.exports = {
         {
           userId: 3, // john
           productId: 15,
-          rating: 4.8,
+          rating: 4.1,
           comment:
-            "Immersive curved display perfect for gaming and movies. 32 inches is the sweet spot!",
+            "Immersive curve and nice size for games and movies. Great value overall.",
           createdAt: new Date("2026-01-01"),
           updatedAt: new Date("2026-01-01"),
         },
         {
           userId: 4, // kakda
           productId: 15,
-          rating: 4.7,
+          rating: 3.0,
           comment:
-            "Love the curve! Makes gaming feel more engaging. Great colors and contrast.",
+            "The curve is nice, but colors needed calibration and the stand isn't very adjustable.",
           createdAt: new Date("2026-01-24"),
           updatedAt: new Date("2026-01-24"),
         },
@@ -309,18 +309,18 @@ module.exports = {
         {
           userId: 2, // user
           productId: 16,
-          rating: 4.5,
+          rating: 4.3,
           comment:
-            "Clean design and great typing experience. Pairs seamlessly with Mac. Battery lasts forever.",
+            "Great typing feel and very clean design. Works flawlessly with Mac.",
           createdAt: new Date("2025-12-31"),
           updatedAt: new Date("2025-12-31"),
         },
         {
           userId: 3, // john
           productId: 16,
-          rating: 4.4,
+          rating: 3.2,
           comment:
-            "Nice keyboard with Apple quality. Numeric keypad is useful for productivity work.",
+            "Nice keyboard, but overpriced. I wish it had backlight at this price.",
           createdAt: new Date("2026-01-23"),
           updatedAt: new Date("2026-01-23"),
         },

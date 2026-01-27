@@ -41,7 +41,7 @@
         <p
           class="mt-1 inline-block bg-yellow-100 text-yellow-800 font-medium px-3 py-1 rounded-full"
         >
-          ⭐ {{ product.rating }} {{product.totalReviews}}
+          ⭐ {{ product.rating }}
         </p>
       </div>
 

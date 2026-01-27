@@ -196,7 +196,7 @@
             <div class="flex justify-between items-center mb-4">
               <span class="text-gray-600">Shipping:</span>
               <span class="font-semibold">${{ cartStore.shipping === 0 ? 'FREE' : formatPrice(cartStore.shipping)
-              }}</span>
+                }}</span>
             </div>
             <div
               class="flex justify-between items-center text-xl font-bold text-gray-900 pt-4 border-t-2 border-gray-200">
@@ -351,8 +351,8 @@ const updateProfile = async () => {
 
     // Update profile
     await profileStore.updateProfile(
-      user.username,
-      user.email
+      user.value.username,
+      user.value.email
     )
 
     isEditing.value = false
