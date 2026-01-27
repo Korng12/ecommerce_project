@@ -27,7 +27,7 @@
     </div>
 
     <!-- Register / Login CTA Section -->
-    <div class="mt-16 px-4 md:px-8">
+    <div v-if="!authStore.isAuthenticated" class="mt-16 px-4 md:px-8">
       <div class="max-w-6xl mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <!-- Sign Up Card -->
@@ -66,7 +66,7 @@
     <!-- Flash Sale / Featured Products Section -->
     <div class="mt-16">
       <ProductSection 
-        title="🔥 Trending Now" 
+        title="Trending Now" 
         :products="productsStore.getPopularProducts" 
         :show="true" 
         viewMorePath="/products?sort=popular"
@@ -86,7 +86,7 @@
     <!-- Recommended Products -->
     <div class="mt-16">
       <ProductSection 
-        title="⭐ Recommended For You" 
+        title="Recommended For You" 
         :products="productsStore.products.slice(0, Math.min(30, productsStore.products.length))" 
         :show="true"
         viewMorePath="/products"
@@ -110,10 +110,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <!-- Fast Shipping -->
           <div class="text-center">
-            <div class="mb-4 flex justify-center">
-              <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
+            <div class="mb-6 flex justify-center">
+              <div class="w-14 h-14 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-xl">1</div>
             </div>
             <h3 class="font-bold text-lg text-gray-900 mb-2">Fast Shipping</h3>
             <p class="text-gray-600">Free shipping on orders over $50. Delivery in 3-5 business days.</p>
@@ -121,10 +119,8 @@
 
           <!-- Secure Payment -->
           <div class="text-center">
-            <div class="mb-4 flex justify-center">
-              <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-              </svg>
+            <div class="mb-6 flex justify-center">
+              <div class="w-14 h-14 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-xl">2</div>
             </div>
             <h3 class="font-bold text-lg text-gray-900 mb-2">Secure Payment</h3>
             <p class="text-gray-600">100% secure & encrypted. Your data is always protected.</p>
@@ -132,10 +128,8 @@
 
           <!-- Easy Returns -->
           <div class="text-center">
-            <div class="mb-4 flex justify-center">
-              <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-              </svg>
+            <div class="mb-6 flex justify-center">
+              <div class="w-14 h-14 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-xl">3</div>
             </div>
             <h3 class="font-bold text-lg text-gray-900 mb-2">Easy Returns</h3>
             <p class="text-gray-600">30-day money-back guarantee. Hassle-free returns process.</p>
@@ -143,10 +137,8 @@
 
           <!-- 24/7 Support -->
           <div class="text-center">
-            <div class="mb-4 flex justify-center">
-              <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5-4a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
+            <div class="mb-6 flex justify-center">
+              <div class="w-14 h-14 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-xl">4</div>
             </div>
             <h3 class="font-bold text-lg text-gray-900 mb-2">24/7 Support</h3>
             <p class="text-gray-600">Dedicated customer service team ready to help anytime.</p>
@@ -253,10 +245,12 @@
 import ProductSection from '@/components/product/ProductSection.vue';
 import BannerHero from '@/components/BannerHero.vue';
 import HeroSection from '@/components/HeroSection.vue';
+import { useAuthStore } from '@/stores/auth';
 import CategoryPreview from '@/components/CategoryPreview.vue';
 import { onMounted } from 'vue';
 import { useProduct } from '@/stores/products';
 const productsStore = useProduct();
+const authStore=useAuthStore();
 onMounted(async () => {
   if (!productsStore.products?.length) {
     try { await productsStore.fetchAllProducts() } catch (e) { /* noop */ }

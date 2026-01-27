@@ -133,12 +133,12 @@
             <!-- Actions -->
             <td class="p-4">
               <div class="flex gap-2">
-                <button class="text-gray-600 hover:text-gray-900 p-2 rounded hover:bg-gray-100 transition-colors" title="Edit">
+                <button @click="openEditModal(promo)" class="text-gray-600 hover:text-gray-900 p-2 rounded hover:bg-gray-100 transition-colors" title="Edit">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                   </svg>
                 </button>
-                <button class="text-gray-600 hover:text-red-600 p-2 rounded hover:bg-red-50 transition-colors" title="Delete">
+                <button @click="deletePromo(promo)" class="text-gray-600 hover:text-red-600 p-2 rounded hover:bg-red-50 transition-colors" title="Delete">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                   </svg>
@@ -160,9 +160,9 @@
       <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <!-- Modal Header -->
         <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 class="text-2xl font-bold text-gray-900">Create New Promotion</h2>
+          <h2 class="text-2xl font-bold text-gray-900">{{ editingPromo ? 'Edit Promotion' : 'Create New Promotion' }}</h2>
           <button
-            @click="showCreateModal = false"
+            @click="closeModal"
             class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
           >
             ×
@@ -241,13 +241,6 @@
                   >
                     Tomorrow
                   </button>
-                  <button
-                    type="button"
-                    @click="setStartDate(7)"
-                    class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
-                  >
-                    In 7 days
-                  </button>
                 </div>
               </div>
 
@@ -272,13 +265,6 @@
                   </button>
                   <button
                     type="button"
-                    @click="setEndDate(14)"
-                    class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
-                  >
-                    +14 days
-                  </button>
-                  <button
-                    type="button"
                     @click="setEndDate(30)"
                     class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
                   >
@@ -291,13 +277,7 @@
               </div>
             </div>
 
-            <!-- Duration Summary -->
-            <div v-if="formData.startDate && formData.endDate && !dateValidationError" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p class="text-sm text-blue-900">
-                <span class="font-semibold">Duration:</span> {{ formatFullDate(formData.startDate) }} to {{ formatFullDate(formData.endDate) }}
-                <span class="ml-2 text-blue-700">({{ durationDays }} days)</span>
-              </p>
-            </div>
+
           </div>
 
           <!-- Product Selection -->
@@ -355,14 +335,14 @@
         <!-- Modal Footer -->
         <div class="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex gap-3 justify-end">
           <button
-            @click="showCreateModal = false"
+            @click="closeModal"
             :disabled="isSubmitting"
             class="px-6 py-2 border border-gray-300 rounded-lg text-gray-900 hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
           >
             Cancel
           </button>
           <button
-            @click="createPromotion"
+            @click="savePromotion"
             :disabled="!isFormValid || isSubmitting"
             :class="[
               'px-6 py-2 rounded-lg text-white font-medium transition-colors flex items-center gap-2',
@@ -371,8 +351,8 @@
                 : 'bg-gray-400 cursor-not-allowed'
             ]"
           >
-            <span v-if="isSubmitting">Creating...</span>
-            <span v-else>Create Promotion</span>
+            <span v-if="isSubmitting">{{ editingPromo ? 'Updating...' : 'Creating...' }}</span>
+            <span v-else>{{ editingPromo ? 'Update Promotion' : 'Create Promotion' }}</span>
           </button>
         </div>
       </div>
@@ -389,6 +369,7 @@ const promotionStore = usePromotion();
 const productStore = useProduct();
 const filterStatus = ref('all');
 const showCreateModal = ref(false);
+const editingPromo = ref(null);
 
 // Form data for creating promotion
 const formData = ref({
@@ -410,13 +391,6 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-// Format full date with time
-const formatFullDate = (dateString) => {
-  if (!dateString) return 'Not set';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-};
-
 // Set start date to today at 00:00
 const setStartDateToday = () => {
   const today = new Date();
@@ -432,18 +406,9 @@ const setStartDateTomorrow = () => {
   formData.value.startDate = tomorrow.toISOString().slice(0, 16);
 };
 
-// Set start date to N days from now
-const setStartDate = (days) => {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  date.setHours(0, 0, 0, 0);
-  formData.value.startDate = date.toISOString().slice(0, 16);
-};
-
 // Set end date to N days from start date
 const setEndDate = (days) => {
   if (!formData.value.startDate) {
-    // If no start date, use today
     setStartDateToday();
   }
   const startDate = new Date(formData.value.startDate);
@@ -462,16 +427,6 @@ const dateValidationError = computed(() => {
     return 'End date must be after start date';
   }
   return null;
-});
-
-// Calculate duration in days
-const durationDays = computed(() => {
-  if (!formData.value.startDate || !formData.value.endDate) return 0;
-  const startDate = new Date(formData.value.startDate);
-  const endDate = new Date(formData.value.endDate);
-  const diffMs = endDate - startDate;
-  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-  return diffDays;
 });
 
 // Helper function to get promotion status
@@ -563,8 +518,8 @@ const toggleProduct = (productId) => {
   }
 };
 
-// Create promotion
-const createPromotion = async () => {
+// Save promotion (create or update)
+const savePromotion = async () => {
   if (!isFormValid.value || isSubmitting.value) return;
 
   isSubmitting.value = true;
@@ -576,23 +531,58 @@ const createPromotion = async () => {
       startDate: formData.value.startDate,
       endDate: formData.value.endDate,
       productIds: formData.value.productIds,
-      isActive: true // New promotions are active by default
+      isActive: true
     };
 
-    // Call the store's createPromotion action
-    await promotionStore.createPromotion(promotionData);
+    if (editingPromo.value) {
+      await promotionStore.updatePromotion(editingPromo.value.id, promotionData);
+      alert('Promotion updated successfully!');
+    } else {
+      await promotionStore.createPromotion(promotionData);
+      alert('Promotion created successfully!');
+    }
 
-    // Show success message (you can add toast notification here)
-    alert('Promotion created successfully!');
-
-    // Reset form and close modal
-    resetForm();
-    showCreateModal.value = false;
+    closeModal();
   } catch (e) {
-    console.error('Error creating promotion:', e);
-    alert('Failed to create promotion: ' + e.message);
+    console.error('Error saving promotion:', e);
+    alert('Failed to save promotion: ' + e.message);
   } finally {
     isSubmitting.value = false;
+  }
+};
+
+// Open modal for editing
+const openEditModal = (promo) => {
+  editingPromo.value = promo;
+  formData.value = {
+    name: promo.name,
+    type: promo.type,
+    value: promo.value,
+    startDate: promo.startDate,
+    endDate: promo.endDate,
+    productIds: promo.products?.map(p => p.id) || [],
+    description: promo.description || ''
+  };
+  showCreateModal.value = true;
+};
+
+// Close modal and reset
+const closeModal = () => {
+  showCreateModal.value = false;
+  editingPromo.value = null;
+  resetForm();
+};
+
+// Delete promotion with confirmation
+const deletePromo = async (promo) => {
+  if (!confirm(`Are you sure you want to delete "${promo.name}"?`)) return;
+
+  try {
+    await promotionStore.deletePromotion(promo.id);
+    alert('Promotion deleted successfully!');
+  } catch (e) {
+    console.error('Error deleting promotion:', e);
+    alert('Failed to delete promotion: ' + e.message);
   }
 };
 
