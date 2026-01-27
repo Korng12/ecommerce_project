@@ -27,33 +27,32 @@
     <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <StatCard
         title="Total Revenue"
-        value="$54,239"
+        :value="analyticsStore.loading ? '...' : formatRevenue(analyticsStore.keyMetrics.totalRevenue)"
         change="+12.5% from last month"
         icon="DollarSign"
         icon-color="blue"
       />
 
       <StatCard
-  title="Total Users"
-  :value="loadingUsers ? '...' : totalUsers"
-  change="+8.2% from last month"
-  icon="UserCheck"
-  icon-color="green"
-/>
-
+        title="Total Users"
+        :value="analyticsStore.loading ? '...' : formatNumber(analyticsStore.keyMetrics.totalUsers)"
+        change="+8.2% from last month"
+        icon="UserCheck"
+        icon-color="green"
+      />
 
       <StatCard
         title="Total Orders"
-        value="1,234"
+        :value="analyticsStore.loading ? '...' : formatNumber(analyticsStore.keyMetrics.totalOrders)"
         change="+15.3% from last month"
         icon="Package"
         icon-color="purple"
       />
 
       <StatCard
-        title="Growth Rate"
-        value="23.5%"
-        change="+4.1% from last month"
+        title="Cart Abandonment"
+        :value="analyticsStore.loading ? '...' : formatPercentage(analyticsStore.keyMetrics.cartAbandonmentRate)"
+        change="Rate of abandoned carts"
         icon="TrendingUp"
         icon-color="orange"
       />
@@ -73,10 +72,17 @@
           </div>
 
           <div class="space-y-4">
-            <ActivityItem title="New order #1234" time="2 minutes ago" status="Completed" status-color="green" />
-            <ActivityItem title="User registration" time="15 minutes ago" status="New" status-color="blue" />
-            <ActivityItem title="Payment received" time="1 hour ago" status="Success" status-color="green" />
-            <ActivityItem title="Low stock alert" time="2 hours ago" status="Warning" status-color="yellow" />
+            <ActivityItem 
+              v-for="(order, index) in analyticsStore.dailyOrders.slice(0, 4)" 
+              :key="index"
+              :title="`${order.orders} orders | ${formatRevenue(order.revenue)}`" 
+              :time="new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })" 
+              :status="order.orders > 5 ? 'High' : 'Normal'" 
+              :status-color="order.orders > 5 ? 'green' : 'blue'" 
+            />
+            <div v-if="analyticsStore.dailyOrders.length === 0" class="text-center text-gray-400 py-4">
+              No recent activity
+            </div>
           </div>
         </div>
       </div>
@@ -90,10 +96,10 @@
           <div>
             <div class="flex justify-between mb-1">
               <span class="text-sm text-gray-600">Conversion Rate</span>
-              <span class="text-sm font-semibold text-green-600">4.7%</span>
+              <span class="text-sm font-semibold text-green-600">{{ conversionRate }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-green-500 h-2 rounded-full" style="width: 47%"></div>
+              <div class="bg-green-500 h-2 rounded-full" :style="`width: ${Math.min(conversionRate, 100)}%`"></div>
             </div>
           </div>
 
@@ -114,13 +120,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       <ChartContainer title="Revenue Overview">
         <div class="h-60 sm:h-80">
-          <BarChart :data="revenueChartData" />
+          <BarChart :data="analyticsStore.revenueTrendChartData" />
         </div>
       </ChartContainer>
 
       <ChartContainer title="Sales by Category">
         <div class="h-60 sm:h-80">
-          <PieChart :data="categoryChartData" />
+          <PieChart :data="analyticsStore.categoryChartData" />
         </div>
       </ChartContainer>
     </div>
@@ -128,8 +134,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onMounted, computed } from 'vue'
+import { useAnalytics } from '@/stores/analytics'
 
 import StatCard from '@/components/admin/StatCard.vue'
 import ActivityItem from '@/components/admin/ActivityItem.vue'
@@ -138,56 +144,43 @@ import BarChart from '@/components/admin/BarChart.vue'
 import PieChart from '@/components/admin/PieChart.vue'
 
 // ==========================
-// DASHBOARD STATS
+// STORE
 // ==========================
-const totalUsers = ref(0)
-const loadingUsers = ref(true)
+const analyticsStore = useAnalytics()
 
-const fetchDashboardStats = async () => {
-  try {
-    const res = await axios.get('/api/dashboard/stats', {
-      withCredentials: true
-    })
-
-    console.log('Dashboard stats response:', res.data)
-
-    totalUsers.value = Number(res.data.totalUsers || 0)
-  } catch (err) {
-    console.error('Dashboard API error:', err.response?.data || err.message)
-  } finally {
-    loadingUsers.value = false
-  }
+// ==========================
+// FORMATTING UTILITIES
+// ==========================
+const formatRevenue = (value) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0
+  }).format(value)
 }
 
-onMounted(fetchDashboardStats)
+const formatNumber = (value) => {
+  return new Intl.NumberFormat('en-US').format(Math.round(value))
+}
+
+const formatPercentage = (value) => {
+  return `${parseFloat(value).toFixed(1)}%`
+}
 
 // ==========================
-// CHART DATA
+// COMPUTED PROPERTIES
 // ==========================
-const revenueChartData = ref({
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [
-    {
-      label: 'Revenue',
-      data: [4200, 5100, 3800, 6200, 5800, 7200],
-      backgroundColor: '#3B82F6'
-    }
-  ]
+const conversionRate = computed(() => {
+  if (analyticsStore.keyMetrics.totalUsers > 0) {
+    return ((analyticsStore.keyMetrics.totalOrders / analyticsStore.keyMetrics.totalUsers) * 100).toFixed(1)
+  }
+  return 0
 })
 
-const categoryChartData = ref({
-  labels: ['Electronics', 'Clothing', 'Food', 'Books', 'Others'],
-  datasets: [
-    {
-      data: [4500, 3200, 2800, 1900, 1600],
-      backgroundColor: [
-        '#3B82F6',
-        '#10B981',
-        '#F59E0B',
-        '#EF4444',
-        '#8B5CF6'
-      ]
-    }
-  ]
+// ==========================
+// LIFECYCLE
+// ==========================
+onMounted(() => {
+  analyticsStore.fetchAllAnalytics()
 })
 </script>

@@ -1,5 +1,6 @@
 const db = require('../models/index.js');
 const Brand = db.brand;
+const Product=db.product;
 
 const getAllBrands = async (req, res) => {
   try {

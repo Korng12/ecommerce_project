@@ -9,6 +9,10 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { createPinia } from 'pinia'
 import router  from './router'
+import axios from 'axios'
+
+// Configure axios to always include credentials (cookies)
+axios.defaults.withCredentials = true
 
 import { faUser, faHome, faEnvelope,faSearch,faShoppingCart,faXmark,faLocation,faPhone} from '@fortawesome/free-solid-svg-icons'
 import { faFacebook,faInstagram,faTiktok,faXTwitter } from '@fortawesome/free-brands-svg-icons';

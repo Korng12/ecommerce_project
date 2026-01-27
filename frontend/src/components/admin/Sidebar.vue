@@ -39,17 +39,9 @@ import { useAuthStore } from '@/stores/auth'
 
 import { useRouter } from 'vue-router'
 const router = useRouter()
+const authStore = useAuthStore();
 
-const logout = () => {
-  // remove JWT token
-  localStorage.removeItem('token')
 
-  // optional: remove user info
-  localStorage.removeItem('user')
-
-  // redirect to login page
-  router.push('/login')
-}
 
 defineProps({
   sidebarOpen: Boolean,
@@ -57,21 +49,21 @@ defineProps({
 })
 
 defineEmits(['toggle-sidebar', 'change-tab'])
-const authStore = useAuthStore();
+
 
 // Menu items configuration
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: markRaw(LayoutDashboard) },
   { id: 'users', label: 'Users', icon: markRaw(Users) },
-  { id: 'products', label: 'Products', icon: markRaw(Package) },
   { id: 'categories', label: 'Categories', icon: markRaw(Folder) },
+  { id: 'products', label: 'Products', icon: markRaw(Package) },
+  { id: 'promotions', label: 'Promotions', icon: markRaw(Package) },
   { id: 'orders', label: 'Orders', icon: markRaw(ShoppingCart) },
   { id: 'notifications', label: 'Notifications', icon: markRaw(Bell) },
   { id: 'analytics', label: 'Analytics', icon: markRaw(BarChart3) },
   { id: 'settings', label: 'Settings', icon: markRaw(Settings) },
 ]
-const authStore = useAuthStore();
-const router = useRouter();
+
 const handleLogout = async () => {
   await authStore.logout();
   router.push({ name: 'login' });

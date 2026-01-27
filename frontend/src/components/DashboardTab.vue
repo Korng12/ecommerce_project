@@ -3,12 +3,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Dashboard Overview</h1>
       <div class="flex items-center gap-2">
-        <select class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select
+          class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option>Last 7 days</option>
           <option>Last 30 days</option>
           <option>Last 90 days</option>
         </select>
-         <button @click="refreshDashboard" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+        <button @click="refreshDashboard" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
           ↻ Refresh
         </button>
         <button class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
@@ -16,43 +17,21 @@
         </button>
       </div>
     </div>
-    
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <StatCard 
-        title="Total Revenue"
-        value="$54,239"
-        change="+12.5% from last month"
-        icon="DollarSign"
-        icon-color="blue"
-      />
-      
-      <StatCard
-  title="Total Users"
-  :value="totalUsers"
-  change="+8.2% from last month"
-  icon="UserCheck"
-  icon-color="green"
-/>
+      <StatCard title="Total Revenue" :value="formattedRevenue" change="From all paid orders" icon="DollarSign"
+        icon-color="blue" />
 
-      
-      <StatCard 
-        title="Total Orders"
-        value="1,234"
-        change="+15.3% from last month"
-        icon="Package"
-        icon-color="purple"
-      />
-      
-      <StatCard 
-        title="Growth Rate"
-        value="23.5%"
-        change="+4.1% from last month"
-        icon="TrendingUp"
-        icon-color="orange"
-      />
+      <StatCard title="Total Users" :value="formattedUsers" change="Active customers" icon="Users" icon-color="green" />
+
+      <StatCard title="Total Orders" :value="formattedOrders" change="Successfully completed" icon="Package"
+        icon-color="purple" />
+
+      <StatCard title="Cart Abandonment" :value="formattedAbandonmentRate" change="Of total carts" icon="ShoppingCart"
+        icon-color="orange" />
     </div>
-    
+
     <!-- Two Column Layout for larger screens -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <!-- Recent Activity -->
@@ -64,35 +43,21 @@
               View All
             </button>
           </div>
-          <div class="space-y-3 sm:space-y-4">
-            <ActivityItem 
-              title="New order #1234"
-              time="2 minutes ago"
-              status="Completed"
-              status-color="green"
-            />
-            <ActivityItem 
-              title="User registration"
-              time="15 minutes ago"
-              status="New"
-              status-color="blue"
-            />
-            <ActivityItem 
-              title="Payment received"
-              time="1 hour ago"
-              status="Success"
-              status-color="green"
-            />
-            <ActivityItem 
-              title="Low stock alert"
-              time="2 hours ago"
-              status="Warning"
-              status-color="yellow"
-            />
+          <div v-if="loading" class="text-center py-8 text-gray-500">
+            Loading...
+          </div>
+          <div v-else-if="recentOrders.length === 0" class="text-center py-8 text-gray-500">
+            No recent activity
+          </div>
+          <div v-else class="space-y-3 sm:space-y-4">
+            <ActivityItem v-for="order in recentOrders" :key="order.id"
+              :title="`Order #${order.id} - $${parseFloat(order.totalAmount).toFixed(2)}`"
+              :time="formatTimeAgo(order.createdAt)" :status="order.status"
+              :status-color="getStatusColor(order.status)" />
           </div>
         </div>
       </div>
-      
+
       <!-- Quick Stats -->
       <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Quick Stats</h2>
@@ -146,87 +111,64 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import StatCard from './StatCard.vue'
 import ActivityItem from './ActivityItem.vue'
 import ChartContainer from './ChartContainer.vue'
 import BarChart from './BarChart.vue'
 import PieChart from './PieChart.vue'
-import StatCard from '@/components/StatCard.vue'
+import { useAnalytics } from '@/stores/analytics'
+const analytics = useAnalytics()
+// Computed values from store
+const loading = computed(() => analytics.loading)
+const formattedRevenue = computed(() => `$${(analytics.keyMetrics.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
+const formattedOrders = computed(() => Number(analytics.keyMetrics.totalOrders || 0).toLocaleString())
+const formattedUsers = computed(() => Number(analytics.keyMetrics.totalUsers || 0).toLocaleString())
+const formattedAbandonmentRate = computed(() => `${analytics.keyMetrics.cartAbandonmentRate || 0}%`)
+// Use store outputs directly
+const recentOrders = computed(() => analytics.recentOrders || [])
 
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+// Fetch all analytics data on mount
+onMounted(() => {
+  analytics.fetchAllAnalytics()
+})
 
-const totalUsers = ref(0)
+// Refresh handler
+const refreshDashboard = async () => {
+  await analytics.fetchAllAnalytics()
+}
 
-const loadStats = async () => {
-  try {
-    const res = await axios.get(
-      'http://localhost:3000/dashboard/stats',
-      { withCredentials: true }
-    )
+// Helper functions
+const formatTimeAgo = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
 
-    console.log('STATS RESPONSE 👉', res.data)
+  if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`
+  if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
+  return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
+}
 
-    totalUsers.value = res.data.totalUsers
-  } catch (err) {
-    console.error('Dashboard stats error:', err)
+const getStatusColor = (status) => {
+  const colors = {
+    'paid': 'green',
+    'completed': 'green',
+    'pending': 'yellow',
+    'processing': 'blue',
+    'cancelled': 'red',
+    'failed': 'red'
   }
+  return colors[status] || 'gray'
 }
 
+// Revenue Chart Data (computed from trend data)
+// Charts: use store getters so data stays in one place
+const revenueChartData = computed(() => analytics.revenueTrendChartData)
 
+// Category Chart Data (computed from category revenue)
+const categoryChartData = computed(() => analytics.categoryChartData)
 
-
-const refreshDashboard = () => {
-  console.log('Refreshing dashboard data...')
-}
-
-// Revenue Chart Data
-const revenueChartData = ref({
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [
-    {
-      label: 'Revenue',
-      data: [4200, 5100, 3800, 6200, 5800, 7200],
-      backgroundColor: '#3B82F6',
-      borderRadius: 6,
-      borderSkipped: false,
-    },
-    {
-      label: 'Expenses',
-      data: [2400, 2800, 2200, 3100, 2900, 3400],
-      backgroundColor: '#EF4444',
-      borderRadius: 6,
-      borderSkipped: false,
-    },
-    {
-      label: 'Profit',
-      data: [1800, 2300, 1600, 3100, 2900, 3800],
-      backgroundColor: '#10B981',
-      borderRadius: 6,
-      borderSkipped: false,
-    }
-  ]
-})
-
-// Category Chart Data
-const categoryChartData = ref({
-  labels: ['Electronics', 'Clothing', 'Food', 'Books', 'Others'],
-  datasets: [
-    {
-      data: [4500, 3200, 2800, 1900, 1600],
-      backgroundColor: [
-        '#3B82F6',
-        '#10B981',
-        '#F59E0B',
-        '#EF4444',
-        '#8B5CF6'
-      ],
-      borderColor: '#ffffff',
-      borderWidth: 2,
-      hoverOffset: 15
-    }
-  ]
-})
-onMounted(loadStats)
 </script>

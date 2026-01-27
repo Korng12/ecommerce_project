@@ -1,10 +1,14 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../models/index.js');
 const User = db.user;
-console.log('--- DB CONTENTS ---');
-console.log(db); // Check your terminal to see the keys!
-console.log('-------------------');
+// console.log('--- DB CONTENTS ---');
+// console.log(db); // Check your terminal to see the keys!
+// console.log('-------------------');
+
+if (!User) {
+  console.error('ERROR: User model not found in db object');
+}
 
 // ================= REGISTER =================
 const register = async (req, res) => {
@@ -49,8 +53,8 @@ const register = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('REGISTER ERROR:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('REGISTER ERROR:', err.message, err.stack);
+    res.status(500).json({ message: 'Server error: ' + err.message });
   }
 };
 
@@ -58,6 +62,10 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
@@ -80,7 +88,7 @@ const login = async (req, res) => {
     );
     res.cookie('token', token, { httpOnly: true, secure:false, sameSite: 'lax' , maxAge: 3600000 }); // 1 hour
 
-    res.json({
+    res.status(200).json({
       user: {
         id: user.id,
         username: user.username,
@@ -91,26 +99,28 @@ const login = async (req, res) => {
 
   } catch (err) {
     console.error('LOGIN ERROR:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
-const me =async(req,res)=>{
-  try{
-    const currentUser  =await User.findByPk(req.user.id);
-    if(!currentUser){
-      res.status(404).json({message:'User not found' });
+const me = async(req, res) => {
+  try {
+    const currentUser = await User.findByPk(req.user.id);
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.status(200).json({user:{
-      id:currentUser.id,
-      username:currentUser.username,
-      email:currentUser.email,
-      roleId:currentUser.roleId
-    }}); 
-  }catch(err){
-    res.status(500).json({message:'Server error' }); 
+    res.status(200).json({
+      user: {
+        id: currentUser.id,
+        username: currentUser.username,
+        email: currentUser.email,
+        roleId: currentUser.roleId
+      }
+    }); 
+  } catch (err) {
+    console.error('ME ERROR:', err);
+    res.status(500).json({ message: 'Server error' }); 
   }
-
-}
+};
 const getAllUsers=async(req,res)=>{
   try{
     const users=await User.findAll();

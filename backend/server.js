@@ -17,11 +17,14 @@ const dashboardRoutes = require('./routes/dashboard')
 const productsRoutes = require('./routes/api/products');
 const categoriesRoutes = require('./routes/api/categories');
 const brandsRoutes = require('./routes/api/brands');
+const reviewRoutes = require('./routes/reviewRoutes');
+const profileRoutes = require('./routes/profileRoutes')
+const statisticsRoutes = require('./routes/statisticsRoutes')
 // Serve static files for images
 app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
 app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
 
-app.use("/categories", express.static(path.join(__dirname, "uploads","categories")));
+app.use("/uploads/categories", express.static(path.join(__dirname, "uploads","categories")));
 
 app.use(cookieParser());
 app.use(
@@ -47,6 +50,8 @@ app.use('/api/users', userRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 
 app.use('/api', authRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/statistics', statisticsRoutes);
 app.use('/hello',(req,res)=>{
   console.log(req.url)
   res.status(200).json("Hello")
@@ -59,6 +64,7 @@ app.use('/protected',verifyJwt,(req,res)=>{
 app.use("/api", productsRoutes);
 app.use("/api", categoriesRoutes);
 app.use("/api", brandsRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", orderRoutes);
 app.use("/api", webhookRouter.apiRoutes); // Payment routes BEFORE analytics
@@ -69,6 +75,21 @@ app.use(
   verifyRole(1),
   require("./controllers/authController").getAllUsers,
 );
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('ERROR:', err);
+  res.status(err.status || 500).json({ 
+    message: err.message || 'Server error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
 app.listen(3000, () => {
   console.log("🚀 Server running on port 3000");
 });
