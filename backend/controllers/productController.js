@@ -178,18 +178,28 @@ const updateProduct = async (req, res) => {
 
     /* ===== IMAGE UPDATE ===== */
     if (req.file) {
+      console.log("📸 IMAGE FILE RECEIVED:", req.file);
       await ProductImage.destroy({ where: { productId } });
       await ProductImage.create({
         productId,
         imageUrl: req.file.filename, // ✅ filename only
         isPrimary: true,
       });
+      console.log("✅ IMAGE SAVED - Filename:", req.file.filename);
+    } else {
+      console.log("⚠️ NO IMAGE FILE RECEIVED IN UPDATE");
     }
 
     const updatedProduct = await Product.findByPk(productId, {
-      include: [{ model: ProductImage, as: "images" }],
+      include: [
+        { model: Category, as: "category", attributes: ["id", "name"] },
+        { model: Brand, as: "brand", attributes: ["id", "name", "logo"] },
+        { model: ProductImage, as: "images" },
+        { model: Specification, as: "specifications" },
+      ],
     });
 
+    console.log("📦 UPDATED PRODUCT RESPONSE:", JSON.stringify(updatedProduct, null, 2));
     res.json(updatedProduct);
   } catch (err) {
     console.error("❌ UPDATE PRODUCT ERROR:", err);

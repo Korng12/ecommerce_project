@@ -24,10 +24,11 @@ const bannerRoutes = require('./routes/api/banners');
 app.use('/api/banners', bannerRoutes);
 
 // Serve static files for images
-app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
-app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
+app.use("/categories", express.static(path.join(__dirname, "public", "images", "categories")));
+app.use("/images/products", express.static(path.join(__dirname, "public", "images", "products")));
 
-app.use("/categories", express.static(path.join(__dirname, "uploads","categories")));
+app.use("/categories", express.static(path.join(__dirname, "uploads", "categories")));
+app.use("/uploads/products", express.static(path.join(__dirname, "uploads", "products")));
 
 
 app.use(cookieParser());
@@ -71,14 +72,14 @@ app.use('/api/users', userRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 
 app.use('/api', authRoutes);
-app.use('/hello',(req,res)=>{
+app.use('/hello', (req, res) => {
   console.log(req.url)
   res.status(200).json("Hello")
 
 });
 
-app.use('/protected',verifyJwt,(req,res)=>{
-  res.status(200).json({message:"Protected content",user:req.user});
+app.use('/protected', verifyJwt, (req, res) => {
+  res.status(200).json({ message: "Protected content", user: req.user });
 });
 app.use("/api", productsRoutes);
 app.use("/api", categoriesRoutes);
