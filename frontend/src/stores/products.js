@@ -22,8 +22,9 @@ export const useProduct = defineStore('productStore',{
       return state.products
         .slice()
         .sort((a,b)=> b.totalReviews - a.totalReviews)
-        .slice(0,10)
+        // .slice(0,10)
     }
+
   },
   actions:{
     async fetchAllProducts(){
@@ -39,6 +40,29 @@ export const useProduct = defineStore('productStore',{
           // Construct full backend URL for images
           const imageUrl = primaryImage?.imageUrl || ''
           const image = imageUrl ? getImageUrl(imageUrl) : ''
+          
+          // Get active promotion if available
+          const activePromotion = p.promotions && Array.isArray(p.promotions) 
+            ? p.promotions.find(promo => promo.isActive && new Date(promo.startDate) <= new Date() && new Date() <= new Date(promo.endDate))
+            : null
+          
+          // Format promotion text based on type
+          let promotionText = ''
+          let promotionDiscount = null
+          if (activePromotion) {
+            if (activePromotion.type === 'percentage') {
+              promotionDiscount = parseFloat(activePromotion.value)
+              promotionText = `${activePromotion.value}% OFF`
+            } else if (activePromotion.type === 'fixed_amount') {
+              promotionDiscount = parseFloat(activePromotion.value)
+              promotionText = `$${activePromotion.value} OFF`
+            }
+            // Add name if available
+            if (activePromotion.name) {
+              promotionText = `${activePromotion.name} - ${promotionText}`
+            }
+          }
+          
           return {
             id: p.id,
             name: p.name,
@@ -48,7 +72,11 @@ export const useProduct = defineStore('productStore',{
             category: p.category?.name || '',
             rating: Number(p.averageRating || 0),
             totalReviews: p.totalReviews || 0,
-            description: p.description || ''
+            description: p.description || '',
+            promotion: promotionText || null,
+            promotionDiscount: promotionDiscount,
+            promotionType: activePromotion?.type || null,
+            stock: p.stock || 0
           }
         }) : []
       }catch(err){

@@ -62,6 +62,10 @@ const routes = [
         name: "adminView",
         component: () => import("@/views/admin/adminView.vue"),
       },
+      // {
+      //   path:"promotions",
+      //   name:""
+      // }
     ],
   },
   {

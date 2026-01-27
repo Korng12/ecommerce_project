@@ -1,26 +1,71 @@
 <template>
-  <div class="w-full">
+  <div class="w-full bg-white">
     <div>
-    <Header></Header>
+      <Header></Header>
     </div>
-    <div class="mt-24">
-        <HeroSection></HeroSection>
-     </div>
-   
-    <!-- Show all product sections -->
-    <ProductSection title="Popular Products" :products="productsStore.getPopularProducts" :show="true" />
 
-    <ProductSection title="Best Selling" :show="true" />
-    <ProductSection title="Recommended" :show="true" />
-    <ProductSection title="Accessories"  :show="true" />
-     <div>
+    <!-- Hero Banner -->
+    <div class="mt-24 px-4 md:px-8">
+      <div class="max-w-7xl mx-auto">
+        <HeroSection></HeroSection>
+      </div>
+    </div>
+
+    <!-- Popular Products Section -->
+    <div class="mt-16 px-4 md:px-8">
+      <div class="max-w-7xl mx-auto">
+        <ProductSection 
+          title="Popular Products" 
+          :products="productsStore.getPopularProducts" 
+          :show="true"
+          viewMorePath="/products?sort=popular"
+        />
+      </div>
+    </div>
+
+    <!-- Best Selling Products -->
+    <div class="mt-16 px-4 md:px-8">
+      <div class="max-w-7xl mx-auto">
+        <ProductSection 
+          title="Best Sellers" 
+          :products="productsStore.products.slice().sort((a,b) => b.totalReviews - a.totalReviews)" 
+          :show="true"
+          viewMorePath="/products?sort=bestselling"
+        />
+      </div>
+    </div>
+
+    <!-- Recommended For You -->
+    <div class="mt-16 px-4 md:px-8">
+      <div class="max-w-7xl mx-auto">
+        <ProductSection 
+          title="Recommended" 
+          :products="productsStore.products.slice(0, Math.min(10, productsStore.products.length))" 
+          :show="true"
+          viewMorePath="/products"
+        />
+      </div>
+    </div>
+
+    <!-- Category Products -->
+    <div v-if="productsStore.getByCategory('Accessories').length > 0" class="mt-16 px-4 md:px-8">
+      <div class="max-w-7xl mx-auto">
+        <ProductSection 
+          title="Accessories" 
+          :products="productsStore.getByCategory('Accessories')" 
+          :show="true"
+          viewMorePath="/products?category=Accessories"
+        />
+      </div>
+    </div>
+
+    <!-- Special Products Sections -->
+    <div class="mt-16">
       <SpecialKind></SpecialKind>
     </div>
-    <div>
+    
+    <div class="mt-16">
       <SpecialProduct></SpecialProduct>
-    </div>
-    <div>
-   
     </div>
   </div>
 </template>
@@ -34,11 +79,19 @@ import SpecialKind from '@/components/SpecialKind.vue';
 import { onMounted } from 'vue'; 
 import { useProduct } from '@/stores/products';
 import { useBrand } from '@/stores/brands';
+import { useAuthStore } from '@/stores/auth';
+
 const productsStore = useProduct();
 const brandsStore = useBrand();
-onMounted(async()=>{
-  if(!productsStore.products?.length){
-    try{ await productsStore.fetchAllProducts()} catch(e){/*no op*/}
+const authStore = useAuthStore();
+
+onMounted(async () => {
+  if (!productsStore.products?.length) {
+    try { 
+      await productsStore.fetchAllProducts();
+    } catch (e) {
+      console.error('Failed to fetch products:', e);
+    }
   }
-})
+});
 </script>
