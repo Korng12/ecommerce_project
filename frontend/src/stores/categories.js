@@ -4,6 +4,7 @@ import  getImageUrl from "../utils/convertImagePath";
 
 const API_URL = 'http://localhost:3000/api';
 
+
 export const useCategory=defineStore('categoryStore',{
   state:()=>({
     categories:[],
@@ -21,7 +22,9 @@ export const useCategory=defineStore('categoryStore',{
       this.loading = true
       this.error = null
       try{
-        const res = await fetch(`${API_URL}/categories`)
+        const res = await fetch(`${API_URL}/categories`,{
+          credentials: 'include'
+        })
         if(!res.ok){
           throw new Error('Failed to fetch categories')
         }
@@ -48,6 +51,7 @@ export const useCategory=defineStore('categoryStore',{
 
       try {
         const options = {
+          credentials: 'include',
           method: 'POST'
         }
 
@@ -63,7 +67,7 @@ export const useCategory=defineStore('categoryStore',{
         }
 
         const res = await fetch(
-          `${API_URL}/categories?subdir=categories`,
+          `${API_URL}/categories`,
           options
         )
 
@@ -73,11 +77,11 @@ export const useCategory=defineStore('categoryStore',{
         }
 
         const newCategory = await res.json()
+        const normalizedCategory = {...newCategory, image: newCategory.image ? getImageUrl(newCategory.image) : ''}
+        this.categories.push(normalizedCategory)
+      
 
-        // update store state
-        this.categories.push(newCategory)
-
-        return newCategory
+        return normalizedCategory
 
       } catch (err) {
         console.error('Failed to create category:', err)
@@ -94,6 +98,7 @@ export const useCategory=defineStore('categoryStore',{
       this.error = null
       try {
         const options = {
+          credentials: 'include',
           method: 'PUT'
         }
 
@@ -118,7 +123,7 @@ export const useCategory=defineStore('categoryStore',{
         const updatedCategory = await res.json()
         const index = this.categories.findIndex(c => c.id === id)
         if (index !== -1) {
-          this.categories[index] = updatedCategory
+          this.categories[index] = {...updatedCategory, image: updatedCategory.image ? getImageUrl(updatedCategory.image) : ''}
         }
         return updatedCategory
       } catch (err) {
