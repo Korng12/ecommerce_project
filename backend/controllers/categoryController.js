@@ -1,4 +1,5 @@
 const db = require('../models/index.js');
+const { Op } = require('sequelize');
 const Category = db.category;
 const Product = db.product;
 const path = require('path');
@@ -110,7 +111,7 @@ const updateCategory = async (req, res) => {
     if (name) {
       // Check if new name is unique
       const existingCategory = await Category.findOne({ 
-        where: { name, id: { [db.sequelize.Op.ne]: req.params.id } }
+        where: { name, id: { [Op.ne]: req.params.id } }
       });
       if (existingCategory) {
         // Clean up uploaded file if name already exists

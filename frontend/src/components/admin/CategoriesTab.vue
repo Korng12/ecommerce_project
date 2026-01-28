@@ -21,7 +21,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-600 text-sm">Total Categories</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ categoryStore.totalCategories }}</p>
+            <p class="text-3xl font-bold text-gray-800 mt-1">{{ categories.length }}</p>
           </div>
           <div class="bg-blue-100 p-3 rounded-lg">
             <Folder class="text-blue-600" :size="24" />
@@ -66,7 +66,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr v-if="categoryStore.loading" class="hover:bg-gray-50">
+            <tr v-if="loading" class="hover:bg-gray-50">
               <td colspan="4" class="px-6 py-8 text-center text-gray-500">
                 <div class="flex items-center justify-center gap-2">
                   <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
@@ -99,7 +99,7 @@
                 </div>
               </td>
               <td class="px-6 py-4">
-                <div class="font-medium text-gray-900">{{ category.name  }} {{ category.image }}</div>
+                <div class="font-medium text-gray-900">{{ category.name  }} </div>
               </td>
               <td class="px-6 py-4">
                 <div class="text-sm text-gray-600 max-w-md truncate">
@@ -211,10 +211,10 @@
             </div>
             <p v-if="imageError" class="text-sm text-red-500 mt-2">Failed to load image</p>
           </div>
-
+          
           <!-- Error Message -->
-          <div v-if="categoryStore.error" class="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p class="text-sm text-red-600">{{ categoryStore.error }}</p>
+          <div v-if="error" class="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-sm text-red-600">{{  error }}</p>
           </div>
 
           <!-- Actions -->
@@ -228,10 +228,10 @@
             </button>
             <button
               type="submit"
-              :disabled="categoryStore.loading"
+              :disabled="loading"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ categoryStore.loading ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+              {{ loading ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
             </button>
           </div>
         </form>
@@ -267,10 +267,10 @@
             </button>
             <button
               @click="handleDelete"
-              :disabled="categoryStore.loading"
+              :disabled="loading"
               class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
             >
-              {{ categoryStore.loading ? 'Deleting...' : 'Delete' }}
+              {{ loading ? 'Deleting...' : 'Delete' }}
             </button>
           </div>
         </div>
@@ -283,8 +283,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useCategory } from '@/stores/categories'
 import { Plus, Search, Edit2, Trash2, Folder, ImageIcon, AlertCircle, Upload } from 'lucide-vue-next'
+import { storeToRefs } from 'pinia'
 
 const categoryStore = useCategory()
+const { categories, loading, error } = storeToRefs(categoryStore)
 
 // State
 const showModal = ref(false)
@@ -305,14 +307,15 @@ const formData = ref({
 
 // Computed
 const filteredCategories = computed(() => {
-  if (!searchQuery.value) return categoryStore.categories
-  
+  if (!searchQuery.value) return categories.value
+
   const query = searchQuery.value.toLowerCase()
-  return categoryStore.categories.filter(category =>
+  return categories.value.filter(category =>
     category.name.toLowerCase().includes(query) ||
     (category.description && category.description.toLowerCase().includes(query))
   )
 })
+
 
 // Methods
 const handleImageUpload = (event) => {
@@ -391,27 +394,32 @@ const handleSubmit = async () => {
   try {
     // If a new image file is selected, create FormData for multipart upload
     if (imageFile.value) {
-      const formDataForUpload = new FormData()
-      formDataForUpload.append('name', formData.value.name)
-      formDataForUpload.append('description', formData.value.description)
-      formDataForUpload.append('image', imageFile.value)
+  const formDataForUpload = new FormData()
+  formDataForUpload.append('name', formData.value.name)
+  formDataForUpload.append('description', formData.value.description)
+  formDataForUpload.append('image', imageFile.value)
 
-      if (isEditMode.value) {
-        await categoryStore.updateCategory(formData.value.id, formDataForUpload)
-      } else {
-        await categoryStore.createCategory(formDataForUpload)
-      }
-    } else {
-      // No new image, send regular data
-      await categoryStore[isEditMode.value ? 'updateCategory' : 'createCategory'](
-        isEditMode.value ? formData.value.id : undefined,
-        {
-          name: formData.value.name,
-          description: formData.value.description,
-          image: formData.value.image
-        }
-      )
-    }
+  if (isEditMode.value) {
+    await categoryStore.updateCategory(formData.value.id, formDataForUpload)
+  } else {
+    await categoryStore.createCategory(formDataForUpload)
+  }
+} else {
+  if (isEditMode.value) {
+    await categoryStore.updateCategory(formData.value.id, {
+      name: formData.value.name,
+      description: formData.value.description,
+      image: formData.value.image
+    })
+  } else {
+    await categoryStore.createCategory({
+      name: formData.value.name,
+      description: formData.value.description,
+      image: formData.value.image
+    })
+  }
+}
+
     closeModal()
   } catch (error) {
     console.error('Error submitting form:', error)

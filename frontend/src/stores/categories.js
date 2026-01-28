@@ -65,6 +65,9 @@ export const useCategory = defineStore('categories', {
         if (!res.ok) throw new Error('Failed to create category')
 
         const newCategory = await res.json()
+        const normalizedCategory = {...newCategory, image: newCategory.image ? getImageUrl(newCategory.image) : ''}
+        this.categories.push(normalizedCategory)
+      
 
         this.categories.push({
           id: newCategory.id,

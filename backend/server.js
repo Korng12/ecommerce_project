@@ -35,6 +35,7 @@ const promotionsRoutes = require('./routes/api/promotions');
 app.use("/categories", express.static(path.join(__dirname, "public", "images","categories")));
 app.use("/images/products", express.static(path.join(__dirname, "public", "images","products")));
 
+app.use("/uploads/categories", express.static(path.join(__dirname, "uploads","categories")));
 
 app.use(cookieParser());
 app.use(

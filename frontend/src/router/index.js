@@ -137,12 +137,16 @@ const routes = [
     path: "/receipt/:orderId",
     component: () => import("@/components/order/Receipt.vue"),
   },
-  // {
-  //   name: "categoryView",
-  //   path: "/product/categoryView/:catName",
-  //   component: () => import("@/views/user/CategoryView.vue"),
-  // },
-  { path: "/:catchAll(.*)", redirect: "/" },
+  {
+    name: "forbidden",
+    path: "/forbidden",
+    component: () => import("@/views/errors/ForbiddenView.vue"),
+  },
+  {
+    name: "notFound",
+    path: "/:catchAll(.*)",
+    component: () => import("@/views/errors/NotFoundView.vue"),
+  },
 ];
 
 const router = createRouter({
@@ -156,10 +160,12 @@ router.beforeEach(async (to) => {
     await authStore.fetchCurrentUser();
   }
 
+  // Redirect to login if route requires auth and user is not authenticated
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: "login" };
   }
 
+  // Redirect to forbidden page if user doesn't have required role
   if (to.meta.requiredRole && authStore.user?.roleId !== to.meta.requiredRole) {
     return { name: "forbidden" };
   }
