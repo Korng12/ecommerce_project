@@ -26,6 +26,7 @@
               :alt="category.name"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
+            
             <!-- Always visible overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
             
@@ -37,6 +38,7 @@
           <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
             <h3 class="text-lg md:text-xl font-bold mb-1">{{ category.name }}</h3>
             <p class="text-sm text-gray-200">{{ category.description }}</p>
+            <p>{{ category.image }}</p>
             <!-- <div class="mt-3 inline-block">
               <span class="text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full group-hover:bg-white/30 transition-colors">
                 Shop Now →

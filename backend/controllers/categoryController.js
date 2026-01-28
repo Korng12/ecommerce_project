@@ -1,4 +1,5 @@
-const db = require("../models/index.js");
+const db = require('../models/index.js');
+const { Op } = require('sequelize');
 const Category = db.category;
 const Product = db.product;
 const path = require("path");
@@ -119,21 +120,16 @@ const updateCategory = async (req, res) => {
     const { name, description } = req.body;
     const updateData = {};
 
-    // Update name if provided and not empty
-    if (name && name.trim()) {
-      // Check if new name is unique (only if it's different from current name)
-      if (name !== category.name) {
-        const existingCategory = await Category.findOne({
-          where: { name, id: { [db.sequelize.Op.ne]: req.params.id } },
-        });
-        if (existingCategory) {
-          // Clean up uploaded file if name already exists
-          if (req.file) {
-            fs.unlinkSync(req.file.path);
-          }
-          return res
-            .status(400)
-            .json({ message: "Category name already exists" });
+    // Update name if provided
+    if (name) {
+      // Check if new name is unique
+      const existingCategory = await Category.findOne({ 
+        where: { name, id: { [Op.ne]: req.params.id } }
+      });
+      if (existingCategory) {
+        // Clean up uploaded file if name already exists
+        if (req.file) {
+          fs.unlinkSync(req.file.path);
         }
       }
       updateData.name = name.trim();

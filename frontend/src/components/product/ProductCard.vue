@@ -17,7 +17,7 @@
           Only {{ product.stock }} left!
         </span>
       </div>
-
+      <p>{{ product.promotionDiscount || 'nothing ' }}</p>
       <!-- Product Image Container -->
       <div class="relative overflow-hidden bg-gray-100 h-48">
         <img :src="fixImage(product.image)" alt=""
@@ -31,7 +31,7 @@
             <path
               d="M4.5 3a2.5 2.5 0 015 0v.006h.01a7 7 0 013.922 12.255.5.5 0 01-.714-.712A6 6 0 009.5 3.5h-.01V3a2.5 2.5 0 00-5 0v.5H4a2 2 0 00-2 2v11a2 2 0 002 2h12a2 2 0 002-2V5.5a2 2 0 00-2-2h-.5v-.5a2.5 2.5 0 00-5 0v.006h-.01A7 7 0 014.5 3z" />
           </svg>
-          <span class="font-black">{{ product.promotion }}</span>
+          <span class="font-black">{{ product.promotion  || 'nothing'}}</span>
         </div>
       </div>
 

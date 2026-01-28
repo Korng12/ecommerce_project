@@ -2,27 +2,29 @@ const express = require("express");
 const router = express.Router();
 
 const productController = require("../../controllers/productController");
-const upload = require("../../middleware/upload"); // function
+const upload = require("../../middleware/upload");
 
+// CREATE PRODUCT
 router.post(
   "/products",
-  upload("/products").single("image"), // ✅ CORRECT
-  productController.createProduct,
+  upload("products").single("image"), // ✅ NO SLASH
+  productController.createProduct
 );
 
 // UPDATE PRODUCT
 router.put(
   "/products/:id",
-  upload("/products").single("image"),
-  productController.updateProduct,
+  upload("products").single("image"), // ✅ NO SLASH
+  productController.updateProduct
 );
 
 // DELETE PRODUCT
 router.delete("/products/:id", productController.deleteProduct);
 
-// GET - IMPORTANT: specific routes must come before parameterized routes
-router.get("/products/low-stock", productController.getLowStockProducts);
+// GET ALL
 router.get("/products", productController.getAllProducts);
+
+// GET ONE
 router.get("/products/:id", productController.getProductById);
 
 module.exports = router;

@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Promotion.init({
     name: DataTypes.STRING,
-    type: DataTypes.ENUM('percentage','fixed'),
+    type: DataTypes.ENUM('percentage','fixed_amount'),
     value: DataTypes.DECIMAL,
     startDate: DataTypes.DATE,
     endDate: {

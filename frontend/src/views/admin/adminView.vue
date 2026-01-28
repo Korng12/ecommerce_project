@@ -19,6 +19,7 @@
         <Products v-else-if="activeTab === 'products'" />
         <Promotions v-else-if="activeTab === 'promotions'" />
         <CategoriesTab v-else-if="activeTab === 'categories'" />
+        <Banner v-else-if="activeTab === 'banners'" />
         <OrdersTab v-else-if="activeTab === 'orders'" />
         <NotificationsTab v-else-if="activeTab === 'notifications'" :notifications="notificationStore.notifications"
           :onUpdate="updateNotifications" />
@@ -43,6 +44,7 @@ import NotificationsTab from '@/components/admin/NotificationsTab.vue'
 import AnalyticsTab from '@/components/admin/AnalyticsTab.vue'
 import SettingsTab from '@/components/admin/SettingsTab.vue'
 import Products from '@/components/admin/Products.vue'
+import Banner from '@/components/admin/Banner.vue'
 import Promotions from '@/components/admin/Promotions.vue'
 
 // Store

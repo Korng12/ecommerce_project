@@ -8,27 +8,36 @@
 
     <!-- Action -->
     <div class="flex justify-between mb-4">
-      <input v-model="search" placeholder="Search product..." class="border px-4 py-2 rounded w-1/3" />
-      <div class="flex gap-2 text-gray-700">
-        <select v-model="selectedCategory" class="rounded-xl border-gray-300">
-          <option value="default">All Categories</option>
-          <option v-for="category in categoryStore.categories" :key="category.id" :value="category.name">
-            {{ category.name }}
-          </option>
-        </select>
-        <select v-model="selectedBrand" class="rounded-xl border-gray-300">
-          <option value="">All Brands</option>
-          <option v-for="brand in brandStore.brands" :key="brand.id" :value="brand.name">
-            {{ brand.name }}
-          </option>
-        </select>
-        <select v-model="sortBy" class="rounded-xl border-gray-300">
-          <option value="default">Sort by: Featured</option>
-          <option value="low-high">Price: Low to High</option>
-          <option value="high-low">Price: High to Low</option>
-        </select>
-      </div>
-      <button @click="openModal" class="bg-blue-600 text-white px-4 py-2 rounded">
+      <input
+        v-model="search"
+        placeholder="Search product..."
+        class="border px-4 py-2 rounded w-1/3"
+      />
+       <div class="flex gap-2 text-gray-700">
+          <select v-model="selectedCategory" class="rounded-xl border-gray-300">
+            <option value="default">All Categories</option>
+            <option v-for="category in categoryStore.categories" :key="category.id" :value="category.name">
+              {{ category.name }}
+            </option>
+          </select>
+          
+          <select v-model="selectedBrand" class="rounded-xl border-gray-300">
+            <option value="">All Brands</option>
+            <option v-for="brand in brandStore.brands" :key="brand.id" :value="brand.name">
+
+              {{ brand.name }}
+            </option>
+          </select>
+          <select v-model="sortBy" class="rounded-xl border-gray-300">
+            <option value="default">Sort by: Featured</option>
+            <option value="low-high">Price: Low to High</option>
+            <option value="high-low">Price: High to Low</option>
+          </select>
+        </div>
+      <button
+        @click="openModal"
+        class="bg-blue-600 text-white px-4 py-2 rounded"
+      >
         + Add Product
       </button>
 
@@ -116,56 +125,44 @@
               class="w-full border p-2 rounded" />
           </div>
 
-          <!-- Image Preview -->
-          <div v-if="imagePreview || (isEditing && form.existingImage)" class="mt-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              {{ imageFile ? 'New Image Preview' : 'Current Image' }}
-            </label>
-            <img :src="imagePreview || form.existingImage" class="w-32 h-32 rounded object-cover border"
-              @error="(e) => e.target.style.display = 'none'" />
-            <button v-if="imageFile" @click="clearImage" type="button"
-              class="mt-2 text-sm text-red-600 hover:underline">
-              Remove new image
-            </button>
-          </div>
-
-          <select v-model="form.categoryId" class="w-full border p-2 rounded">
-            <option disabled value="">Select category</option>
-            <option v-for="cat in categoryStore.categories" :key="cat.id" :value="cat.id">
-              {{ cat.name }}
-            </option>
-          </select>
-
+          <img v-if="imagePreview" :src="imagePreview" class="w-24 h-24 rounded object-cover" />
+          <!-- BRAND -->
           <select v-model="form.brandId" class="w-full border p-2 rounded">
-            <option disabled value="">Select brand (optional)</option>
-            <option v-for="brand in brandStore.brands" :key="brand.id" :value="brand.id">
-              {{ brand.name }}
+            <option value="">Select brand</option>
+            <option v-for="b in brandStore.brands" :key="b.id" :value="b.id">
+              {{ b.name }}
             </option>
           </select>
 
+          <!-- CATEGORY -->
+          <select v-model="form.categoryId" class="w-full border p-2 rounded">
+            <option value="">Select category</option>
+            <option v-for="c in categoryStore.categories" :key="c.id" :value="c.id">
+              {{ c.name }}
+            </option>
+          </select>
 
           <!-- PRICE -->
-          <input type="number" v-model.number="form.price" min="1" step="0.01" placeholder="Price"
-            class="w-full border p-2 rounded" />
+          <input type="number" v-model.number="form.price" placeholder="Price" class="w-full border p-2 rounded" />
           <p v-if="priceError" class="text-red-600 text-sm">
             Price must be greater than 0
           </p>
 
           <!-- STOCK -->
-          <input type="number" v-model.number="form.stock" min="1" step="1" placeholder="Stock"
-            class="w-full border p-2 rounded" />
+          <input type="number" v-model.number="form.stock" placeholder="Stock" class="w-full border p-2 rounded" />
           <p v-if="stockError" class="text-red-600 text-sm">
             Stock must be greater than 0
           </p>
         </div>
 
         <div class="flex justify-end gap-3 mt-4">
-          <button @click="closeModal" class="border px-4 py-2 rounded hover:bg-gray-50">
-            Cancel
-          </button>
-
-          <button @click="saveProduct" :disabled="!isFormValid" class="px-4 py-2 rounded text-white"
-            :class="isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'">
+          <button @click="closeModal" class="border px-4 py-2 rounded">Cancel</button>
+          <button
+            @click="saveProduct"
+            :disabled="!isFormValid"
+            class="px-4 py-2 rounded text-white"
+            :class="isFormValid ? 'bg-blue-600' : 'bg-gray-400 cursor-not-allowed'"
+          >
             Save
           </button>
         </div>
@@ -177,19 +174,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useProduct } from '@/stores/products'
-
-import { useBrand } from "@/stores/brands";
+import { useBrand } from '@/stores/brands'
 import { useCategory } from '@/stores/categories'
 
+/* ================= STORES ================= */
+const productStore = useProduct()
 const brandStore = useBrand()
 const categoryStore = useCategory()
-const productStore = useProduct()
-
-
-// const API_URL = 'http://localhost:3000/api/products'
-
-/* ================= STATE ================= */
-// const products = ref([])
 const search = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -200,80 +191,75 @@ const imageFile = ref(null)
 const imagePreview = ref(null)
 const fileInput = ref(null)
 
+/* ================= FORM ================= */
 const form = ref({
   id: null,
   name: '',
   description: '',
-  price: 1,
-  stock: 1,
+  price: null,
+  stock: null,
   categoryId: '',
   brandId: ''
 })
 
+
 /* ================= VALIDATION ================= */
-const priceError = computed(() => form.value.price <= 0)
-const stockError = computed(() => form.value.stock <= 0)
+const priceError = computed(
+  () => form.value.price !== null && form.value.price <= 0
+)
+const stockError = computed(
+  () => form.value.stock !== null && form.value.stock <= 0
+)
 
-const isFormValid = computed(() => {
-  return (
-    form.value.name &&
-    form.value.categoryId &&
-    form.value.price > 0 &&
-    form.value.stock > 0
-  )
-})
+const isFormValid = computed(() =>
+  form.value.name &&
+  form.value.categoryId !== null &&
+  form.value.price > 0 &&
+  form.value.stock > 0
+)
 
+/* ================= COMPUTED ================= */
+// const filteredProducts = computed(() =>
+//   productStore.products.filter(p =>
+//     p.name.toLowerCase().includes(search.value.toLowerCase())
+//   )
+// )
 
 /* ================= IMAGE ================= */
-const handleImage = e => {
-  imageFile.value = e.target.files[0] || null
-  imagePreview.value = imageFile.value
-    ? URL.createObjectURL(imageFile.value)
-    : null
+const handleImage = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  imageFile.value = file
+  imagePreview.value = URL.createObjectURL(file)
 }
 
-const clearImage = () => {
-  imageFile.value = null
-  imagePreview.value = null
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
-}
-
-/* ================= SAVE ================= */
+/* ================= CRUD ================= */
 const saveProduct = async () => {
-  if (!isFormValid.value) {
-    alert('Price and stock must be greater than 0')
-    return
-  }
-
-  const fd = new FormData()
-  fd.append('name', form.value.name)
-  fd.append('description', form.value.description || '')
-  fd.append('price', form.value.price)
-  fd.append('stock', form.value.stock)
-  fd.append('categoryId', form.value.categoryId)
-
-  if (form.value.brandId) fd.append('brandId', form.value.brandId)
-  if (imageFile.value) fd.append('image', imageFile.value)
+  if (!isFormValid.value) return
 
   try {
     if (isEditing.value) {
-      await productStore.updateProduct(form.value.id, fd)
+      await productStore.updateProduct(
+        form.value.id,
+        form.value,
+        imageFile.value
+      )
     } else {
-      await productStore.createProduct(fd)
+      await productStore.createProduct(
+        form.value,
+        imageFile.value
+      )
     }
-
     closeModal()
   } catch (err) {
-    console.error('❌ Save Error:', err.response?.data || err)
-    alert(err.response?.data?.message || 'Save failed')
+    alert(productStore.error || 'Action failed')
   }
 }
 
-/* ================= EDIT ================= */
-const editProduct = p => {
+const editProduct = (p) => {
   isEditing.value = true
+
+  // ✅ MAP CORRECT FIELDS
   form.value = {
     id: p.id,
     name: p.name,
@@ -284,19 +270,18 @@ const editProduct = p => {
     brandId: p.brandId,
     existingImage: p.image // Store existing image URL
   }
-  imagePreview.value = null // Clear preview to show existing image
+
+  imagePreview.value = p.image
   imageFile.value = null
   showModal.value = true
 }
 
-/* ================= DELETE ================= */
-const deleteProduct = async p => {
-  if (!confirm(`Delete "${p.name}"? This action cannot be undone.`)) return
-
+const deleteProduct = async (p) => {
+  if (!confirm('Delete product?')) return
   try {
     await productStore.deleteProduct(p.id)
   } catch (err) {
-    alert(err.message || 'Failed to delete product')
+    alert(productStore.error || 'Delete failed')
   }
 }
 
@@ -307,11 +292,10 @@ const openModal = () => {
     id: null,
     name: '',
     description: '',
-    price: 1,
-    stock: 1,
-    categoryId: '',
-    brandId: '',
-    existingImage: null
+    price: null,
+    stock: null,
+    categoryId: null,
+    brandId: null
   }
   imageFile.value = null
   imagePreview.value = null
@@ -323,6 +307,12 @@ const closeModal = () => {
   isEditing.value = false
 }
 
+/* ================= LOAD ================= */
+// onMounted(async () => {
+//   await productStore.fetchAllProducts()
+//   await brandStore.fetchBrands()
+//   await categoryStore.fetchCategories()
+// })
 /* ================= SEARCH ================= */
 const filteredProducts = computed(() => {
   let products = [...productStore.products];
@@ -349,8 +339,8 @@ onMounted(async () => {
       await productStore.fetchAllProducts()
     } catch (e) {/* silent */ }
   }
-  if (!brandStore.brands.length) {
-    try {
+  if(!brandStore.brands?.length){
+    try{
       await brandStore.fetchAllBrands()
     } catch (e) {/* silent */ }
   }
@@ -361,6 +351,4 @@ onMounted(async () => {
   }
 
 })
-
-
 </script>

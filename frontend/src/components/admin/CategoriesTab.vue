@@ -19,7 +19,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-600 text-sm">Total Categories</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ categoryStore.totalCategories }}</p>
+            <p class="text-3xl font-bold text-gray-800 mt-1">{{ categories.length }}</p>
           </div>
           <div class="bg-blue-100 p-3 rounded-lg">
             <Folder class="text-blue-600" :size="24" />
@@ -63,8 +63,8 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr v-if="categoryStore.loading" class="hover:bg-gray-50">
-              <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+            <tr v-if="loading" class="hover:bg-gray-50">
+              <td colspan="5" class="px-6 py-8 text-center text-gray-500">
                 <div class="flex items-center justify-center gap-2">
                   <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                   <span>Loading categories...</span>
@@ -72,7 +72,7 @@
               </td>
             </tr>
             <tr v-else-if="filteredCategories.length === 0" class="hover:bg-gray-50">
-              <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+              <td colspan="5" class="px-6 py-8 text-center text-gray-500">
                 No categories found
               </td>
             </tr>
@@ -210,10 +210,10 @@
             </div>
             <p v-if="imageError" class="text-sm text-red-500 mt-2">Failed to load image</p>
           </div>
-
+          
           <!-- Error Message -->
-          <div v-if="categoryStore.error" class="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p class="text-sm text-red-600">{{ categoryStore.error }}</p>
+          <div v-if="error" class="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-sm text-red-600">{{  error }}</p>
           </div>
 
           <!-- Actions -->
@@ -266,10 +266,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useCategory } from '@/stores/categories'
 import { Plus, Search, Edit2, Trash2, Folder, ImageIcon, AlertCircle, Upload, ChevronDown, ChevronRight } from 'lucide-vue-next'
 
 const categoryStore = useCategory()
+const { categories, loading, error } = storeToRefs(categoryStore)
 
 // State
 const showModal = ref(false)
@@ -282,7 +284,7 @@ const fileInput = ref(null)
 const imageFile = ref(null)
 const imagePreview = ref(null)
 const expanded = ref(new Set())
-
+const successMessage = ref('')
 const formData = ref({
   name: '',
   description: '',
@@ -291,10 +293,10 @@ const formData = ref({
 
 // Computed
 const filteredCategories = computed(() => {
-  if (!searchQuery.value) return categoryStore.categories
+  if (!searchQuery.value) return categories.value
 
   const query = searchQuery.value.toLowerCase()
-  return categoryStore.categories.filter(category =>
+  return categories.value.filter(category =>
     category.name.toLowerCase().includes(query) ||
     (category.description && category.description.toLowerCase().includes(query))
   )
@@ -400,6 +402,10 @@ const closeModal = () => {
 
 const handleSubmit = async () => {
   try {
+    // Clear previous messages
+    successMessage.value = ''
+    categoryStore.error = null
+
     // If a new image file is selected, create FormData for multipart upload
     if (imageFile.value) {
       const formDataForUpload = new FormData()
@@ -409,27 +415,38 @@ const handleSubmit = async () => {
 
       if (isEditMode.value) {
         await categoryStore.updateCategory(formData.value.id, formDataForUpload)
+        successMessage.value = 'Category updated successfully!'
       } else {
         await categoryStore.createCategory(formDataForUpload)
+        successMessage.value = 'Category created successfully!'
       }
     } else {
-      // No new image, send regular data
       if (isEditMode.value) {
         await categoryStore.updateCategory(formData.value.id, {
           name: formData.value.name,
-          description: formData.value.description
+          description: formData.value.description,
+          image: formData.value.image
         })
+        successMessage.value = 'Category updated successfully!'
       } else {
         await categoryStore.createCategory({
           name: formData.value.name,
           description: formData.value.description,
           image: formData.value.image
         })
+        successMessage.value = 'Category created successfully!'
       }
+    }    // Only close modal if no error occurred
+    if (!categoryStore.error) {
+      closeModal()
+      // Show success message for 3 seconds
+      setTimeout(() => {
+        successMessage.value = ''
+      }, 3000)
     }
-    closeModal()
-  } catch (error) {
-    console.error('Error submitting form:', error)
+  } catch (err) {
+    console.error('Error submitting form:', err)
+    categoryStore.error = err.message || 'An error occurred'
   }
 }
 

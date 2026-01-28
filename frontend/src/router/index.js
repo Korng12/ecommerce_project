@@ -43,9 +43,7 @@ const routes = [
     meta: { requiresAuth: true, ROLES: [ROLES.USER, ROLES.ADMIN] },
     children: [
       {
-        path: "",
-        name: "home",
-        component: () => import("@/views/user/HomePage.vue"),
+        path: '', name: "home", component: () => import("@/views/user/HomePage.vue"),
       },
       {
         path: "category/:catName",
@@ -62,15 +60,61 @@ const routes = [
 
   // Admin Layout
   {
-    path: "/adminView",
+    path: "/admin",
     component: () => import("@/layouts/AdminLayout.vue"),
+    redirect: '/admin/dashboard',
     meta: { requiresAuth: true, requiredRole: ROLES.ADMIN },
     children: [
       {
-        path: "",
-        name: "adminView",
-        component: () => import("@/views/admin/adminView.vue"),
+        path: 'dashboard',
+        name: 'adminDashboard',
+        component: () => import("@/components/admin/DashboardTab.vue"),
       },
+      {
+        path: 'users',
+        name: 'adminUsers',
+        component: () => import("@/components/admin/UsersTab.vue"),
+      },
+      {
+        path: 'products',
+        name: 'adminProducts',
+        component: () => import("@/components/admin/Products.vue"),
+      },
+      {
+        path: 'categories',
+        name: 'adminCategories',
+        component: () => import("@/components/admin/CategoriesTab.vue"),
+      },
+      {
+        path: 'orders',
+        name: 'adminOrders',
+        component: () => import("@/components/admin/OrdersTab.vue"),
+      },
+      {
+        path: 'promotions',
+        name: 'adminPromotions',
+        component: () => import("@/components/admin/Promotions.vue"),
+      },
+      {
+        path: 'banners',
+        name: 'adminBanners',
+        component: () => import("@/components/admin/Banner.vue"),
+      },
+      {
+        path: 'notifications',
+        name: 'adminNotifications',
+        component: () => import("@/components/admin/NotificationsTab.vue"),
+      },
+      {
+        path: 'analytics',
+        name: 'adminAnalytics',
+        component: () => import("@/components/admin/AnalyticsTab.vue"),
+      },
+      {
+        path: 'settings',
+        name: 'adminSettings',
+        component: () => import("@/components/admin/SettingsTab.vue"),
+      }
 
     ],
   },
