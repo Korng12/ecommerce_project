@@ -6,6 +6,7 @@ const Cart = db.cart;
 const CartItem = db.cartItem;
 const Product = db.product;
 
+const transaction = db.transaction;
 const Order = db.order;
 const OrderItem = db.orderItem;
 
@@ -198,6 +199,11 @@ const getAllOrders = async (req, res) => {
           as: "orderItems",
           include: [{ model: Product, as: "orderProduct" }],
         },
+        {
+          model: transaction,
+          as: "orderTransactions",
+          attributes: ["id", "paymentMethod", "status", "totalAmount"],
+        },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -224,6 +230,11 @@ const getAllOrdersAdmin = async (req, res) => {
           model: db.user,
           as: "userOrder",
           attributes: ["id", "username", "email"],
+        },
+        {
+          model: transaction,
+          as: "orderTransactions",
+          attributes: ["id", "paymentMethod", "status", "totalAmount"],
         },
       ],
       order: [["createdAt", "DESC"]],

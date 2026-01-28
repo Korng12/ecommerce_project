@@ -3,11 +3,11 @@ const { Op } = require("sequelize");
 
 const Product = db.product;
 const Category = db.category;
-const Review =db.review;
+const Review = db.review;
 const Brand = db.brand;
 const ProductImage = db.productImage;
 const Specification = db.specification;
-const sequelize=db.sequelize
+const sequelize = db.sequelize;
 const Promotion = db.promotion;
 const LOW_STOCK_ALERT = 5;
 
@@ -35,9 +35,9 @@ const getAllProducts = async (req, res) => {
           where: {
             isActive: true,
             startDate: { [Op.lte]: new Date() },
-            endDate: { [Op.gte]: new Date() }
-          }
-        }
+            endDate: { [Op.gte]: new Date() },
+          },
+        },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -48,9 +48,9 @@ const getAllProducts = async (req, res) => {
           where: { productId: product.id },
           attributes: [
             [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
-            [sequelize.fn("COUNT", sequelize.col("id")), "totalReviews"]
+            [sequelize.fn("COUNT", sequelize.col("id")), "totalReviews"],
           ],
-          raw: true
+          raw: true,
         });
 
         const productJson = product.toJSON();
@@ -81,9 +81,9 @@ const getAllProducts = async (req, res) => {
           // 👇 promotion fields
           originalPrice: productJson.price,
           finalPrice: Math.max(finalPrice, 0),
-          promotion
+          promotion,
         };
-      })
+      }),
     );
 
     res.status(200).json(result);
@@ -92,7 +92,6 @@ const getAllProducts = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 /* ================= GET PRODUCT BY ID ================= */
 const getProductById = async (req, res) => {
@@ -119,15 +118,16 @@ const getProductById = async (req, res) => {
           as: "specifications",
           attributes: ["id", "key", "value"],
         },
-        {          model: Promotion,
+        {
+          model: Promotion,
           as: "promotions",
           required: false,
           where: {
             isActive: true,
             startDate: { [Op.lte]: new Date() },
-            endDate: { [Op.gte]: new Date() }
-          }
-        }
+            endDate: { [Op.gte]: new Date() },
+          },
+        },
       ],
     });
 

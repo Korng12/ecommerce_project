@@ -4,16 +4,14 @@
       <Header></Header>
     </div>
 
-    <!-- Hero Banner -->
-    <div class="mt-24 px-4 md:px-8">
-      <div class="max-w-7xl mx-auto">
-        <HeroSection></HeroSection>
-      </div>
+    <!-- Hero Banner - Full Width -->
+    <div class="mt-24">
+      <HeroSection></HeroSection>
     </div>
 
     <!-- Popular Products Section -->
-    <div class="mt-16 px-4 md:px-8">
-      <div class="max-w-7xl mx-auto">
+    <div class="mt-16 px-4 md:px-8 lg:px-16">
+      <div class="max-w-[1400px] mx-auto">
         <ProductSection 
           title="Popular Products" 
           :products="productsStore.getPopularProducts" 
@@ -24,8 +22,8 @@
     </div>
 
     <!-- Best Selling Products -->
-    <div class="mt-16 px-4 md:px-8">
-      <div class="max-w-7xl mx-auto">
+    <div class="mt-16 px-4 md:px-8 lg:px-16">
+      <div class="max-w-[1400px] mx-auto">
         <ProductSection 
           title="Best Sellers" 
           :products="productsStore.products.slice().sort((a,b) => b.totalReviews - a.totalReviews)" 
@@ -36,8 +34,8 @@
     </div>
 
     <!-- Recommended For You -->
-    <div class="mt-16 px-4 md:px-8">
-      <div class="max-w-7xl mx-auto">
+    <div class="mt-16 px-4 md:px-8 lg:px-16">
+      <div class="max-w-[1400px] mx-auto">
         <ProductSection 
           title="Recommended" 
           :products="productsStore.products.slice(0, Math.min(10, productsStore.products.length))" 
@@ -48,8 +46,8 @@
     </div>
 
     <!-- Category Products -->
-    <div v-if="productsStore.getByCategory('Accessories').length > 0" class="mt-16 px-4 md:px-8">
-      <div class="max-w-7xl mx-auto">
+    <div v-if="productsStore.getByCategory('Accessories').length > 0" class="mt-16 px-4 md:px-8 lg:px-16">
+      <div class="max-w-[1400px] mx-auto">
         <ProductSection 
           title="Accessories" 
           :products="productsStore.getByCategory('Accessories')" 

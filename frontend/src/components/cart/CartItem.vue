@@ -1,5 +1,6 @@
 <script setup>
 import { useCart } from '@/stores/carts';
+import { useWishlist } from '@/stores/wishlist';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -7,6 +8,7 @@ const props = defineProps({
 });
 
 const cartStore = useCart();
+const wishlistStore = useWishlist();
 const stockError = ref('');
 
 const increment = async () => {
@@ -37,6 +39,19 @@ const decrement = async () => {
     }
   }
 };
+
+const toggleWishlist = () => {
+  const product = {
+    id: props.item.productId,
+    name: props.item.name,
+    price: props.item.price,
+    image: props.item.image,
+    brand: props.item.brand,
+    rating: props.item.rating || 0,
+    stock: props.item.stock
+  };
+  wishlistStore.toggleWishlist(product);
+};
 </script>
 
 <template>
@@ -58,7 +73,18 @@ const decrement = async () => {
           </div>
 
           <div class="flex gap-2 sm:gap-3">
-            <i class="pi pi-heart cursor-pointer border p-2 rounded-full hover:bg-gray-200"></i>
+            <button 
+              @click="toggleWishlist"
+              class="border p-2 rounded-full transition-colors"
+              :class="wishlistStore.isInWishlist(item.productId) 
+                ? 'bg-red-50 border-red-300 hover:bg-red-100' 
+                : 'hover:bg-gray-200'"
+              :title="wishlistStore.isInWishlist(item.productId) ? 'Remove from wishlist' : 'Add to wishlist'">
+              <i class="pi cursor-pointer"
+                :class="wishlistStore.isInWishlist(item.productId) 
+                  ? 'pi-heart-fill text-red-500' 
+                  : 'pi-heart text-gray-700'"></i>
+            </button>
             <i @click="cartStore.removeFromCart(item.productId)"
               class="pi pi-times cursor-pointer border p-2 rounded-full hover:bg-gray-200"></i>
           </div>

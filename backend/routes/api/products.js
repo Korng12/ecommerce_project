@@ -19,10 +19,7 @@ router.put(
 );
 
 // DELETE PRODUCT
-router.delete(
-  "/products/:id",
-  productController.deleteProduct
-);
+router.delete("/products/:id", productController.deleteProduct);
 
 // GET ALL
 router.get("/products", productController.getAllProducts);

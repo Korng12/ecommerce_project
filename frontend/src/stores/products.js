@@ -43,7 +43,7 @@ export const useProduct = defineStore('products', {
         if (!res.ok) {
           throw new Error('Failed to fetch products')
         }
-        const data = await res.json()
+        const data = await res.json();
         // Normalize backend shape to what the UI expects
         this.products = Array.isArray(data) ? data.map(p => {
           const primaryImage = (p.images && Array.isArray(p.images)) ? (p.images.find(i => i.isPrimary) || p.images[0]) : null

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const reviewController = require('../controllers/reviewController');
-const verifyJWT = require('../middleware/verifyJWT');
+const verifyJWT = require('../middleware/authJwt');
 
 // Public routes
 // Get all reviews for a product with pagination

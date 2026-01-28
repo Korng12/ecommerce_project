@@ -50,11 +50,19 @@ const routes = [
         name: "categoryView",
         component: () => import("@/views/user/CategoryView.vue"),
       },
+      {
+        path: "profile",
+        name: "profile",
+        component: () => import("@/views/user/ProfileView.vue"),
+      },
     ],
   },
+
+  // Admin Layout
   {
-    path: "/adminView",
+    path: "/admin",
     component: () => import("@/layouts/AdminLayout.vue"),
+    redirect: '/admin/dashboard',
     meta: { requiresAuth: true, requiredRole: ROLES.ADMIN },
     children: [
       {
@@ -112,13 +120,19 @@ const routes = [
   },
   {
     name: "productView",
-    path: "/product/productView/:productId",
+    path: "/product/:productId",
     component: () => import("@/views/user/ProductView.vue"),
   },
   {
     name: "cartView",
     path: "/cartView",
     component: () => import("@/views/user/CartView.vue"),
+    meta: { requiresAuth: true, requiredRole: ROLES.USER },
+  },
+  {
+    name: "wishlist",
+    path: "/wishlist",
+    component: () => import("@/views/user/WishlistView.vue"),
     meta: { requiresAuth: true, requiredRole: ROLES.USER },
   },
   {
@@ -167,7 +181,7 @@ router.beforeEach(async (to) => {
 
   // Redirect to forbidden page if user doesn't have required role
   if (to.meta.requiredRole && authStore.user?.roleId !== to.meta.requiredRole) {
-    return { name: "forbidden" };
+    return { name: "landingPage" };
   }
 });
 

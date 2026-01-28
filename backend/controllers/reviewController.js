@@ -1,5 +1,6 @@
 const db = require("../models/index.js");
-const { Op, sequelize } = require("sequelize");
+const { Op } = require("sequelize");
+const sequelize = db.sequelize;
 const Review = db.review;
 const Product = db.product;
 const User = db.user;
@@ -19,44 +20,44 @@ const getProductReviews = async (req, res) => {
 
     const { count, rows } = await Review.findAndCountAll({
       where: {
-        productId: productId
+        productId: productId,
       },
       include: [
         {
           model: User,
-          as: 'user',
-          attributes: ['id', 'username', 'email']
-        }
+          as: "user",
+          attributes: ["id", "username", "email"],
+        },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       limit: parseInt(limit),
-      offset: offset
+      offset: offset,
     });
 
     // Calculate average rating
     const avgRating = await Review.findOne({
       where: {
-        productId: productId
+        productId: productId,
       },
       attributes: [
-        [sequelize.fn('AVG', sequelize.col('rating')), 'averageRating'],
-        [sequelize.fn('COUNT', sequelize.col('id')), 'totalReviews']
+        [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "totalReviews"],
       ],
-      raw: true
+      raw: true,
     });
 
     // Get rating distribution
     const ratingDistribution = await Review.findAll({
       where: {
-        productId: productId
+        productId: productId,
       },
       attributes: [
-        'rating',
-        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+        "rating",
+        [sequelize.fn("COUNT", sequelize.col("id")), "count"],
       ],
-      group: ['rating'],
+      group: ["rating"],
       raw: true,
-      order: [['rating', 'DESC']]
+      order: [["rating", "DESC"]],
     });
 
     res.json({
@@ -65,13 +66,13 @@ const getProductReviews = async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         total: count,
-        pages: Math.ceil(count / limit)
+        pages: Math.ceil(count / limit),
       },
       stats: {
         averageRating: parseFloat(avgRating?.averageRating || 0).toFixed(1),
         totalReviews: parseInt(avgRating?.totalReviews || 0),
-        ratingDistribution: ratingDistribution || []
-      }
+        ratingDistribution: ratingDistribution || [],
+      },
     });
   } catch (error) {
     console.error("Error fetching reviews:", error);
@@ -88,7 +89,9 @@ const createReview = async (req, res) => {
 
     // Validation
     if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be between 1 and 5" });
     }
 
     // Check if product exists
@@ -101,12 +104,14 @@ const createReview = async (req, res) => {
     const existingReview = await Review.findOne({
       where: {
         userId: userId,
-        productId: productId
-      }
+        productId: productId,
+      },
     });
 
     if (existingReview) {
-      return res.status(400).json({ message: "You already reviewed this product" });
+      return res
+        .status(400)
+        .json({ message: "You already reviewed this product" });
     }
 
     // Create review
@@ -114,7 +119,7 @@ const createReview = async (req, res) => {
       userId: userId,
       productId: productId,
       rating: parseInt(rating),
-      comment: comment || null
+      comment: comment || null,
     });
 
     // Fetch created review with user info
@@ -122,15 +127,15 @@ const createReview = async (req, res) => {
       include: [
         {
           model: User,
-          as: 'user',
-          attributes: ['id', 'username', 'email']
-        }
-      ]
+          as: "user",
+          attributes: ["id", "username", "email"],
+        },
+      ],
     });
 
     res.status(201).json({
       message: "Review created successfully",
-      review: createdReview
+      review: createdReview,
     });
   } catch (error) {
     console.error("Error creating review:", error);
@@ -152,22 +157,26 @@ const updateReview = async (req, res) => {
 
     // Check if user owns the review
     if (review.userId !== userId) {
-      return res.status(403).json({ message: "You can only edit your own reviews" });
+      return res
+        .status(403)
+        .json({ message: "You can only edit your own reviews" });
     }
 
     // Validation
     if (rating && (rating < 1 || rating > 5)) {
-      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be between 1 and 5" });
     }
 
     await review.update({
       rating: rating || review.rating,
-      comment: comment !== undefined ? comment : review.comment
+      comment: comment !== undefined ? comment : review.comment,
     });
 
     res.json({
       message: "Review updated successfully",
-      review: review
+      review: review,
     });
   } catch (error) {
     console.error("Error updating review:", error);
@@ -188,7 +197,9 @@ const deleteReview = async (req, res) => {
 
     // Check if user owns the review
     if (review.userId !== userId) {
-      return res.status(403).json({ message: "You can only delete your own reviews" });
+      return res
+        .status(403)
+        .json({ message: "You can only delete your own reviews" });
     }
 
     await review.destroy();
@@ -216,13 +227,13 @@ const getUserReviews = async (req, res) => {
       include: [
         {
           model: Product,
-          as: 'product',
-          attributes: ['id', 'name', 'price']
-        }
+          as: "product",
+          attributes: ["id", "name", "price"],
+        },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       limit: parseInt(limit),
-      offset: offset
+      offset: offset,
     });
 
     res.json({
@@ -231,8 +242,8 @@ const getUserReviews = async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         total: count,
-        pages: Math.ceil(count / limit)
-      }
+        pages: Math.ceil(count / limit),
+      },
     });
   } catch (error) {
     console.error("Error fetching user reviews:", error);
@@ -246,5 +257,5 @@ module.exports = {
   updateReview,
   deleteReview,
   markHelpful,
-  getUserReviews
+  getUserReviews,
 };

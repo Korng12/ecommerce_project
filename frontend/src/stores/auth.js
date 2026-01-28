@@ -54,12 +54,16 @@ export const useAuthStore = defineStore("auth", {
           credentials: "include",
         });
 
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+          console.warn('Failed to fetch current user:', res.status);
+          throw new Error();
+        }
 
         const data = await res.json();
         this.user = data.user;
         this.isAuthenticated = true;
-      } catch {
+      } catch (error) {
+        console.warn('Fetch current user error:', error);
         this.user = null;
         this.isAuthenticated = false;
       } finally {

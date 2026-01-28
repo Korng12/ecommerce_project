@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold">Product Inventory</h1>
       <p class="text-gray-600">Manage products and stock</p>
     </div>
-    
+
     <!-- Action -->
     <div class="flex justify-between mb-4">
       <input
@@ -40,45 +40,69 @@
       >
         + Add Product
       </button>
-       
+
     </div>
 
     <!-- Table -->
-    <table class="w-full bg-white border rounded">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="p-3 text-left">Image</th>
-          <th class="p-3 text-left">Name</th>
-          <th class="p-3 text-left">Description</th>
-          <th class="p-3 text-left">Brand</th>
-          <th class="p-3 text-left">Category</th>
-          <th class="p-3 text-left">Price</th>
-          <th class="p-3 text-left">Stock</th>
-          <th class="p-3 text-left">Action</th>
-        </tr>
-      </thead>
+    <div class="bg-white rounded-lg shadow">
+      <!-- Loading State -->
+      <div v-if="productStore.loading" class="p-8 text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Loading products...</p>
+      </div>
 
-      <tbody>
-        <tr v-for="p in filteredProducts" :key="p.id" class="border-t">
-          <td class="p-3">
-            <img
-              :src="p.image || 'https://via.placeholder.com/50'"
-              class="w-12 h-12 rounded object-cover"
-            />
-          </td>
-          <td class="p-3">{{ p.name }}</td>
-          <td class="p-3">{{ p.description || '-' }}</td>
-          <td class="p-3">{{ p.brand || '-' }}</td>
-          <td class="p-3">{{ p.category || '-' }}</td>
-          <td class="p-3">${{ p.price }}</td>
-          <td class="p-3">{{ p.stock }}</td>
-          <td class="p-3 space-x-2">
-            <button @click="editProduct(p)" class="text-blue-600">Edit</button>
-            <button @click="deleteProduct(p)" class="text-red-600">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <!-- Error State -->
+      <div v-else-if="productStore.error" class="p-8 text-center">
+        <p class="text-red-600">{{ productStore.error }}</p>
+        <button @click="productStore.fetchAllProducts()" class="mt-4 text-blue-600 hover:underline">
+          Retry
+        </button>
+      </div>
+
+      <!-- Products Table -->
+      <table v-else class="w-full bg-white border rounded">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3 text-left">Image</th>
+            <th class="p-3 text-left">Name</th>
+            <th class="p-3 text-left">Description</th>
+            <th class="p-3 text-left">Brand</th>
+            <th class="p-3 text-left">Category</th>
+            <th class="p-3 text-left">Price</th>
+            <th class="p-3 text-left">Stock</th>
+            <th class="p-3 text-left">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr v-if="filteredProducts.length === 0">
+            <td colspan="8" class="p-8 text-center text-gray-500">
+              No products found
+            </td>
+          </tr>
+          <tr v-else v-for="p in filteredProducts" :key="p.id" class="border-t">
+            <td class="p-3">
+              <img :src="p.image || 'https://via.placeholder.com/50'" class="w-12 h-12 rounded object-cover"
+                @error="(e) => e.target.src = 'https://via.placeholder.com/50'" />
+            </td>
+            <td class="p-3">{{ p.name }}</td>
+            <td class="p-3 max-w-xs truncate">{{ p.description || '-' }}</td>
+            <td class="p-3">{{ p.brand || '-' }}</td>
+            <td class="p-3">{{ p.category || '-' }}</td>
+            <td class="p-3">${{ Number(p.price).toFixed(2) }}</td>
+            <td class="p-3">
+              <span :class="p.stock <= 10 ? 'text-red-600 font-semibold' : ''">
+                {{ p.stock }}
+              </span>
+            </td>
+            <td class="p-3 space-x-2">
+              <button @click="editProduct(p)" class="text-blue-600 hover:underline">Edit</button>
+              <button @click="deleteProduct(p)" class="text-red-600 hover:underline">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Modal -->
     <div v-if="showModal" class="fixed inset-0 bg-black/40 flex items-center justify-center">
@@ -90,13 +114,16 @@
         <div class="space-y-3">
           <input v-model="form.name" placeholder="Product name" class="w-full border p-2 rounded" />
 
-          <textarea
-            v-model="form.description"
-            placeholder="Description"
-            class="w-full border p-2 rounded"
-          ></textarea>
+          <textarea v-model="form.description" placeholder="Description" class="w-full border p-2 rounded"></textarea>
 
-          <input type="file" accept="image/*" @change="handleImage" />
+          <!-- Image Upload -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Product Image {{ isEditing ? '(Leave empty to keep current image)' : '' }}
+            </label>
+            <input ref="fileInput" type="file" accept="image/*" @change="handleImage"
+              class="w-full border p-2 rounded" />
+          </div>
 
           <img v-if="imagePreview" :src="imagePreview" class="w-24 h-24 rounded object-cover" />
           <!-- BRAND -->
@@ -162,6 +189,7 @@ const selectedBrand = ref('');
 const selectedCategory = ref('default');
 const imageFile = ref(null)
 const imagePreview = ref(null)
+const fileInput = ref(null)
 
 /* ================= FORM ================= */
 const form = ref({
@@ -239,7 +267,8 @@ const editProduct = (p) => {
     price: p.price,
     stock: p.stock,
     categoryId: p.categoryId,
-    brandId: p.brandId
+    brandId: p.brandId,
+    existingImage: p.image // Store existing image URL
   }
 
   imagePreview.value = p.image
@@ -285,41 +314,41 @@ const closeModal = () => {
 //   await categoryStore.fetchCategories()
 // })
 /* ================= SEARCH ================= */
-const filteredProducts = computed(() =>{
-  let products=[...productStore.products];
-  if(selectedBrand.value){
-    products = products.filter(p=>p.brand.toLowerCase()===selectedBrand.value.toLowerCase())
+const filteredProducts = computed(() => {
+  let products = [...productStore.products];
+  if (selectedBrand.value) {
+    products = products.filter(p => p.brand.toLowerCase() === selectedBrand.value.toLowerCase())
   }
-  if(sortBy.value==='low-high'){
-    products.sort((a,b)=>a.price - b.price)
-  } else if(sortBy.value==='high-low'){
-    products.sort((a,b)=>b.price - a.price) 
+  if (sortBy.value === 'low-high') {
+    products.sort((a, b) => a.price - b.price)
+  } else if (sortBy.value === 'high-low') {
+    products.sort((a, b) => b.price - a.price)
   }
-  if(selectedCategory.value !=='default'){
-    products = products.filter(p=>p.category.toLowerCase()===selectedCategory.value.toLowerCase())
+  if (selectedCategory.value !== 'default') {
+    products = products.filter(p => p.category.toLowerCase() === selectedCategory.value.toLowerCase())
   }
   return products.filter(p =>
-    p.name.toLowerCase().includes(search.value.trim().toLowerCase())  
+    p.name.toLowerCase().includes(search.value.trim().toLowerCase())
 
   )
 })
 
 onMounted(async () => {
-  if(!productStore.products.length){
-    try{
+  if (!productStore.products.length) {
+    try {
       await productStore.fetchAllProducts()
-    } catch(e){/* silent */} 
+    } catch (e) {/* silent */ }
   }
   if(!brandStore.brands?.length){
     try{
       await brandStore.fetchAllBrands()
-    } catch(e){/* silent */} 
+    } catch (e) {/* silent */ }
   }
-  if(!categoryStore.categories.length){
-    try{
+  if (!categoryStore.categories.length) {
+    try {
       await categoryStore.fetchAllCategories()
-    } catch(e){/* silent */} 
+    } catch (e) {/* silent */ }
   }
-  
+
 })
 </script>

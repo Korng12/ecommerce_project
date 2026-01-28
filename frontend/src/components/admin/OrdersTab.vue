@@ -72,6 +72,10 @@
             <p class="font-semibold">Total Amount</p>
             <p>${{ selectedOrder.totalAmount }}</p>
           </div>
+                    <div>
+            <p class="font-semibold">Payment Method</p>
+            <p>{{ selectedOrder.orderTransactions?.[0]?.paymentMethod || 'N/A' }}</p>
+          </div>
           <div>
             <p class="font-semibold">Date</p>
             <p>{{ formatDate(selectedOrder.createdAt) }}</p>
