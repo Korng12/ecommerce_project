@@ -17,6 +17,18 @@ const dashboardRoutes = require('./routes/dashboard')
 const productsRoutes = require('./routes/api/products');
 const categoriesRoutes = require('./routes/api/categories');
 const brandsRoutes = require('./routes/api/brands');
+// banner routes
+const bannerRoutes = require('./routes/api/banners');
+
+// Use banner routes
+app.use('/api/banners', bannerRoutes);
+
+// Serve static files for images
+// app.use("/categories", express.static(path.join(__dirname, "public", "images", "categories")));
+// app.use("/images/products", express.static(path.join(__dirname, "public", "images", "products")));
+
+app.use("/categories", express.static(path.join(__dirname, "uploads", "categories")));
+app.use("/uploads/products", express.static(path.join(__dirname, "uploads", "products")));
 const reviewRoutes = require('./routes/reviewRoutes');
 const promotionsRoutes = require('./routes/api/promotions');
 // Serve static files for images
@@ -42,21 +54,38 @@ app.use(express.json()); // ✅ REQUIRED
 app.use(express.urlencoded({ extended: true }));
 
 
+
 // user management routes
+app.use('/api/users', userRoutes)
+
+// Dashboard routes
+
+app.use('/api/dashboard', dashboardRoutes)
+
+// Product Routes
+
+app.use('/api', productsRoutes);
+
+// Serve static files for images
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+// for uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+console.log('📁 Serving static images from:', path.join(__dirname, 'public', 'images'));
+
 app.use('/api/users', userRoutes)
 
 // Dashboard routes
 app.use('/api/dashboard', dashboardRoutes)
 
 app.use('/api', authRoutes);
-app.use('/hello',(req,res)=>{
+app.use('/hello', (req, res) => {
   console.log(req.url)
   res.status(200).json("Hello")
 
 });
 
-app.use('/protected',verifyJwt,(req,res)=>{
-  res.status(200).json({message:"Protected content",user:req.user});
+app.use('/protected', verifyJwt, (req, res) => {
+  res.status(200).json({ message: "Protected content", user: req.user });
 });
 app.use("/api", productsRoutes);
 app.use("/api", categoriesRoutes);

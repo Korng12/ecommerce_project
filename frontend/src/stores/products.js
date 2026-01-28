@@ -1,36 +1,46 @@
-import { defineStore } from "pinia";
-import getImageUrl from "../utils/convertImagePath";
+import { defineStore } from 'pinia'
+import getImageUrl from '@/utils/convertImagePath'
 
-export const useProduct = defineStore('productStore',{
-  state:()=>({
+const API_URL = '/api/products' // ✅ use Vite proxy
+
+export const useProduct = defineStore('products', {
+  state: () => ({
     products: [],
+    loading: false,
+    error: null
   }),
-  getters:{
-    getByCategory:(state)=>(catName)=>{
-      if(!catName) return state.products
-      return state.products.filter(p=> (p.category || '').toLowerCase()===catName.toLowerCase())
+
+  /* ================= GETTERS ================= */
+  getters: {
+    getByCategory: (state) => (catName) => {
+      if (!catName) return state.products
+      return state.products.filter(
+        p =>
+          (p.category || '')
+            .toLowerCase() === catName.toLowerCase()
+      )
     },
-    searchSuggestions:(state)=>(query)=>{
-      if(!query) return []
-      return state.products.filter(p=> (p.name || '').toLowerCase().includes(query.toLowerCase())).slice(0,5)
+    searchSuggestions: (state) => (query) => {
+      if (!query) return []
+      return state.products.filter(p => (p.name || '').toLowerCase().includes(query.toLowerCase())).slice(0, 5)
     },
-    getProductsByBrand:(state)=>(brandName)=>{
-      if(!brandName) return state.products
-      return state.products.filter(p=> (p.brand || '').toLowerCase()===brandName.toLowerCase())
+    getProductsByBrand: (state) => (brandName) => {
+      if (!brandName) return state.products
+      return state.products.filter(p => (p.brand || '').toLowerCase() === brandName.toLowerCase())
     },
-    getPopularProducts:(state)=>{
+    getPopularProducts: (state) => {
       return state.products
         .slice()
-        .sort((a,b)=> b.totalReviews - a.totalReviews)
-        // .slice(0,10)
+        .sort((a, b) => b.totalReviews - a.totalReviews)
+      // .slice(0,10)
     }
 
   },
-  actions:{
-    async fetchAllProducts(){
-      try{
+  actions: {
+    async fetchAllProducts() {
+      try {
         const res = await fetch('http://localhost:3000/api/products')
-        if(!res.ok){
+        if (!res.ok) {
           throw new Error('Failed to fetch products')
         }
         const data = await res.json()
@@ -40,12 +50,12 @@ export const useProduct = defineStore('productStore',{
           // Construct full backend URL for images
           const imageUrl = primaryImage?.imageUrl || ''
           const image = imageUrl ? getImageUrl(imageUrl) : ''
-          
+
           // Get active promotion if available
-          const activePromotion = p.promotions && Array.isArray(p.promotions) 
+          const activePromotion = p.promotions && Array.isArray(p.promotions)
             ? p.promotions.find(promo => promo.isActive && new Date(promo.startDate) <= new Date() && new Date() <= new Date(promo.endDate))
             : null
-          
+
           // Format promotion text based on type
           let promotionText = ''
           let promotionDiscount = null
@@ -62,7 +72,7 @@ export const useProduct = defineStore('productStore',{
               promotionText = `${activePromotion.name} - ${promotionText}`
             }
           }
-          
+
           return {
             id: p.id,
             name: p.name,
@@ -79,33 +89,110 @@ export const useProduct = defineStore('productStore',{
             stock: p.stock || 0
           }
         }) : []
-      }catch(err){
+      } catch (err) {
         console.error('Failed to fetch products:', err)
         this.products = []
         throw err
       }
     },
-    async createProduct(productData){
-      try{
-        const res = await fetch('http://localhost:3000/api/products',{
-          method:'POST',
-          headers:{
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(productData)
+
+    async fetchAllProducts() {
+      this.loading = true
+      this.error = null
+
+      try {
+        const res = await fetch(API_URL)
+        if (!res.ok) throw new Error('Failed to fetch products')
+
+        const data = await res.json()
+
+        // ✅ keep `this` context
+        this.products = data.map(p => {
+          const primaryImage = p.images?.find(i => i.isPrimary) || p.images?.[0]
+          return {
+            id: p.id,
+            name: p.name,
+            description: p.description || '',
+            price: p.price,
+            stock: p.stock,
+            image: primaryImage?.imageUrl ? getImageUrl(primaryImage.imageUrl) : '',
+            brand: p.brand?.name || '',
+            brandId: p.brand?.id ?? null,
+            category: p.category?.name || '',
+            categoryId: p.category?.id ?? null,
+            rating: p.rating || 0
+          }
         })
-        if(!res.ok){
-          throw new Error('Failed to create product')
-        }
-        const newProduct = await res.json()
-        this.products.push({
-          ...newProduct,
-          image: newProduct.images && newProduct.images.length > 0 ? getImageUrl(newProduct.images[0].imageUrl) : ''
-        })
-      }catch(err){
-        console.error('Failed to create product:', err)
-        throw err
+      } catch (err) {
+        console.error(err)
+        this.error = err.message
+        this.products = []
+      } finally {
+        this.loading = false
       }
+    },
+
+    async createProduct(form, imageFile) {
+      this.error = null
+
+      const fd = new FormData()
+      fd.append('name', form.name)
+      fd.append('price', Number(form.price))
+      fd.append('stock', Number(form.stock))
+      fd.append('categoryId', Number(form.categoryId))
+      fd.append('description', form.description || '')
+
+      if (form.brandId) fd.append('brandId', Number(form.brandId))
+      if (imageFile) fd.append('image', imageFile)
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: fd
+      })
+
+      if (!res.ok) throw new Error('Create product failed')
+
+      const newProduct = await res.json()
+      this.products.unshift(this.normalizeProduct(newProduct))
+    },
+
+    async updateProduct(id, form, imageFile) {
+      this.error = null
+
+      const fd = new FormData()
+      fd.append('name', form.name)
+      fd.append('price', Number(form.price))
+      fd.append('stock', Number(form.stock))
+      fd.append('categoryId', Number(form.categoryId))
+      fd.append('description', form.description || '')
+
+      if (form.brandId) fd.append('brandId', Number(form.brandId))
+      if (imageFile) fd.append('image', imageFile)
+
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        body: fd
+      })
+
+      if (!res.ok) throw new Error('Update failed')
+
+      const updated = await res.json()
+      const index = this.products.findIndex(p => p.id === id)
+      if (index !== -1) {
+        this.products[index] = this.normalizeProduct(updated)
+      }
+    },
+
+    async deleteProduct(id) {
+      this.error = null
+
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (!res.ok) throw new Error('Delete failed')
+
+      this.products = this.products.filter(p => p.id !== id)
     }
   }
 })

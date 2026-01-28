@@ -34,12 +34,12 @@
       />
 
       <StatCard
-  title="Total Users"
-  :value="loadingUsers ? '...' : totalUsers"
-  change="+8.2% from last month"
-  icon="UserCheck"
-  icon-color="green"
-/>
+      title="Total Users"
+      :value="loadingUsers ? '...' : totalUsers"
+      change="+8.2% from last month"
+      icon="UserCheck"
+      icon-color="green"
+    />
 
 
       <StatCard
@@ -136,6 +136,7 @@ import ActivityItem from '@/components/admin/ActivityItem.vue'
 import ChartContainer from '@/components/admin/ChartContainer.vue'
 import BarChart from '@/components/admin/BarChart.vue'
 import PieChart from '@/components/admin/PieChart.vue'
+
 
 // ==========================
 // DASHBOARD STATS

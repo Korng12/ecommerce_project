@@ -1,24 +1,38 @@
 import { defineStore } from "pinia";
-import brands from "@/model/brands.json";
 
-export const useBrand = defineStore("useBrand", {
+const API_URL = "http:/api/brands"; // ✅ use Vite proxy
+
+export const useBrand = defineStore("brand", {
   state: () => ({
-    brands:[]
+    brands: [],
+    loading: false,
+    error: null
   }),
-  getters: {},
+
   actions: {
-    async fetchAllBrands(){
-      try{
-        const res = await fetch('http://localhost:3000/api/brands') 
-        if(!res.ok){
-          throw new Error('Failed to fetch brands')
-        }
-        const data = await res.json()
-        this.brands=Array.isArray(data) ? data : []
-      }catch(err){
-        console.error('Failed to fetch brands:', err)
-        this.brands=[]
-        throw err
+    async fetchAllBrands() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+
+        // ✅ normalize data for UI
+        this.brands = Array.isArray(data)
+          ? data.map(b => ({
+              id: b.id,
+              name: b.name
+            }))
+          : [];
+      } catch (err) {
+        console.error("❌ Failed to fetch brands:", err);
+        this.brands = [];
+        this.error = err.message;
+      } finally {
+        this.loading = false;
       }
     }
   }

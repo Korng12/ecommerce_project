@@ -20,9 +20,11 @@
               {{ category.name }}
             </option>
           </select>
+          
           <select v-model="selectedBrand" class="rounded-xl border-gray-300">
             <option value="">All Brands</option>
             <option v-for="brand in brandStore.brands" :key="brand.id" :value="brand.name">
+
               {{ brand.name }}
             </option>
           </select>
@@ -86,11 +88,7 @@
         </h2>
 
         <div class="space-y-3">
-          <input
-            v-model="form.name"
-            placeholder="Product name"
-            class="w-full border p-2 rounded"
-          />
+          <input v-model="form.name" placeholder="Product name" class="w-full border p-2 rounded" />
 
           <textarea
             v-model="form.description"
@@ -100,56 +98,38 @@
 
           <input type="file" accept="image/*" @change="handleImage" />
 
-          <img
-            v-if="imagePreview"
-            :src="imagePreview"
-            class="w-24 h-24 rounded object-cover"
-          />
-
-          <select v-model="form.categoryId" class="w-full border p-2 rounded">
-            <option disabled value="">Select category</option>
-            <option
-              v-for="cat in categoryStore.categories"
-              :key="cat.id"
-              :value="cat.id"
-            >
-              {{ cat.name }}
+          <img v-if="imagePreview" :src="imagePreview" class="w-24 h-24 rounded object-cover" />
+          <!-- BRAND -->
+          <select v-model="form.brandId" class="w-full border p-2 rounded">
+            <option value="">Select brand</option>
+            <option v-for="b in brandStore.brands" :key="b.id" :value="b.id">
+              {{ b.name }}
             </option>
           </select>
 
+          <!-- CATEGORY -->
+          <select v-model="form.categoryId" class="w-full border p-2 rounded">
+            <option value="">Select category</option>
+            <option v-for="c in categoryStore.categories" :key="c.id" :value="c.id">
+              {{ c.name }}
+            </option>
+          </select>
 
           <!-- PRICE -->
-          <input
-            type="number"
-            v-model.number="form.price"
-            min="1"
-            step="0.01"
-            placeholder="Price"
-            class="w-full border p-2 rounded"
-          />
+          <input type="number" v-model.number="form.price" placeholder="Price" class="w-full border p-2 rounded" />
           <p v-if="priceError" class="text-red-600 text-sm">
             Price must be greater than 0
           </p>
 
           <!-- STOCK -->
-          <input
-            type="number"
-            v-model.number="form.stock"
-            min="1"
-            step="1"
-            placeholder="Stock"
-            class="w-full border p-2 rounded"
-          />
+          <input type="number" v-model.number="form.stock" placeholder="Stock" class="w-full border p-2 rounded" />
           <p v-if="stockError" class="text-red-600 text-sm">
             Stock must be greater than 0
           </p>
         </div>
 
         <div class="flex justify-end gap-3 mt-4">
-          <button @click="closeModal" class="border px-4 py-2 rounded">
-            Cancel
-          </button>
-
+          <button @click="closeModal" class="border px-4 py-2 rounded">Cancel</button>
           <button
             @click="saveProduct"
             :disabled="!isFormValid"
@@ -167,19 +147,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useProduct } from '@/stores/products'
-
-import { useBrand } from "@/stores/brands";
+import { useBrand } from '@/stores/brands'
 import { useCategory } from '@/stores/categories'
 
+/* ================= STORES ================= */
+const productStore = useProduct()
 const brandStore = useBrand()
 const categoryStore = useCategory()
-const productStore = useProduct()
-
-
-// const API_URL = 'http://localhost:3000/api/products'
-
-/* ================= STATE ================= */
-// const products = ref([])
 const search = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -189,72 +163,75 @@ const selectedCategory = ref('default');
 const imageFile = ref(null)
 const imagePreview = ref(null)
 
+/* ================= FORM ================= */
 const form = ref({
   id: null,
   name: '',
   description: '',
-  price: 1,
-  stock: 1,
+  price: null,
+  stock: null,
   categoryId: '',
   brandId: ''
 })
 
+
 /* ================= VALIDATION ================= */
-const priceError = computed(() => form.value.price <= 0)
-const stockError = computed(() => form.value.stock <= 0)
+const priceError = computed(
+  () => form.value.price !== null && form.value.price <= 0
+)
+const stockError = computed(
+  () => form.value.stock !== null && form.value.stock <= 0
+)
 
-const isFormValid = computed(() => {
-  return (
-    form.value.name &&
-    form.value.categoryId &&
-    form.value.price > 0 &&
-    form.value.stock > 0
-  )
-})
+const isFormValid = computed(() =>
+  form.value.name &&
+  form.value.categoryId !== null &&
+  form.value.price > 0 &&
+  form.value.stock > 0
+)
 
+/* ================= COMPUTED ================= */
+// const filteredProducts = computed(() =>
+//   productStore.products.filter(p =>
+//     p.name.toLowerCase().includes(search.value.toLowerCase())
+//   )
+// )
 
 /* ================= IMAGE ================= */
-const handleImage = e => {
-  imageFile.value = e.target.files[0] || null
-  imagePreview.value = imageFile.value
-    ? URL.createObjectURL(imageFile.value)
-    : null
+const handleImage = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  imageFile.value = file
+  imagePreview.value = URL.createObjectURL(file)
 }
 
-/* ================= SAVE ================= */
+/* ================= CRUD ================= */
 const saveProduct = async () => {
-  if (!isFormValid.value) {
-    alert('Price and stock must be greater than 0')
-    return
-  }
-
-  const fd = new FormData()
-  fd.append('name', form.value.name)
-  fd.append('description', form.value.description || '')
-  fd.append('price', form.value.price)
-  fd.append('stock', form.value.stock)
-  fd.append('categoryId', form.value.categoryId)
-
-  if (form.value.brandId) fd.append('brandId', form.value.brandId)
-  if (imageFile.value) fd.append('image', imageFile.value)
+  if (!isFormValid.value) return
 
   try {
     if (isEditing.value) {
-      await productStore.updateProduct(form.value.id, fd)
+      await productStore.updateProduct(
+        form.value.id,
+        form.value,
+        imageFile.value
+      )
     } else {
-      await productStore.addProduct(fd) 
+      await productStore.createProduct(
+        form.value,
+        imageFile.value
+      )
     }
-
     closeModal()
   } catch (err) {
-    console.error('❌ Save Error:', err.response?.data || err)
-    alert(err.response?.data?.message || 'Save failed')
+    alert(productStore.error || 'Action failed')
   }
 }
 
-/* ================= EDIT ================= */
-const editProduct = p => {
+const editProduct = (p) => {
   isEditing.value = true
+
+  // ✅ MAP CORRECT FIELDS
   form.value = {
     id: p.id,
     name: p.name,
@@ -264,15 +241,19 @@ const editProduct = p => {
     categoryId: p.categoryId,
     brandId: p.brandId
   }
-  imagePreview.value = p.imageUrl
+
+  imagePreview.value = p.image
   imageFile.value = null
   showModal.value = true
 }
 
-/* ================= DELETE ================= */
-const deleteProduct = async p => {
+const deleteProduct = async (p) => {
   if (!confirm('Delete product?')) return
-  productStore.deleteProduct(p.id)
+  try {
+    await productStore.deleteProduct(p.id)
+  } catch (err) {
+    alert(productStore.error || 'Delete failed')
+  }
 }
 
 /* ================= MODAL ================= */
@@ -282,10 +263,10 @@ const openModal = () => {
     id: null,
     name: '',
     description: '',
-    price: 1,
-    stock: 1,
-    categoryId: '',
-    brandId: ''
+    price: null,
+    stock: null,
+    categoryId: null,
+    brandId: null
   }
   imageFile.value = null
   imagePreview.value = null
@@ -297,6 +278,12 @@ const closeModal = () => {
   isEditing.value = false
 }
 
+/* ================= LOAD ================= */
+// onMounted(async () => {
+//   await productStore.fetchAllProducts()
+//   await brandStore.fetchBrands()
+//   await categoryStore.fetchCategories()
+// })
 /* ================= SEARCH ================= */
 const filteredProducts = computed(() =>{
   let products=[...productStore.products];
@@ -323,7 +310,7 @@ onMounted(async () => {
       await productStore.fetchAllProducts()
     } catch(e){/* silent */} 
   }
-  if(!brandStore.brands.length){
+  if(!brandStore.brands?.length){
     try{
       await brandStore.fetchAllBrands()
     } catch(e){/* silent */} 
@@ -335,6 +322,4 @@ onMounted(async () => {
   }
   
 })
-
-
 </script>

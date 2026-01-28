@@ -2,18 +2,19 @@ const express = require("express");
 const router = express.Router();
 
 const productController = require("../../controllers/productController");
-const upload = require("../../middleware/upload"); // function
+const upload = require("../../middleware/upload");
 
+// CREATE PRODUCT
 router.post(
   "/products",
-  upload("/products").single("image"), // ✅ CORRECT
+  upload("products").single("image"), // ✅ NO SLASH
   productController.createProduct
 );
 
 // UPDATE PRODUCT
 router.put(
   "/products/:id",
-  upload("/products").single("image"),
+  upload("products").single("image"), // ✅ NO SLASH
   productController.updateProduct
 );
 
@@ -23,8 +24,10 @@ router.delete(
   productController.deleteProduct
 );
 
-// GET
+// GET ALL
 router.get("/products", productController.getAllProducts);
+
+// GET ONE
 router.get("/products/:id", productController.getProductById);
 
 module.exports = router;

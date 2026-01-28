@@ -178,6 +178,11 @@ onMounted(async () => {
 
 const searchOpen = ref(false)
 const searchQuery = ref('')
+const products = ['iPhone 15', 'MacBook Pro', 'AirPods', 'Apple Watch', 'iPad Pro']
+onMounted(async () => {
+  await categoriesStore.fetchCategories();
+  console.log('Fetched categories in header:', categoriesStore.categories);
+});
 
 const toggleSearch = () => {
   searchOpen.value = !searchOpen.value
