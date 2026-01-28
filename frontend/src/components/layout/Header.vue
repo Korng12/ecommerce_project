@@ -61,7 +61,7 @@
           </ul>
           <ul v-else
             class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-            <li><router-link to="app/profile" class="block px-4 py-2 hover:bg-gray-100">Profile</router-link></li>
+            <li><router-link to="/app/profile" class="block px-4 py-2 hover:bg-gray-100">Profile</router-link></li>
             <li><button @click="handleLogout" class="w-full text-left px-4 py-2 hover:bg-gray-100">Logout</button></li>
           </ul>
         </div>

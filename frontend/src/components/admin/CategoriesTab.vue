@@ -127,8 +127,7 @@
                       class="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
                       <div class="w-14 h-14 rounded-md bg-gray-100 overflow-hidden flex-shrink-0 relative">
                         <img v-if="getPrimaryImage(product)" :src="getPrimaryImage(product)" :alt="product.name"
-                          class="w-full h-full object-cover"
-                          @error="(e) => e.target.style.display = 'none'" />
+                          class="w-full h-full object-cover" @error="(e) => e.target.style.display = 'none'" />
                         <div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400"
                           :class="{ 'hidden': getPrimaryImage(product) }">
                           <ImageIcon :size="20" />
@@ -415,14 +414,18 @@ const handleSubmit = async () => {
       }
     } else {
       // No new image, send regular data
-      await categoryStore[isEditMode.value ? 'updateCategory' : 'createCategory'](
-        isEditMode.value ? formData.value.id : undefined,
-        {
+      if (isEditMode.value) {
+        await categoryStore.updateCategory(formData.value.id, {
+          name: formData.value.name,
+          description: formData.value.description
+        })
+      } else {
+        await categoryStore.createCategory({
           name: formData.value.name,
           description: formData.value.description,
           image: formData.value.image
-        }
-      )
+        })
+      }
     }
     closeModal()
   } catch (error) {

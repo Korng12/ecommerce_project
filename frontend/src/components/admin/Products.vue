@@ -75,7 +75,6 @@
             <td class="p-3">
               <img :src="p.image || 'https://via.placeholder.com/50'" class="w-12 h-12 rounded object-cover"
                 @error="(e) => e.target.src = 'https://via.placeholder.com/50'" />
-              <p>{{ p.image }}</p>
             </td>
             <td class="p-3">{{ p.name }}</td>
             <td class="p-3 max-w-xs truncate">{{ p.description || '-' }}</td>
